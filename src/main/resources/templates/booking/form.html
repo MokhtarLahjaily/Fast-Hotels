@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Book Your Stay - Hotel Reservation System</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/hotels}">Hotels</a></li>
+                <li class="breadcrumb-item" th:if="${hotel != null}">
+                    <a th:href="@{'/hotels/' + ${hotel.id}}" th:text="${hotel != null ? hotel.name : 'Hotel'}">Hotel Name</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Book Now</li>
+            </ol>
+        </nav>
+
+        <!-- Error Message -->
+        <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
+            Error message goes here
+        </div>
+
+        <h1 class="mb-4">Complete Your Booking</h1>
+
+        <div class="row">
+            <!-- Booking Form -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h3 class="mb-0">Guest Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/booking/create}" method="post" th:object="${bookingRequest}" id="bookingForm">
+                            <input type="hidden" th:field="*{roomId}">
+                            <input type="hidden" th:field="*{checkInDate}">
+                            <input type="hidden" th:field="*{checkOutDate}">
+                            <input type="hidden" th:field="*{guestCount}">
+                            <input type="hidden" th:field="*{totalPrice}">
+
+                            <!-- Personal Information -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Personal Details</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="firstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" th:field="*{firstName}" required>
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">
+                                            Please enter your first name.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="lastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" th:field="*{lastName}" required>
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">
+                                            Please enter your last name.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                                            Please enter a valid email address.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" th:field="*{phone}" required>
+                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">
+                                            Please enter a valid phone number.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Special Requests -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Special Requests</h5>
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="specialRequests" th:field="*{specialRequests}" style="height: 100px"></textarea>
+                                    <label for="specialRequests">Special Requests (optional)</label>
+                                </div>
+                                <div class="form-text">
+                                    Please note that special requests cannot be guaranteed - however, the hotel will do its best to meet your needs.
+                                </div>
+                            </div>
+
+                            <!-- Payment Information -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Payment Information</h5>
+                                <div class="alert alert-info">
+                                    <p class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Your card will not be charged now. It will be used to guarantee your booking.
+                                    </p>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="cardName" class="form-label">Name on Card</label>
+                                        <input type="text" class="form-control" id="cardName" th:field="*{cardName}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="cardNumber" class="form-label">Card Number</label>
+                                        <input type="text" class="form-control" id="cardNumber" th:field="*{cardNumber}"
+                                               placeholder="XXXX XXXX XXXX XXXX" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="expiryMonth" class="form-label">Expiry Month</label>
+                                        <select class="form-select" id="expiryMonth" th:field="*{expiryMonth}" required>
+                                            <option value="">Month</option>
+                                            <option value="01">01 - January</option>
+                                            <option value="02">02 - February</option>
+                                            <option value="03">03 - March</option>
+                                            <option value="04">04 - April</option>
+                                            <option value="05">05 - May</option>
+                                            <option value="06">06 - June</option>
+                                            <option value="07">07 - July</option>
+                                            <option value="08">08 - August</option>
+                                            <option value="09">09 - September</option>
+                                            <option value="10">10 - October</option>
+                                            <option value="11">11 - November</option>
+                                            <option value="12">12 - December</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="expiryYear" class="form-label">Expiry Year</label>
+                                        <select class="form-select" id="expiryYear" th:field="*{expiryYear}" required>
+                                            <option value="">Year</option>
+                                            <option th:each="year : ${#numbers.sequence(#dates.year(#dates.createNow()), #dates.year(#dates.createNow()) + 10)}"
+                                                    th:value="${year}" th:text="${year}">2025</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="cvv" class="form-label">CVV</label>
+                                        <input type="text" class="form-control" id="cvv" th:field="*{cvv}"
+                                               placeholder="123" required maxlength="4">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Terms and Conditions -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="termsAccepted" name="termsAccepted" required>
+                                    <label class="form-check-label" for="termsAccepted">
+                                        I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    Complete Booking
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Summary -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-4 sticky-top" style="top: 20px; z-index: 100;">
+                    <div class="card-header bg-white">
+                        <h3 class="mb-0">Booking Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3" th:if="${hotel != null}">
+                            <img th:src="${hotel.imageUrl != null ? hotel.imageUrl : (hotel.primaryImageUrl != null ? hotel.primaryImageUrl : '/images/hotel-placeholder.jpg')}" class="img-fluid rounded me-3"
+                                 alt="Hotel Image" style="width: 80px; height: 80px; object-fit: cover;"
+                                 onerror="this.onerror=null; this.src='/images/hotel-placeholder.jpg';">
+                            <div>
+                                <h5 class="mb-1" th:text="${hotel != null ? hotel.name : 'Hotel'}">Hotel Name</h5>
+                                <p class="mb-0 text-muted" th:if="${hotel != null && hotel.city != null && hotel.country != null}">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <span th:text="${hotel.city + ', ' + hotel.country}">City, Country</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 pb-3 border-bottom" th:if="${room != null}">
+                            <h6 class="mb-2" th:text="${room.name}">Room Name</h6>
+                            <div class="d-flex align-items-center mb-2" th:if="${bookingRequest != null && bookingRequest.guestCount != null}">
+                                <i class="fas fa-user-friends me-2"></i>
+                                <span th:text="${bookingRequest.guestCount + ' Guests'}">2 Guests</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 pb-3 border-bottom" th:if="${bookingRequest != null}">
+                            <div class="row mb-2" th:if="${bookingRequest.checkInDate != null}">
+                                <div class="col-6">
+                                    <strong>Check-in:</strong>
+                                </div>
+                                <div class="col-6 text-end" th:text="${#temporals.format(bookingRequest.checkInDate, 'MMM d, yyyy')}">
+                                    May 15, 2025
+                                </div>
+                            </div>
+                            <div class="row mb-2" th:if="${bookingRequest.checkOutDate != null}">
+                                <div class="col-6">
+                                    <strong>Check-out:</strong>
+                                </div>
+                                <div class="col-6 text-end" th:text="${#temporals.format(bookingRequest.checkOutDate, 'MMM d, yyyy')}">
+                                    May 18, 2025
+                                </div>
+                            </div>
+                            <div class="row" th:if="${nights != null}">
+                                <div class="col-6">
+                                    <strong>Duration:</strong>
+                                </div>
+                                <div class="col-6 text-end" th:text="${nights + ' nights'}">
+                                    3 nights
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 pb-3 border-bottom" th:if="${room != null && nights != null}">
+                            <div class="row mb-2" th:if="${room.pricePerNight != null}">
+                                <div class="col-8">
+                                    <span th:text="${'$' + room.pricePerNight + ' x ' + nights + ' nights'}">$120 x 3 nights</span>
+                                </div>
+                                <div class="col-4 text-end" th:if="${roomTotal != null}" th:text="${'$' + roomTotal}">
+                                    $360
+                                </div>
+                            </div>
+                            <div class="row mb-2" th:if="${taxesAndFees != null}">
+                                <div class="col-8">
+                                    <span>Taxes and fees</span>
+                                </div>
+                                <div class="col-4 text-end" th:text="${'$' + taxesAndFees}">
+                                    $40
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row fw-bold fs-5" th:if="${bookingRequest != null && bookingRequest.totalPrice != null}">
+                            <div class="col-8">
+                                <span>Total</span>
+                            </div>
+                            <div class="col-4 text-end text-primary" th:text="${'$' + bookingRequest.totalPrice}">
+                                $400
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms and Conditions Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5>Booking Terms</h5>
+                    <p>By completing this booking, you agree to the following terms and conditions:</p>
+                    <ul>
+                        <li>Your credit card is used to guarantee your booking. It will not be charged at this time.</li>
+                        <li>Cancellation policy: Free cancellation up to 48 hours before check-in. After that, the first night will be charged.</li>
+                        <li>Check-in time is typically after 3:00 PM and check-out time is before 12:00 PM.</li>
+                        <li>The hotel may require a security deposit upon arrival.</li>
+                        <li>Special requests cannot be guaranteed but the hotel will try to accommodate them.</li>
+                        <li>You must present a valid ID and the credit card used for booking upon check-in.</li>
+                    </ul>
+
+                    <h5>Privacy Policy</h5>
+                    <p>We respect your privacy and will only use your personal information for the purpose of managing your booking. Your information may be shared with the hotel to facilitate your stay.</p>
+
+                    <h5>Payment Terms</h5>
+                    <p>Payment will be collected by the hotel during your stay unless otherwise specified. The hotel accepts major credit cards and may have additional payment options available.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page-specific JavaScript -->
+<th:block layout:fragment="jsResources">
+    <script>
+        // Form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('bookingForm');
+
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+
+                    form.classList.add('was-validated');
+                });
+
+                // Credit card formatting
+                const cardNumberInput = document.getElementById('cardNumber');
+                if (cardNumberInput) {
+                    cardNumberInput.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length > 16) value = value.slice(0, 16);
+
+                        // Add spaces every 4 digits
+                        let formattedValue = '';
+                        for (let i = 0; i < value.length; i++) {
+                            if (i > 0 && i % 4 === 0) {
+                                formattedValue += ' ';
+                            }
+                            formattedValue += value[i];
+                        }
+
+                        e.target.value = formattedValue;
+                    });
+                }
+
+                // CVV validation
+                const cvvInput = document.getElementById('cvv');
+                if (cvvInput) {
+                    cvvInput.addEventListener('input', function(e) {
+                        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    });
+                }
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Booking Confirmation - Hotel Reservation System</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Success Message -->
+                <div class="alert alert-success mb-4" th:if="${successMessage}">
+                    <h4 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Booking Confirmed!</h4>
+                    <p th:text="${successMessage}">Your booking has been confirmed.</p>
+                </div>
+
+                <!-- Error Message -->
+                <div class="alert alert-danger mb-4" th:if="${errorMessage}">
+                    <h4 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Error</h4>
+                    <p th:text="${errorMessage}">An error occurred.</p>
+                </div>
+
+                <!-- Booking Details Card -->
+                <div class="card shadow-sm mb-4" th:if="${booking != null}">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Booking Confirmation</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Booking Reference</h5>
+                                <p class="mb-0 fw-bold" th:text="${'#' + booking.id}">Booking ID</p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <h5>Status</h5>
+                                <span class="badge bg-success" th:text="${booking.status}">Confirmed</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Hotel and Room Details -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Hotel</h5>
+                                <p class="mb-1 fw-bold" th:text="${booking.hotel.name}">Hotel Name</p>
+                                <p class="mb-0 text-muted" th:text="${booking.hotel.address + ', ' + booking.hotel.city + ', ' + booking.hotel.country}">
+                                    Hotel Address
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Room</h5>
+                                <p class="mb-1 fw-bold" th:text="${booking.room.name}">Room Name</p>
+                                <p class="mb-0 text-muted" th:text="${booking.guestCount + ' Guests'}">2 Guests</p>
+                            </div>
+                        </div>
+
+                        <!-- Stay Details -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Check-in</h5>
+                                <p class="mb-1 fw-bold" th:text="${#temporals.format(booking.checkInDate, 'EEEE, MMMM d, yyyy')}">
+                                    Monday, May 15, 2025
+                                </p>
+                                <p class="mb-0 text-muted">After 3:00 PM</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Check-out</h5>
+                                <p class="mb-1 fw-bold" th:text="${#temporals.format(booking.checkOutDate, 'EEEE, MMMM d, yyyy')}">
+                                    Thursday, May 18, 2025
+                                </p>
+                                <p class="mb-0 text-muted">Before 12:00 PM</p>
+                            </div>
+                        </div>
+
+                        <!-- Payment Details -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Payment Details</h5>
+                                <table class="table">
+                                    <tbody>
+                                    <tr>
+                                        <td>Room Rate</td>
+                                        <td class="text-end" th:text="${'$' + booking.totalPrice}">$400</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Payment Status</td>
+                                        <td class="text-end">To be paid at the hotel</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Special Requests -->
+                        <div class="row mb-4" th:if="${booking.specialRequests != null && !booking.specialRequests.isEmpty()}">
+                            <div class="col-12">
+                                <h5>Special Requests</h5>
+                                <p class="mb-0" th:text="${booking.specialRequests}">Special requests text...</p>
+                            </div>
+                        </div>
+
+                        <!-- Guest Details -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5>Guest Details</h5>
+                                <p class="mb-1" th:text="${booking.user.firstName + ' ' + booking.user.lastName}">John Doe</p>
+                                <p class="mb-1" th:text="${booking.user.email}">john.doe@example.com</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a th:href="@{/hotels/{id}(id=${booking.hotel.id})}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Hotel
+                            </a>
+                            <a th:href="@{/bookings}" class="btn btn-primary">
+                                <i class="fas fa-list me-2"></i>View All Bookings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Booking Found -->
+                <div class="text-center py-5" th:if="${booking == null && !errorMessage}">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h4>Booking Not Found</h4>
+                    <p class="text-muted">The booking you're looking for could not be found.</p>
+                    <a href="/" class="btn btn-primary mt-3">
+                        <i class="fas fa-home me-2"></i>Return to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

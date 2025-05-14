@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Explore Hotels</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <section class="bg-primary text-white py-4 mb-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">Explore Hotels</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/" class="text-white">Home</a></li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">Hotels</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <p class="mb-0" th:if="${totalHotels != null}">
+                        <span class="badge bg-light text-primary" th:text="${totalHotels + ' Hotels Found'}">120 Hotels Found</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container py-4">
+        <!-- Search criteria summary -->
+        <div class="mb-4" th:if="${destination != null && !destination.isEmpty()}">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-search text-primary me-2"></i>Search Results
+                    </h5>
+                    <div>
+                        <span class="text-muted">Destination: </span>
+                        <span class="badge bg-light text-dark me-2" th:text="${destination}">Destination</span>
+                    </div>
+                    <div th:if="${starRating != null && !starRating.empty}" class="mt-2">
+                        <span class="text-muted">Star Rating: </span>
+                        <span class="badge bg-light text-dark me-2" th:each="rating : ${starRating}" th:text="${rating + ' Star'}">5 Star</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error message -->
+        <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}"></div>
+
+        <!-- Filter sidebar and hotel listings -->
+        <div class="row g-4">
+            <!-- Filters -->
+            <div class="col-lg-3">
+                <div class="card shadow-sm sticky-top" style="top: 20px; z-index: 1000;">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter me-2"></i>Filters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/hotels}" method="get" id="filterForm">
+                            <!-- Destination -->
+                            <div class="mb-3">
+                                <label for="destination" class="form-label">Destination</label>
+                                <input type="text" class="form-control" id="destination" name="destination"
+                                       th:value="${destination}" placeholder="City, Country or Hotel name">
+                            </div>
+
+                            <!-- Price Range -->
+                            <div class="mb-3">
+                                <label class="form-label">Price Range</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="minPrice" name="minPrice"
+                                                   th:value="${minPrice}" placeholder="Min" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="maxPrice" name="maxPrice"
+                                                   th:value="${maxPrice}" placeholder="Max" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Star Rating -->
+                            <div class="mb-3">
+                                <label class="form-label">Star Rating</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="5" id="star5" name="starRating"
+                                               th:checked="${starRating != null && starRating.contains(5)}">
+                                        <label class="form-check-label" for="star5">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="4" id="star4" name="starRating"
+                                               th:checked="${starRating != null && starRating.contains(4)}">
+                                        <label class="form-check-label" for="star4">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="3" id="star3" name="starRating"
+                                               th:checked="${starRating != null && starRating.contains(3)}">
+                                        <label class="form-check-label" for="star3">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sort By -->
+                            <div class="mb-3">
+                                <label for="sortBy" class="form-label">Sort By</label>
+                                <select class="form-select" id="sortBy" name="sortBy">
+                                    <option value="recommended" th:selected="${sortBy == null || sortBy == 'recommended'}">Recommended</option>
+                                    <option value="priceAsc" th:selected="${sortBy == 'priceAsc'}">Price (Low to High)</option>
+                                    <option value="priceDesc" th:selected="${sortBy == 'priceDesc'}">Price (High to Low)</option>
+                                    <option value="ratingDesc" th:selected="${sortBy == 'ratingDesc'}">Rating (Highest First)</option>
+                                </select>
+                            </div>
+
+                            <!-- Hidden fields to preserve pagination -->
+                            <input type="hidden" name="page" value="0">
+                            <input type="hidden" name="size" th:value="${size != null ? size : 9}">
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter me-2"></i>Apply Filters
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+                                    <i class="fas fa-times me-2"></i>Clear Filters
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hotel listings -->
+            <div class="col-lg-9">
+                <!-- No results message -->
+                <div class="alert alert-info d-flex align-items-center" th:if="${hotels == null || hotels.empty}">
+                    <i class="fas fa-info-circle fa-2x me-3"></i>
+                    <div>
+                        <h5 class="alert-heading">No hotels found</h5>
+                        <p class="mb-0">No hotels found matching your criteria. Try adjusting your filters or search for a different location.</p>
+                    </div>
+                </div>
+
+                <!-- Hotel cards -->
+                <div class="row g-4" th:if="${hotels != null && !hotels.empty}">
+                    <div class="col-md-6 col-xl-4" th:each="hotel : ${hotels}" th:if="${hotel != null}">
+                        <div class="card h-100 shadow-sm hover-shadow border-0 rounded-lg overflow-hidden">
+                            <div class="position-relative">
+                                <!-- Hotel image with proper null checks -->
+                                <img th:if="${hotel.images != null && !hotel.images.empty}"
+                                     th:with="primaryImage=${hotel.images.stream().filter(img -> img != null && img.isPrimary != null && img.isPrimary).findFirst().orElse(null)},
+                                             firstImage=${!hotel.images.empty ? hotel.images.get(0) : null},
+                                             imageUrl=${primaryImage != null ? primaryImage.url : (firstImage != null ? firstImage.url : '/images/hotel-placeholder.jpg')}"
+                                     th:src="${imageUrl}"
+                                     class="card-img-top" alt="Hotel Image" style="height: 220px; object-fit: cover;"
+                                     onerror="this.src='/images/hotel-placeholder.jpg';">
+                                <img th:if="${hotel.images == null || hotel.images.empty}"
+                                     src="/images/hotel-placeholder.jpg"
+                                     class="card-img-top" alt="Hotel Image" style="height: 220px; object-fit: cover;">
+                                <div class="position-absolute top-0 end-0 p-2">
+                                    <span class="badge bg-primary rounded-pill px-3 py-2" th:text="${hotel.starRating + ' Stars'}">5 Stars</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${hotel.name}">Hotel Name</h5>
+                                <p class="card-text mb-2">
+                                    <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                    <span th:text="${(hotel.city != null ? hotel.city : 'Unknown') + ', ' + (hotel.country != null ? hotel.country : '')}" class="text-muted">Location</span>
+                                </p>
+                                <div class="mb-3">
+                                    <span class="text-warning" th:each="i : ${#numbers.sequence(1, hotel.starRating)}">
+                                        <i class="fas fa-star"></i>
+                                    </span>
+                                    <span class="ms-2" th:if="${hotel.averageRating != null}">
+                                        <span class="fw-bold" th:text="${#numbers.formatDecimal(hotel.averageRating, 1, 1)}">4.5</span>
+                                        <span class="text-muted">/5</span>
+                                    </span>
+                                </div>
+
+                                <!-- Amenities section with improved null handling -->
+                                <div class="amenities mt-2" th:if="${hotel.amenities != null}">
+                                    <span class="small text-muted">Amenities:</span>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <span th:each="amenity : ${hotel.amenities}"
+                                              th:if="${amenity != null && amenity.name != null}"
+                                              class="badge bg-light text-dark me-1">
+                                            <i th:if="${amenity.icon != null}" th:class="${amenity.icon}"></i>
+                                            <span th:text="${amenity.name}">Amenity</span>
+                                        </span>
+                                        <span th:if="${hotel.amenities.empty}" class="text-muted small">No amenities listed</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
+                                <!-- Calculate minimum price from rooms with proper null checks -->
+                                <span class="fw-bold text-primary" th:if="${hotel.minPrice != null}">
+                                    From $<span th:text="${hotel.minPrice}">120</span>
+                                </span>
+                                <span class="fw-bold text-primary" th:if="${hotel.minPrice == null && hotel.rooms != null && !hotel.rooms.empty}"
+                                      th:with="minPrice=${hotel.rooms.stream().filter(room -> room != null && room.pricePerNight != null).map(room -> room.pricePerNight).min(java.math.BigDecimal::compareTo).orElse(null)}"
+                                      th:text="${minPrice != null ? 'From $' + minPrice : 'Contact for price'}">
+                                    From $120
+                                </span>
+                                <span class="fw-bold text-primary" th:if="${hotel.minPrice == null && (hotel.rooms == null || hotel.rooms.empty)}">
+                                    Contact for price
+                                </span>
+                                <a th:href="@{/hotels/{id}(id=${hotel.id})}" class="btn btn-outline-primary">
+                                    <i class="fas fa-info-circle me-1"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-4" th:if="${totalPages != null && totalPages > 1}">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/hotels(page=${currentPage - 1}, size=${size}, destination=${destination}, minPrice=${minPrice}, maxPrice=${maxPrice}, starRating=${starRating}, sortBy=${sortBy})}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${currentPage == i ? 'active' : ''}">
+                                <a class="page-link" th:href="@{/hotels(page=${i}, size=${size}, destination=${destination}, minPrice=${minPrice}, maxPrice=${maxPrice}, starRating=${starRating}, sortBy=${sortBy})}"
+                                   th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/hotels(page=${currentPage + 1}, size=${size}, destination=${destination}, minPrice=${minPrice}, maxPrice=${maxPrice}, starRating=${starRating}, sortBy=${sortBy})}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="jsResources">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clear filters button
+            const clearFiltersBtn = document.getElementById('clearFilters');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    const destinationInput = document.getElementById('destination');
+                    const minPriceInput = document.getElementById('minPrice');
+                    const maxPriceInput = document.getElementById('maxPrice');
+                    const sortBySelect = document.getElementById('sortBy');
+
+                    if (destinationInput) destinationInput.value = '';
+                    if (minPriceInput) minPriceInput.value = '';
+                    if (maxPriceInput) maxPriceInput.value = '';
+                    if (sortBySelect) sortBySelect.value = 'recommended';
+
+                    // Uncheck all checkboxes
+                    document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+                        checkbox.checked = false;
+                    });
+
+                    // Submit the form
+                    const filterForm = document.getElementById('filterForm');
+                    if (filterForm) filterForm.submit();
+                });
+            }
+
+            // Add error handling for images
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', function() {
+                    if (this.src.indexOf('hotel-placeholder.jpg') === -1) {
+                        this.src = '/images/hotel-placeholder.jpg';
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

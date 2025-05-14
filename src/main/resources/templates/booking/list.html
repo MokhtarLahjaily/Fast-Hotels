@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>My Bookings - Hotel Reservation System</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <h1 class="mb-4">My Bookings</h1>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- No Bookings -->
+        <div th:if="${bookings == null || #lists.isEmpty(bookings)}" class="text-center py-5">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h3>No Bookings Found</h3>
+            <p class="text-muted">You haven't made any bookings yet.</p>
+            <a href="/hotels" class="btn btn-primary mt-3">Browse Hotels</a>
+        </div>
+
+        <!-- Bookings List -->
+        <div th:if="${bookings != null && !#lists.isEmpty(bookings)}" class="row">
+            <div class="col-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Hotel</th>
+                                    <th>Room</th>
+                                    <th>Check-in</th>
+                                    <th>Check-out</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="booking : ${bookings}">
+                                    <td th:text="${'#' + booking.id}">Booking ID</td>
+                                    <td>
+                                        <span th:if="${booking.hotel != null}" th:text="${booking.hotel.name}">Hotel Name</span>
+                                        <span th:unless="${booking.hotel != null}">Unknown Hotel</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${booking.room != null}" th:text="${booking.room.name}">Room Type</span>
+                                        <span th:unless="${booking.room != null}">Unknown Room</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(booking.checkInDate, 'MMM dd, yyyy')}">Check-in Date</td>
+                                    <td th:text="${#temporals.format(booking.checkOutDate, 'MMM dd, yyyy')}">Check-out Date</td>
+                                    <td>
+                                            <span th:class="${'badge ' +
+                                                (booking.status == 'CONFIRMED' ? 'bg-success' :
+                                                (booking.status == 'PENDING' ? 'bg-warning' :
+                                                (booking.status == 'CANCELLED' ? 'bg-danger' : 'bg-secondary')))}"
+                                                  th:text="${booking.status}">Status</span>
+                                    </td>
+                                    <td th:text="${'$' + booking.totalPrice}">Total Price</td>
+                                    <td>
+                                        <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a th:if="${booking.status == 'CONFIRMED'}"
+                                           th:href="@{/bookings/{id}/cancel(id=${booking.id})}"
+                                           class="btn btn-sm btn-outline-danger ms-1"
+                                           onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/bookings(page=${currentPage - 1})}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                        th:classappend="${currentPage == i ? 'active' : ''}">
+                                        <a class="page-link" th:href="@{/bookings(page=${i})}" th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/bookings(page=${currentPage + 1})}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

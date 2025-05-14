@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Test</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Header -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<!-- Main Content -->
+<main class="container py-5">
+    <h1>Dropdown Test Page</h1>
+    <p>This page tests the functionality of Bootstrap dropdowns.</p>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h2>Test Dropdowns</h2>
+        </div>
+        <div class="card-body">
+            <h3>Standard Bootstrap Dropdown</h3>
+            <div class="dropdown mb-4">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="testDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Test Dropdown
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="testDropdown">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+            </div>
+
+            <h3>User Profile Dropdown (Same as Header)</h3>
+            <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="profileTestDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-1"></i>
+                    <span th:text="${#authentication.name}">Username</span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="profileTestDropdown">
+                    <li><a class="dropdown-item" th:href="@{/profile}">
+                        <i class="fas fa-user me-2"></i>My Profile
+                    </a></li>
+                    <li><a class="dropdown-item" th:href="@{/bookings}">
+                        <i class="fas fa-calendar-check me-2"></i>My Bookings
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" class="m-0">
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Bootstrap 5 JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- jQuery (for some components) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Custom JS -->
+<script th:src="@{/js/main.js}"></script>
+
+<!-- Bootstrap initialization -->
+<script th:src="@{/js/bootstrap-init.js}"></script>
+
+<!-- Inline script for testing -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, initializing dropdowns');
+
+        // Log all dropdown elements
+        const dropdowns = document.querySelectorAll('.dropdown-toggle');
+        console.log('Found ' + dropdowns.length + ' dropdown elements');
+
+        // Manually initialize dropdowns
+        dropdowns.forEach(function(dropdown) {
+            console.log('Initializing dropdown:', dropdown);
+            new bootstrap.Dropdown(dropdown);
+        });
+    });
+</script>
+</body>
+</html>

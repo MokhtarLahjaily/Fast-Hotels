@@ -1,0 +1,47 @@
+package com.hotelreservation.controller.view;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+public class MainController {
+    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+
+    @GetMapping("/about")
+    public String about(Model model) {
+        logger.info("Displaying about page");
+        return "about";
+    }
+
+    @GetMapping("/contact")
+    public String contact(Model model) {
+        logger.info("Displaying contact page");
+        return "contact";
+    }
+
+    @PostMapping("/contact")
+    public String handleContactForm(
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("subject") String subject,
+            @RequestParam("message") String message,
+            RedirectAttributes redirectAttributes) {
+
+        logger.info("Contact form submission received from: {}, email: {}, subject: {}", name, email, subject);
+
+        // In a real application, you would process the form data here
+        // For example, send an email or save to database
+
+        // Add a success message
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Thank you for your message! We'll get back to you soon.");
+
+        return "redirect:/contact";
+    }
+}

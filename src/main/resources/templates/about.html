@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>About Us</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="section-title text-center mb-5">About FastHotels</h1>
+
+                <div class="card shadow-sm mb-5">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">Our Story</h2>
+                        <p>FastHotels was established in 2021 with a simple mission: to make hotel bookings fast, easy, and accessible to everyone. What began as a small startup in Casablanca has now grown into a trusted hotel reservation platform serving travelers around the world.</p>
+
+                        <h2 class="h4 mb-3 mt-4">Our Mission</h2>
+                        <p>We aim to provide the best hotel booking experience by offering a wide selection of accommodations, competitive prices, and exceptional customer service. Our goal is to help travelers find their perfect stay, whatever their budget or preferences may be.</p>
+
+                        <h2 class="h4 mb-3 mt-4">Why Choose Us</h2>
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="feature-icon bg-primary text-white mb-3">
+                                        <i class="fas fa-search fa-lg"></i>
+                                    </div>
+                                </div>
+                                <h3 class="h5">Wide Selection</h3>
+                                <p>With thousands of hotels in our database, we offer accommodations for every taste and budget.</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="feature-icon bg-primary text-white mb-3">
+                                        <i class="fas fa-tag fa-lg"></i>
+                                    </div>
+                                </div>
+                                <h3 class="h5">Best Price Guarantee</h3>
+                                <p>We work hard to offer you the best available rates, with no hidden fees or charges.</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="feature-icon bg-primary text-white mb-3">
+                                        <i class="fas fa-headset fa-lg"></i>
+                                    </div>
+                                </div>
+                                <h3 class="h5">24/7 Support</h3>
+                                <p>Our dedicated customer support team is available around the clock to assist you.</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="feature-icon bg-primary text-white mb-3">
+                                        <i class="fas fa-shield-alt fa-lg"></i>
+                                    </div>
+                                </div>
+                                <h3 class="h5">Secure Booking</h3>
+                                <p>Book with confidence knowing your personal and payment information is secure.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-5">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">Our Team</h2>
+                        <p>FastHotels is proudly run by a dedicated team of travel enthusiasts and technology experts who are passionate about making travel planning easier. Led by founders FETHEDDINE and LAHJAILY, our team combines industry expertise with innovative technology to deliver an exceptional booking experience.</p>
+
+                        <div class="row g-4 mt-3">
+                            <div class="col-md-6">
+                                <div class="card hover-shadow">
+                                    <div class="card-body text-center p-4">
+                                        <div class="rounded-circle bg-light mx-auto mb-3" style="width: 100px; height: 100px; overflow: hidden;">
+                                            <i class="fas fa-user fa-3x text-primary d-flex justify-content-center align-items-center h-100"></i>
+                                        </div>
+                                        <h3 class="h5">FETHEDDINE</h3>
+                                        <p class="text-muted">Co-Founder & CTO</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card hover-shadow">
+                                    <div class="card-body text-center p-4">
+                                        <div class="rounded-circle bg-light mx-auto mb-3" style="width: 100px; height: 100px; overflow: hidden;">
+                                            <i class="fas fa-user fa-3x text-primary d-flex justify-content-center align-items-center h-100"></i>
+                                        </div>
+                                        <h3 class="h5">LAHJAILY</h3>
+                                        <p class="text-muted">Co-Founder & CEO</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <p class="lead">Have questions or feedback? We'd love to hear from you!</p>
+                    <a href="/contact" class="btn btn-primary btn-lg">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

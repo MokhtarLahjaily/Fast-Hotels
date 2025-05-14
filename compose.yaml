@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  # Spring Boot Application
+#   app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - db
+#      - ollama
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/hoteldb
+#      - SPRING_DATASOURCE_USERNAME=postgres
+#      - SPRING_DATASOURCE_PASSWORD=postgres
+#      - OLLAMA_API_URL=http://ollama:11434/api
+#    volumes:
+#      - ./uploads:/app/uploads
+#    restart: unless-stopped
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=hoteldb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Ollama for AI features
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  ollama_data:

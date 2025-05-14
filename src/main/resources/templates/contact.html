@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Contact Us</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="section-title text-center mb-5">Contact Us</h1>
+
+                <!-- Success Message -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}">Thank you for your message!</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Contact Information -->
+                    <div class="col-md-5">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <h2 class="h4 mb-4">Get In Touch</h2>
+
+                                <div class="d-flex mb-3">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-map-marker-alt text-primary fa-2x me-3"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 mb-1">Address</h3>
+                                        <p>La Grande École des Sciences de l'Ingénieur, Casablanca, Maroc</p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex mb-3">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-phone text-primary fa-2x me-3"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 mb-1">Phone</h3>
+                                        <p>+212 (0) 77097-8336</p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex mb-3">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-envelope text-primary fa-2x me-3"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 mb-1">Email</h3>
+                                        <p>info@pfahotels.com</p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex mb-3">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-clock text-primary fa-2x me-3"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 mb-1">Working Hours</h3>
+                                        <p>Monday-Friday: 9am-6pm<br>Saturday: 10am-4pm<br>Sunday: Closed</p>
+                                    </div>
+                                </div>
+
+                                <h3 class="h6 mb-3 mt-4">Follow Us</h3>
+                                <div class="social-icons">
+                                    <a href="#" class="bg-primary text-white"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#" class="bg-primary text-white"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="bg-primary text-white"><i class="fab fa-instagram"></i></a>
+                                    <a href="#" class="bg-primary text-white"><i class="fab fa-linkedin-in"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="col-md-7">
+                        <div class="card shadow-sm">
+                            <div class="card-body p-4">
+                                <h2 class="h4 mb-4">Send Us a Message</h2>
+
+                                <form th:action="@{/contact}" method="post" class="needs-validation" novalidate>
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Your Name</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required>
+                                        </div>
+                                        <div class="invalid-feedback">Please enter your name.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Your Email</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                                        </div>
+                                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="subject" class="form-label">Subject</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject" required>
+                                        </div>
+                                        <div class="invalid-feedback">Please enter a subject.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="message" class="form-label">Message</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-comment"></i></span>
+                                            <textarea class="form-control" id="message" name="message" rows="5" placeholder="Enter your message" required></textarea>
+                                        </div>
+                                        <div class="invalid-feedback">Please enter your message.</div>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-4">Our Location</h2>
+                        <div class="ratio ratio-16x9">
+                            <div class="placeholder-img d-flex align-items-center justify-content-center">
+                                <div class="text-center">
+                                    <i class="fas fa-map-marked-alt fa-4x mb-3 text-primary"></i>
+                                    <p class="mb-0">Map would be displayed here</p>
+                                    <p class="text-muted">Interactive map functionality will be implemented soon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
