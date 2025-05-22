@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Terms of Service</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="section-title text-center mb-5">Terms of Service</h1>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <p class="text-muted">Last Updated: May 22, 2023</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <p>Welcome to FastHotels. These Terms of Service ("Terms") govern your access to and use of the FastHotels website, mobile applications, and services (collectively, the "Services").</p>
+                            <p>By accessing or using our Services, you agree to be bound by these Terms. If you do not agree to these Terms, you may not access or use the Services.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">1. Account Registration</h2>
+                            <p>To use certain features of our Services, you may need to create an account. When you create an account, you must provide accurate and complete information. You are solely responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+                            <p>You agree to:</p>
+                            <ul>
+                                <li>Provide accurate and complete information when creating your account</li>
+                                <li>Keep your password secure and confidential</li>
+                                <li>Notify us immediately of any unauthorized use of your account</li>
+                                <li>Ensure that you log out from your account at the end of each session</li>
+                            </ul>
+                            <p>We reserve the right to disable your account if we have reason to believe that you have violated these Terms.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">2. Booking and Reservation Services</h2>
+                            <p>FastHotels provides a platform for you to search for and book hotel accommodations. When you make a reservation through our Services:</p>
+                            <ul>
+                                <li>You agree to provide accurate and complete information for all travelers included in the booking</li>
+                                <li>You acknowledge that you have the legal authority to make the reservation on behalf of all travelers in your party</li>
+                                <li>You agree to pay all fees, taxes, and charges associated with your booking</li>
+                                <li>You understand that the hotel's own terms and conditions, including cancellation and no-show policies, will apply to your reservation</li>
+                            </ul>
+                            <p>We act as an intermediary between you and the hotels. The hotel is responsible for providing the accommodation services, and any issues related to the quality of those services should be addressed directly with the hotel.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">3. Payments and Fees</h2>
+                            <p>When you make a booking through our Services, you agree to pay all applicable fees and taxes. Payment terms vary depending on the hotel and rate type you select:</p>
+                            <ul>
+                                <li><strong>Pay Now Rates:</strong> Your payment method will be charged the full amount at the time of booking</li>
+                                <li><strong>Pay Later Rates:</strong> Your payment method will be used to guarantee the reservation, but you will pay directly to the hotel during your stay</li>
+                                <li><strong>Deposit Rates:</strong> A partial payment will be charged at the time of booking, with the remaining balance due at the hotel</li>
+                            </ul>
+                            <p>All prices are displayed in the selected currency and include applicable taxes and fees unless otherwise stated. Additional charges, such as resort fees or incidental expenses, may be collected by the hotel.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">4. Cancellations and Modifications</h2>
+                            <p>Cancellation and modification policies vary by hotel and rate type. The specific policies applicable to your booking will be displayed during the booking process and in your confirmation email.</p>
+                            <p>If you need to cancel or modify your reservation, you can do so through your account or by contacting our customer support. Depending on the hotel's policy, cancellation fees may apply.</p>
+                            <p>In the event of a no-show (failure to check in on the scheduled arrival date without prior cancellation), the hotel's no-show policy will apply, which may result in charges up to the full amount of the reservation.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">5. User Conduct</h2>
+                            <p>When using our Services, you agree not to:</p>
+                            <ul>
+                                <li>Violate any applicable laws or regulations</li>
+                                <li>Infringe upon the rights of others</li>
+                                <li>Submit false or misleading information</li>
+                                <li>Impersonate any person or entity</li>
+                                <li>Interfere with or disrupt the Services or servers</li>
+                                <li>Attempt to gain unauthorized access to any part of the Services</li>
+                                <li>Use the Services for any illegal or unauthorized purpose</li>
+                                <li>Engage in any activity that could damage, disable, or impair the Services</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">6. Intellectual Property</h2>
+                            <p>All content, features, and functionality of our Services, including but not limited to text, graphics, logos, icons, images, audio clips, and software, are owned by FastHotels, its licensors, or other providers and are protected by copyright, trademark, and other intellectual property laws.</p>
+                            <p>You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store, or transmit any of the material on our Services without our prior written consent.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">7. Limitation of Liability</h2>
+                            <p>To the maximum extent permitted by law, FastHotels and its affiliates, officers, directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, use, or goodwill, arising out of or in connection with your access to or use of the Services.</p>
+                            <p>Our total liability for all claims related to the Services shall not exceed the greater of $100 or the amount you paid to us for the applicable booking.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">8. Disclaimers</h2>
+                            <p>The Services are provided on an "as is" and "as available" basis, without any warranties of any kind, either express or implied. We do not guarantee that the Services will be uninterrupted, secure, or error-free.</p>
+                            <p>We do not control and are not responsible for the content, services, or policies of third-party websites or resources that may be linked from our Services.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">9. Indemnification</h2>
+                            <p>You agree to indemnify, defend, and hold harmless FastHotels and its affiliates, officers, directors, employees, and agents from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses, or fees (including reasonable attorneys' fees) arising out of or relating to your violation of these Terms or your use of the Services.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">10. Modifications to the Terms</h2>
+                            <p>We may revise these Terms from time to time. The most current version will always be posted on our website. If we make material changes, we will notify you by email or through a notice on our Services prior to the changes becoming effective.</p>
+                            <p>Your continued use of the Services after the effective date of the revised Terms constitutes your acceptance of those changes.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h2 class="h4 mb-3">11. Governing Law</h2>
+                            <p>These Terms shall be governed by and construed in accordance with the laws of Morocco, without regard to its conflict of law provisions.</p>
+                        </div>
+
+                        <div>
+                            <h2 class="h4 mb-3">12. Contact Information</h2>
+                            <p>If you have any questions about these Terms, please contact us at:</p>
+                            <p>Email: legal@pfahotels.com<br>
+                                Address: La Grande École des Sciences de l'Ingénieur, Casablanca, Maroc</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

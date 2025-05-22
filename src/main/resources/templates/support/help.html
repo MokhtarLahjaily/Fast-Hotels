@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Help Center</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="section-title text-center mb-5">Help Center</h1>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">How Can We Help You?</h2>
+                        <p>Welcome to the FastHotels Help Center. We're here to assist you with any questions or issues you may have regarding our hotel booking platform.</p>
+
+                        <div class="mt-4">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-primary rounded-circle p-2 me-3">
+                                                    <i class="fas fa-search text-white"></i>
+                                                </div>
+                                                <h3 class="h5 mb-0">Booking Help</h3>
+                                            </div>
+                                            <p>Get assistance with making, modifying, or canceling your hotel reservations.</p>
+                                            <a href="#booking-help" class="btn btn-sm btn-outline-primary">Learn More</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-primary rounded-circle p-2 me-3">
+                                                    <i class="fas fa-credit-card text-white"></i>
+                                                </div>
+                                                <h3 class="h5 mb-0">Payment Issues</h3>
+                                            </div>
+                                            <p>Resolve payment-related problems and understand our payment policies.</p>
+                                            <a href="#payment-issues" class="btn btn-sm btn-outline-primary">Learn More</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-primary rounded-circle p-2 me-3">
+                                                    <i class="fas fa-user text-white"></i>
+                                                </div>
+                                                <h3 class="h5 mb-0">Account Support</h3>
+                                            </div>
+                                            <p>Get help with your account settings, profile updates, and security concerns.</p>
+                                            <a href="#account-support" class="btn btn-sm btn-outline-primary">Learn More</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-primary rounded-circle p-2 me-3">
+                                                    <i class="fas fa-question-circle text-white"></i>
+                                                </div>
+                                                <h3 class="h5 mb-0">General Inquiries</h3>
+                                            </div>
+                                            <p>Find answers to common questions about our services and policies.</p>
+                                            <a href="/faq" class="btn btn-sm btn-outline-primary">View FAQs</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="booking-help" class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">Booking Help</h2>
+
+                        <div class="accordion" id="bookingAccordion">
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        How do I make a reservation?
+                                    </button>
+                                </h3>
+                                <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#bookingAccordion">
+                                    <div class="accordion-body">
+                                        <p>Making a reservation on FastHotels is simple:</p>
+                                        <ol>
+                                            <li>Use the search form on our homepage to enter your destination, dates, and number of guests</li>
+                                            <li>Browse the available hotels and select the one you prefer</li>
+                                            <li>Choose your room type and review the booking details</li>
+                                            <li>Enter your personal and payment information</li>
+                                            <li>Confirm your booking</li>
+                                        </ol>
+                                        <p>You'll receive a confirmation email with all the details of your reservation.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        How can I modify or cancel my reservation?
+                                    </button>
+                                </h3>
+                                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#bookingAccordion">
+                                    <div class="accordion-body">
+                                        <p>To modify or cancel your reservation:</p>
+                                        <ol>
+                                            <li>Log in to your FastHotels account</li>
+                                            <li>Go to "My Bookings" in your profile</li>
+                                            <li>Find the booking you want to modify or cancel</li>
+                                            <li>Click on "Modify" or "Cancel" button</li>
+                                            <li>Follow the instructions to complete the process</li>
+                                        </ol>
+                                        <p>Please note that modification and cancellation policies vary by hotel and rate type. Some bookings may be non-refundable or subject to cancellation fees.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                        What if I don't receive a confirmation email?
+                                    </button>
+                                </h3>
+                                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#bookingAccordion">
+                                    <div class="accordion-body">
+                                        <p>If you haven't received your confirmation email:</p>
+                                        <ol>
+                                            <li>Check your spam or junk folder</li>
+                                            <li>Verify that you entered the correct email address during booking</li>
+                                            <li>Log in to your account to check if the booking appears in "My Bookings"</li>
+                                        </ol>
+                                        <p>If you still can't find your confirmation, please contact our customer support team for assistance.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="payment-issues" class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">Payment Issues</h2>
+
+                        <div class="accordion" id="paymentAccordion">
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#paymentOne" aria-expanded="true" aria-controls="paymentOne">
+                                        What payment methods do you accept?
+                                    </button>
+                                </h3>
+                                <div id="paymentOne" class="accordion-collapse collapse show" data-bs-parent="#paymentAccordion">
+                                    <div class="accordion-body">
+                                        <p>FastHotels accepts the following payment methods:</p>
+                                        <ul>
+                                            <li>Credit cards (Visa, MasterCard, American Express)</li>
+                                            <li>Debit cards</li>
+                                            <li>PayPal</li>
+                                        </ul>
+                                        <p>The available payment methods may vary depending on the hotel and country.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paymentTwo" aria-expanded="false" aria-controls="paymentTwo">
+                                        When will I be charged for my booking?
+                                    </button>
+                                </h3>
+                                <div id="paymentTwo" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
+                                    <div class="accordion-body">
+                                        <p>The charging policy depends on the hotel and rate type you choose:</p>
+                                        <ul>
+                                            <li><strong>Pay now rates:</strong> Your card will be charged immediately at the time of booking</li>
+                                            <li><strong>Pay later rates:</strong> Your card will be used to guarantee the reservation, but you'll pay directly at the hotel during your stay</li>
+                                            <li><strong>Deposit rates:</strong> A partial payment will be charged at the time of booking, with the remaining balance due at the hotel</li>
+                                        </ul>
+                                        <p>The payment policy is always clearly displayed during the booking process.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paymentThree" aria-expanded="false" aria-controls="paymentThree">
+                                        How do refunds work?
+                                    </button>
+                                </h3>
+                                <div id="paymentThree" class="accordion-collapse collapse" data-bs-parent="#paymentAccordion">
+                                    <div class="accordion-body">
+                                        <p>If you cancel a refundable booking:</p>
+                                        <ol>
+                                            <li>The refund will be processed back to your original payment method</li>
+                                            <li>Processing time typically takes 5-10 business days, depending on your bank or credit card company</li>
+                                            <li>You'll receive an email confirmation when the refund is processed</li>
+                                        </ol>
+                                        <p>Please note that some bookings may be non-refundable or subject to partial refunds depending on the cancellation policy.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="account-support" class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="h4 mb-3">Account Support</h2>
+
+                        <div class="accordion" id="accountAccordion">
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accountOne" aria-expanded="true" aria-controls="accountOne">
+                                        How do I create an account?
+                                    </button>
+                                </h3>
+                                <div id="accountOne" class="accordion-collapse collapse show" data-bs-parent="#accountAccordion">
+                                    <div class="accordion-body">
+                                        <p>To create a FastHotels account:</p>
+                                        <ol>
+                                            <li>Click on the "Sign Up" button in the top right corner of the website</li>
+                                            <li>Enter your email address and create a password</li>
+                                            <li>Fill in your personal information</li>
+                                            <li>Verify your email address by clicking the link sent to your inbox</li>
+                                        </ol>
+                                        <p>Once your account is created, you can manage your bookings, save favorite hotels, and enjoy a faster checkout process.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accountTwo" aria-expanded="false" aria-controls="accountTwo">
+                                        How do I reset my password?
+                                    </button>
+                                </h3>
+                                <div id="accountTwo" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
+                                    <div class="accordion-body">
+                                        <p>If you've forgotten your password:</p>
+                                        <ol>
+                                            <li>Click on "Login" in the top right corner</li>
+                                            <li>Select "Forgot Password"</li>
+                                            <li>Enter the email address associated with your account</li>
+                                            <li>Check your email for a password reset link</li>
+                                            <li>Follow the link to create a new password</li>
+                                        </ol>
+                                        <p>For security reasons, password reset links expire after 24 hours.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accountThree" aria-expanded="false" aria-controls="accountThree">
+                                        How do I update my profile information?
+                                    </button>
+                                </h3>
+                                <div id="accountThree" class="accordion-collapse collapse" data-bs-parent="#accountAccordion">
+                                    <div class="accordion-body">
+                                        <p>To update your profile information:</p>
+                                        <ol>
+                                            <li>Log in to your FastHotels account</li>
+                                            <li>Click on your name in the top right corner</li>
+                                            <li>Select "Profile" from the dropdown menu</li>
+                                            <li>Click "Edit Profile" to update your personal information</li>
+                                            <li>Save your changes</li>
+                                        </ol>
+                                        <p>You can update your name, contact information, address, and communication preferences.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <h3 class="h5 mb-4">Still need help?</h3>
+                    <p>Our customer support team is available 24/7 to assist you.</p>
+                    <a href="/contact" class="btn btn-primary">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

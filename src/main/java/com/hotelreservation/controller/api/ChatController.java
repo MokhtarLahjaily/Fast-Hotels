@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,98 +38,96 @@ public class ChatController {
 
         // Process the message to extract intents and entities
         String message = request.getMessage().toLowerCase();
-        ChatResponse response = new ChatResponse();
+        ChatResponse response;
 
-        // Check for hotel search intent
-        if (containsHotelSearchIntent(message)) {
-            // Extract location from message
-            String location = extractLocation(message);
+        try {
+            // First, get the AI response
+            response = aiChatService.getResponse(request.getMessage(), request.getSessionId());
 
-            if (location != null) {
-                logger.info("Extracted location: {}", location);
+            // Check for hotel search intent to enhance with actual hotel data
+            if (containsHotelSearchIntent(message)) {
+                // Extract location from message
+                String location = extractLocation(message);
 
-                // Search for hotels in the location
-                Pageable pageable = PageRequest.of(0, 3); // Limit to 3 hotels for chat
-                List<HotelResponse> hotels = hotelService.searchHotels(
-                        location, null, null, null, null, "ratingDesc", pageable).getContent();
+                if (location != null) {
+                    logger.info("Extracted location: {}", location);
 
-                if (!hotels.isEmpty()) {
-                    response = aiChatService.getResponse(
-                            "I found " + hotels.size() + " hotels in " + location + ". Here are some options:",
-                            request.getSessionId());
-                    response.setHotels(hotels);
+                    // Search for hotels in the location
+                    Pageable pageable = PageRequest.of(0, 3); // Limit to 3 hotels for chat
+                    List<HotelResponse> hotels = hotelService.searchHotels(
+                            location, null, null, null, null, "ratingDesc", pageable).getContent();
 
-                    // Add suggestions for follow-up questions
+                    if (!hotels.isEmpty()) {
+                        // Add hotels to the response
+                        response.setHotels(hotels);
+
+                        // Add suggestions for follow-up questions
+                        response.setSuggestions(Arrays.asList(
+                                "Tell me more about " + hotels.get(0).getName(),
+                                "What amenities does " + hotels.get(0).getName() + " have?",
+                                "Show me more hotels in " + location
+                        ));
+                    } else {
+                        // No hotels found, suggest popular destinations
+                        response.setSuggestions(Arrays.asList(
+                                "Hotels in Paris",
+                                "Hotels in New York",
+                                "Hotels in Tokyo",
+                                "Hotels in London"
+                        ));
+                    }
+                }
+            } else if (containsAmenitySearchIntent(message)) {
+                // Handle amenity search intent
+                List<String> amenities = extractAmenities(message);
+
+                if (!amenities.isEmpty()) {
+                    // Add suggestions related to amenities
                     response.setSuggestions(Arrays.asList(
-                            "Tell me more about " + hotels.get(0).getName(),
-                            "What amenities does " + hotels.get(0).getName() + " have?",
-                            "Show me more hotels in " + location
-                    ));
-                } else {
-                    response = aiChatService.getResponse(
-                            "I couldn't find any hotels in " + location + ". Would you like to try another location?",
-                            request.getSessionId());
-
-                    // Suggest popular destinations
-                    response.setSuggestions(Arrays.asList(
-                            "Hotels in Paris",
-                            "Hotels in New York",
-                            "Hotels in Tokyo",
-                            "Hotels in London"
+                            "Hotels with " + String.join(" and ", amenities),
+                            "Luxury hotels with " + amenities.get(0),
+                            "Budget-friendly hotels with " + amenities.get(0)
                     ));
                 }
+            } else if (containsBookingIntent(message)) {
+                // Handle booking intent with suggestions
+                response.setSuggestions(Arrays.asList(
+                        "Show me hotels in Paris",
+                        "What documents do I need for booking?",
+                        "What's your cancellation policy?"
+                ));
+            } else if (containsHelpIntent(message)) {
+                // Handle help intent with suggestions
+                response.setSuggestions(Arrays.asList(
+                        "Find hotels",
+                        "Booking process",
+                        "Cancellation policy",
+                        "Payment methods"
+                ));
             } else {
-                // No location found, ask for clarification
-                response = aiChatService.getResponse(
-                        "I'd be happy to help you find a hotel. Could you please specify which city or location you're interested in?",
-                        request.getSessionId());
+                // For other queries, provide general suggestions
+                response.setSuggestions(Arrays.asList(
+                        "Find hotels near me",
+                        "How do I make a booking?",
+                        "What amenities do your hotels offer?",
+                        "Tell me about your loyalty program"
+                ));
             }
-        } else if (containsAmenitySearchIntent(message)) {
-            // Handle amenity search intent
-            List<String> amenities = extractAmenities(message);
+        } catch (Exception e) {
+            logger.error("Error processing chat request: {}", e.getMessage(), e);
 
-            if (!amenities.isEmpty()) {
-                response = aiChatService.getResponse(
-                        "I can help you find hotels with " + String.join(", ", amenities) + ". " +
-                                "Please also let me know which city you're interested in.",
-                        request.getSessionId());
-            } else {
-                response = aiChatService.getResponse(request.getMessage(), request.getSessionId());
-            }
-        } else if (containsBookingIntent(message)) {
-            // Handle booking intent
-            response = aiChatService.getResponse(
-                    "To make a booking, you'll need to select a hotel and room first, then fill out the booking form. " +
-                            "I can help you find the perfect hotel. Which city are you planning to visit?",
-                    request.getSessionId());
-
-            // Add suggestions
-            response.setSuggestions(Arrays.asList(
-                    "Show me hotels in Paris",
-                    "What documents do I need for booking?",
-                    "What's your cancellation policy?"
-            ));
-        } else if (containsHelpIntent(message)) {
-            // Handle help intent
-            response = aiChatService.getResponse(
-                    "I can help you with:\n" +
-                            "- Finding hotels in specific locations\n" +
-                            "- Information about amenities and services\n" +
-                            "- Booking policies and procedures\n" +
-                            "- Payment methods and cancellation policies\n\n" +
-                            "What would you like to know about?",
-                    request.getSessionId());
-
-            // Add suggestions
-            response.setSuggestions(Arrays.asList(
-                    "Find hotels",
-                    "Booking process",
-                    "Cancellation policy",
-                    "Payment methods"
-            ));
-        } else {
-            // Default to AI response for other queries
-            response = aiChatService.getResponse(request.getMessage(), request.getSessionId());
+            // Fallback response in case of error
+            response = ChatResponse.builder()
+                    .message("I'm sorry, I'm having trouble processing your request right now. Please try again later or contact our support team for assistance.")
+                    .sessionId(request.getSessionId() != null ? request.getSessionId() : UUID.randomUUID().toString())
+                    .timestamp(LocalDateTime.now()) // Fixed: Using LocalDateTime.now() directly
+                    .isAiResponse(true)
+                    .suggestions(Arrays.asList(
+                            "Browse hotels",
+                            "Contact support",
+                            "Check booking status"
+                    ))
+                    .build();
         }
 
         return ResponseEntity.ok(response);
@@ -139,7 +137,8 @@ public class ChatController {
         List<String> searchKeywords = Arrays.asList(
                 "find hotel", "search hotel", "looking for hotel", "show hotel",
                 "hotels in", "hotel in", "accommodation in", "place to stay in",
-                "find a place", "where to stay"
+                "find a place", "where to stay", "best hotel", "recommend hotel",
+                "hotel near", "lodging in", "stay in", "book hotel in"
         );
 
         return searchKeywords.stream().anyMatch(message::contains);
@@ -149,7 +148,10 @@ public class ChatController {
         List<String> amenityKeywords = Arrays.asList(
                 "with pool", "with spa", "with gym", "with wifi", "with breakfast",
                 "with restaurant", "with parking", "with air conditioning",
-                "pet friendly", "family friendly", "luxury", "budget"
+                "pet friendly", "family friendly", "luxury", "budget", "free wifi",
+                "room service", "fitness center", "business center", "conference room",
+                "beach access", "ocean view", "mountain view", "city view", "balcony",
+                "kitchen", "suite", "accessible", "wheelchair", "airport shuttle"
         );
 
         return amenityKeywords.stream().anyMatch(message::contains);
@@ -158,7 +160,9 @@ public class ChatController {
     private boolean containsBookingIntent(String message) {
         List<String> bookingKeywords = Arrays.asList(
                 "book", "reserve", "make reservation", "booking", "reservation",
-                "check availability", "available room", "book a room", "reserve a room"
+                "check availability", "available room", "book a room", "reserve a room",
+                "check in", "check out", "cancel booking", "modify booking", "change reservation",
+                "booking confirmation", "reservation details", "booking policy"
         );
 
         return bookingKeywords.stream().anyMatch(message::contains);
@@ -167,7 +171,8 @@ public class ChatController {
     private boolean containsHelpIntent(String message) {
         List<String> helpKeywords = Arrays.asList(
                 "help", "how to", "how do i", "what is", "explain", "tell me about",
-                "information", "guide", "assistance", "support"
+                "information", "guide", "assistance", "support", "faq", "question",
+                "confused", "don't understand", "unclear", "more info", "details about"
         );
 
         return helpKeywords.stream().anyMatch(message::contains);
@@ -190,6 +195,49 @@ public class ChatController {
             return capitalizedMatcher.group(1);
         }
 
+        // Look for common city names directly
+        List<String> commonCities = Arrays.asList(
+                "new york", "los angeles", "chicago", "houston", "phoenix", "philadelphia",
+                "san antonio", "san diego", "dallas", "san jose", "austin", "jacksonville",
+                "fort worth", "columbus", "charlotte", "san francisco", "indianapolis",
+                "seattle", "denver", "washington", "boston", "el paso", "nashville",
+                "detroit", "oklahoma city", "portland", "las vegas", "memphis", "louisville",
+                "baltimore", "milwaukee", "albuquerque", "tucson", "fresno", "sacramento",
+                "kansas city", "mesa", "atlanta", "omaha", "colorado springs", "raleigh",
+                "miami", "long beach", "virginia beach", "oakland", "minneapolis",
+                "tampa", "tulsa", "arlington", "new orleans", "wichita", "cleveland",
+                "bakersfield", "aurora", "anaheim", "honolulu", "santa ana", "riverside",
+                "corpus christi", "lexington", "stockton", "st. louis", "saint louis",
+                "pittsburgh", "saint paul", "anchorage", "cincinnati", "henderson",
+                "greensboro", "plano", "newark", "lincoln", "toledo", "orlando",
+                "chula vista", "jersey city", "chandler", "fort wayne", "buffalo",
+                "durham", "st. petersburg", "irvine", "laredo", "lubbock", "madison",
+                "gilbert", "norfolk", "reno", "winston-salem", "glendale", "hialeah",
+                "garland", "scottsdale", "irving", "chesapeake", "north las vegas",
+                "fremont", "baton rouge", "richmond", "boise", "san bernardino",
+                "paris", "london", "tokyo", "rome", "barcelona", "amsterdam", "berlin",
+                "madrid", "dubai", "singapore", "hong kong", "bangkok", "istanbul",
+                "sydney", "melbourne", "toronto", "vancouver", "montreal", "mexico city",
+                "rio de janeiro", "sao paulo", "buenos aires", "lima", "santiago",
+                "cairo", "cape town", "nairobi", "marrakech", "dubai", "abu dhabi",
+                "moscow", "st. petersburg", "kiev", "warsaw", "prague", "budapest",
+                "vienna", "zurich", "geneva", "brussels", "copenhagen", "oslo",
+                "stockholm", "helsinki", "reykjavik", "dublin", "edinburgh", "glasgow",
+                "manchester", "liverpool", "birmingham", "lisbon", "porto", "athens",
+                "thessaloniki", "milan", "florence", "venice", "naples", "munich",
+                "frankfurt", "hamburg", "cologne", "marseille", "lyon", "nice",
+                "seoul", "beijing", "shanghai", "taipei", "manila", "kuala lumpur",
+                "jakarta", "delhi", "mumbai", "bangalore", "chennai", "kolkata",
+                "auckland", "wellington", "christchurch", "queenstown", "honolulu",
+                "cancun", "havana", "punta cana", "san juan", "nassau", "montego bay"
+        );
+
+        for (String city : commonCities) {
+            if (message.contains(city)) {
+                return city;
+            }
+        }
+
         return null;
     }
 
@@ -197,7 +245,16 @@ public class ChatController {
         List<String> foundAmenities = new ArrayList<>();
         List<String> amenities = Arrays.asList(
                 "pool", "spa", "gym", "wifi", "breakfast", "restaurant",
-                "parking", "air conditioning", "pet friendly", "family friendly"
+                "parking", "air conditioning", "pet friendly", "family friendly",
+                "room service", "fitness center", "business center", "conference room",
+                "beach access", "ocean view", "mountain view", "city view", "balcony",
+                "kitchen", "suite", "accessible", "wheelchair", "airport shuttle",
+                "free wifi", "bar", "lounge", "concierge", "laundry", "dry cleaning",
+                "childcare", "kids club", "tennis court", "golf course", "casino",
+                "nightclub", "entertainment", "hot tub", "sauna", "steam room",
+                "massage", "beauty salon", "gift shop", "convenience store", "atm",
+                "currency exchange", "tour desk", "ticket service", "car rental",
+                "bicycle rental", "shuttle service", "valet parking", "electric vehicle charging"
         );
 
         for (String amenity : amenities) {

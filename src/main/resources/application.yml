@@ -49,9 +49,12 @@ jwt:
   refresh-expiration: 604800000 # 7 days in milliseconds
 
 ollama:
-  enabled: false  # Disable Ollama API calls
-  api-url: ${OLLAMA_API_URL:http://localhost:11434/api}
-  model: llama2
+  enabled: true
+  api-url: ${OLLAMA_API_URL:http://localhost:11434}
+  model: phi3:mini
+  timeout: 30000 # 30 secondes
+  max-tokens: 150 # Limiter la longueur des réponses
+  temperature: 0.7
 
 logging:
   level:

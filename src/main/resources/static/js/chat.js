@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let sessionId = null
     let isTyping = false
+    let typingTimer = null
 
     // Open chat when FAB is clicked
     chatFab.addEventListener("click", () => {
@@ -29,7 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Send message when send button is clicked or Enter is pressed
     sendButton.addEventListener("click", sendMessage)
     chatInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault()
             sendMessage()
         }
     })
@@ -80,8 +82,14 @@ document.addEventListener("DOMContentLoaded", () => {
         chatInput.value = ""
         sendButton.disabled = true
 
-        // Show typing indicator
+        // Show typing indicator with random timing for more natural feel
+        const typingDuration = Math.floor(Math.random() * 2000) + 1000 // 1-3 seconds
         showTypingIndicator()
+
+        // Clear any existing typing timer
+        if (typingTimer) {
+            clearTimeout(typingTimer)
+        }
 
         // Send message to server
         fetch("/api/chat/support", {
@@ -101,29 +109,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 return response.json()
             })
             .then((data) => {
-                // Hide typing indicator
-                hideTypingIndicator()
+                // Set a minimum typing time for natural feel
+                const remainingTime = Math.max(0, typingDuration - (Date.now() - typingStartTime))
 
-                // Save session ID for future requests
-                sessionId = data.sessionId
+                typingTimer = setTimeout(() => {
+                    // Hide typing indicator
+                    hideTypingIndicator()
 
-                // Add bot message to chat
-                addBotMessage(data.message)
+                    // Save session ID for future requests
+                    sessionId = data.sessionId
 
-                // Process any hotel data if present
-                if (data.hotels && data.hotels.length > 0) {
-                    addHotelCards(data.hotels)
-                }
+                    // Add bot message to chat
+                    addBotMessage(data.message)
 
-                // Add suggestions if present
-                if (data.suggestions && data.suggestions.length > 0) {
-                    addSuggestions(data.suggestions)
-                }
+                    // Process any hotel data if present
+                    if (data.hotels && data.hotels.length > 0) {
+                        addHotelCards(data.hotels)
+                    }
+
+                    // Add suggestions if present
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        addSuggestions(data.suggestions)
+                    }
+                }, remainingTime)
             })
             .catch((error) => {
                 console.error("Error:", error)
-                hideTypingIndicator()
-                addBotMessage("I'm sorry, I'm having trouble connecting to the server. Please try again later.")
+
+                // Ensure minimum typing time for natural feel
+                const remainingTime = Math.max(0, typingDuration - (Date.now() - typingStartTime))
+
+                setTimeout(() => {
+                    hideTypingIndicator()
+                    addBotMessage("I'm sorry, I'm having trouble connecting to the server. Please try again later.")
+                }, remainingTime)
             })
     }
 
@@ -145,10 +164,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (message.includes("<") && message.includes(">")) {
             botMessage.innerHTML = message
         } else {
-            // Process URLs and line breaks
+            // Process URLs, line breaks, and markdown-like formatting
             const processedMessage = message
                 .replace(/\n/g, "<br>")
                 .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
+                // Bold text between asterisks
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                // Italic text between single asterisks
+                .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                // Bullet points
+                .replace(/^- (.*)/gm, "• $1")
+
             botMessage.innerHTML = processedMessage
         }
 
@@ -167,12 +193,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const imageUrl = hotel.imageUrl || "/images/hotel-placeholder.jpg"
             const price = hotel.minPrice ? `$${hotel.minPrice}` : "Price on request"
+            const rating = hotel.rating
+                ? `<div class="chat-hotel-rating">${"★".repeat(Math.round(hotel.rating))}${hotel.rating.toFixed(1)}</div>`
+                : ""
 
             card.innerHTML = `
                 <img src="${imageUrl}" alt="${hotel.name}" class="chat-hotel-image" onerror="this.src='/images/hotel-placeholder.jpg'">
                 <div class="chat-hotel-content">
                     <div class="chat-hotel-title">${hotel.name}</div>
                     <div class="chat-hotel-location">${hotel.city}, ${hotel.country}</div>
+                    ${rating}
                     <div class="chat-hotel-price">From ${price} per night</div>
                 </div>
                 <a href="/hotels/${hotel.id}" class="chat-hotel-link">View Details</a>
@@ -206,16 +236,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Function to select a suggestion
-    function selectSuggestion(suggestion) {
+    window.selectSuggestion = (suggestion) => {
         chatInput.value = suggestion
         sendMessage()
     }
+
+    // Track typing indicator start time
+    let typingStartTime = 0
 
     // Function to show typing indicator
     function showTypingIndicator() {
         if (isTyping) return
 
         isTyping = true
+        typingStartTime = Date.now()
+
         const typingIndicator = document.createElement("div")
         typingIndicator.className = "typing-indicator"
         typingIndicator.id = "typing-indicator"

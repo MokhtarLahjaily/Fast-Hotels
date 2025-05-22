@@ -48,7 +48,7 @@ public class AiRecommendationService {
     @Value("${ollama.model}")
     private String ollamaModel;
 
-    @Value("${ollama.enabled:false}")
+    @Value("${ollama.enabled:true}")
     private boolean ollamaEnabled;
 
     public List<HotelResponse> getRecommendedHotels(String location, String preferences) {

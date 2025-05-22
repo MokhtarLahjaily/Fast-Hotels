@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Frequently Asked Questions</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="section-title text-center mb-5">Frequently Asked Questions</h1>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" id="faqSearch" class="form-control border-start-0" placeholder="Search FAQs...">
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <button class="btn btn-sm btn-outline-primary faq-filter active" data-filter="all">All</button>
+                                    <button class="btn btn-sm btn-outline-primary faq-filter" data-filter="booking">Booking</button>
+                                    <button class="btn btn-sm btn-outline-primary faq-filter" data-filter="payment">Payment</button>
+                                    <button class="btn btn-sm btn-outline-primary faq-filter" data-filter="account">Account</button>
+                                    <button class="btn btn-sm btn-outline-primary faq-filter" data-filter="hotels">Hotels</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Booking FAQs -->
+                        <div class="faq-category" id="booking-faqs">
+                            <h2 class="h4 mb-3">Booking Questions</h2>
+
+                            <div class="accordion mb-4" id="bookingFaqAccordion">
+                                <div class="accordion-item faq-item" data-category="booking">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bookingFaq1" aria-expanded="true" aria-controls="bookingFaq1">
+                                            How do I make a hotel reservation?
+                                        </button>
+                                    </h3>
+                                    <div id="bookingFaq1" class="accordion-collapse collapse show" data-bs-parent="#bookingFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>Making a reservation is easy! Simply use the search form on our homepage to enter your destination, check-in and check-out dates, and the number of guests. Browse the available hotels, select your preferred accommodation, choose a room type, and complete the booking process by providing your personal and payment information.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="booking">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bookingFaq2" aria-expanded="false" aria-controls="bookingFaq2">
+                                            Can I modify or cancel my reservation?
+                                        </button>
+                                    </h3>
+                                    <div id="bookingFaq2" class="accordion-collapse collapse" data-bs-parent="#bookingFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>Yes, you can modify or cancel your reservation by logging into your account and going to "My Bookings." Find the booking you want to change and click on the "Modify" or "Cancel" button. Please note that modification and cancellation policies vary by hotel and rate type, and some bookings may be non-refundable or subject to cancellation fees.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="booking">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bookingFaq3" aria-expanded="false" aria-controls="bookingFaq3">
+                                            What is the check-in and check-out time?
+                                        </button>
+                                    </h3>
+                                    <div id="bookingFaq3" class="accordion-collapse collapse" data-bs-parent="#bookingFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>Check-in and check-out times vary by hotel. Generally, check-in is available from 2:00 PM or 3:00 PM, and check-out is required by 11:00 AM or 12:00 PM. The specific times for your booking will be displayed on your confirmation and in your account. Some hotels offer early check-in or late check-out for an additional fee.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment FAQs -->
+                        <div class="faq-category" id="payment-faqs">
+                            <h2 class="h4 mb-3">Payment Questions</h2>
+
+                            <div class="accordion mb-4" id="paymentFaqAccordion">
+                                <div class="accordion-item faq-item" data-category="payment">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#paymentFaq1" aria-expanded="true" aria-controls="paymentFaq1">
+                                            What payment methods do you accept?
+                                        </button>
+                                    </h3>
+                                    <div id="paymentFaq1" class="accordion-collapse collapse show" data-bs-parent="#paymentFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>We accept major credit cards (Visa, MasterCard, American Express), debit cards, and PayPal. The available payment methods may vary depending on the hotel and country.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="payment">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paymentFaq2" aria-expanded="false" aria-controls="paymentFaq2">
+                                            Is my payment information secure?
+                                        </button>
+                                    </h3>
+                                    <div id="paymentFaq2" class="accordion-collapse collapse" data-bs-parent="#paymentFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>Yes, we take security seriously. All payment transactions are encrypted using SSL technology. We comply with PCI DSS standards and never store your full credit card details on our servers.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="payment">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paymentFaq3" aria-expanded="false" aria-controls="paymentFaq3">
+                                            How long do refunds take to process?
+                                        </button>
+                                    </h3>
+                                    <div id="paymentFaq3" class="accordion-collapse collapse" data-bs-parent="#paymentFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>After a refund is initiated, it typically takes 5-10 business days for the funds to appear in your account. The exact timing depends on your bank or credit card company's processing times. You'll receive an email confirmation when the refund is processed from our end.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account FAQs -->
+                        <div class="faq-category" id="account-faqs">
+                            <h2 class="h4 mb-3">Account Questions</h2>
+
+                            <div class="accordion mb-4" id="accountFaqAccordion">
+                                <div class="accordion-item faq-item" data-category="account">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accountFaq1" aria-expanded="true" aria-controls="accountFaq1">
+                                            Do I need an account to make a booking?
+                                        </button>
+                                    </h3>
+                                    <div id="accountFaq1" class="accordion-collapse collapse show" data-bs-parent="#accountFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>While you can browse hotels without an account, creating an account is required to complete a booking. Having an account allows you to manage your reservations, access your booking history, and enjoy a faster checkout process for future bookings.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="account">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accountFaq2" aria-expanded="false" aria-controls="accountFaq2">
+                                            How do I reset my password?
+                                        </button>
+                                    </h3>
+                                    <div id="accountFaq2" class="accordion-collapse collapse" data-bs-parent="#accountFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>If you've forgotten your password, click on "Login," then select "Forgot Password." Enter the email address associated with your account, and we'll send you a password reset link. Follow the link to create a new password. For security reasons, password reset links expire after 24 hours.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="account">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accountFaq3" aria-expanded="false" aria-controls="accountFaq3">
+                                            Can I delete my account?
+                                        </button>
+                                    </h3>
+                                    <div id="accountFaq3" class="accordion-collapse collapse" data-bs-parent="#accountFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>Yes, you can request to delete your account by contacting our customer support team. Please note that if you have active bookings, you'll need to complete or cancel them before your account can be deleted. We'll process your request in accordance with our Privacy Policy and applicable data protection laws.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hotels FAQs -->
+                        <div class="faq-category" id="hotels-faqs">
+                            <h2 class="h4 mb-3">Hotels Questions</h2>
+
+                            <div class="accordion mb-4" id="hotelsFaqAccordion">
+                                <div class="accordion-item faq-item" data-category="hotels">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hotelsFaq1" aria-expanded="true" aria-controls="hotelsFaq1">
+                                            How are hotels rated on your platform?
+                                        </button>
+                                    </h3>
+                                    <div id="hotelsFaq1" class="accordion-collapse collapse show" data-bs-parent="#hotelsFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>Hotels on our platform are rated based on a combination of factors, including official star ratings (where applicable), guest reviews, and our own quality assessment. The rating system helps you identify the level of service, amenities, and overall quality you can expect from each property.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="hotels">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#hotelsFaq2" aria-expanded="false" aria-controls="hotelsFaq2">
+                                            Are the hotel photos accurate?
+                                        </button>
+                                    </h3>
+                                    <div id="hotelsFaq2" class="accordion-collapse collapse" data-bs-parent="#hotelsFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>We strive to provide accurate and up-to-date photos of all hotels on our platform. Most photos are provided directly by the hotels and are regularly updated. In some cases, we also include photos from verified guest reviews to give you a more complete picture of the property.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item faq-item" data-category="hotels">
+                                    <h3 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#hotelsFaq3" aria-expanded="false" aria-controls="hotelsFaq3">
+                                            Can I request special accommodations?
+                                        </button>
+                                    </h3>
+                                    <div id="hotelsFaq3" class="accordion-collapse collapse" data-bs-parent="#hotelsFaqAccordion">
+                                        <div class="accordion-body">
+                                            <p>Yes, you can request special accommodations during the booking process. There's a "Special Requests" field where you can note preferences such as room location, bed type, accessibility needs, or dietary restrictions. While hotels will try to accommodate these requests, they cannot be guaranteed and may be subject to availability.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <h3 class="h5 mb-4">Didn't find what you were looking for?</h3>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="/support/help" class="btn btn-outline-primary">Help Center</a>
+                        <a href="/contact" class="btn btn-primary">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="js">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // FAQ Search functionality
+            const searchInput = document.getElementById('faqSearch');
+            const faqItems = document.querySelectorAll('.faq-item');
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+
+                faqItems.forEach(item => {
+                    const question = item.querySelector('.accordion-button').textContent.toLowerCase();
+                    const answer = item.querySelector('.accordion-body').textContent.toLowerCase();
+
+                    if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // FAQ Filter functionality
+            const filterButtons = document.querySelectorAll('.faq-filter');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Filter items
+                    if (filter === 'all') {
+                        faqItems.forEach(item => item.style.display = '');
+                    } else {
+                        faqItems.forEach(item => {
+                            if (item.getAttribute('data-category') === filter) {
+                                item.style.display = '';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

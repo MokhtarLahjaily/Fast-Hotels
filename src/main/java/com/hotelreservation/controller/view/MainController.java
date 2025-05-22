@@ -44,4 +44,29 @@ public class MainController {
 
         return "redirect:/contact";
     }
+
+    // Support pages
+    @GetMapping("/support/help")
+    public String helpCenter(Model model) {
+        logger.info("Displaying help center page");
+        return "support/help";
+    }
+
+    @GetMapping("/faq")
+    public String faq(Model model) {
+        logger.info("Displaying FAQ page");
+        return "support/faq";
+    }
+
+    @GetMapping("/privacy-policy")
+    public String privacyPolicy(Model model) {
+        logger.info("Displaying privacy policy page");
+        return "support/privacy-policy";
+    }
+
+    @GetMapping("/terms-of-service")
+    public String termsOfService(Model model) {
+        logger.info("Displaying terms of service page");
+        return "support/terms-of-service";
+    }
 }
