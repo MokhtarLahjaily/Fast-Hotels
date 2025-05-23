@@ -42,5 +42,11 @@ public class HotelRequest {
     @Max(value = 5, message = "Star rating must be at most 5")
     private Short starRating;
 
+    private Long ownerId;
+
     private List<Long> amenityIds;
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
 }

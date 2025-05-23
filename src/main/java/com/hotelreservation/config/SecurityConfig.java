@@ -39,12 +39,21 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/", "/search", "/hotels/**", "/css/**", "/js/**", "/images/**",
                                 "/login", "/register", "/about", "/contact", "/error", "/favicon.ico", "/auth-debug", "/auth-test").permitAll()
                         .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/hotel-owner/**").hasRole("HOTEL_OWNER")
                         .anyRequest().authenticated()
                 )
-                // Change from STATELESS to ALWAYS to ensure session creation for web views
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionAuthenticationStrategy(sessionAuthenticationStrategy())
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

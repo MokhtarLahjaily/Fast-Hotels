@@ -37,4 +37,5 @@ public class HotelResponse {
 
     // Additional field for admin views
     private String ownerName;
+    private Long ownerId;
 }

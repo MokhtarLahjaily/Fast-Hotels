@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -43,7 +44,8 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         // Only seed data if the database is empty
         if (hotelRepository.count() > 0) {
-            logger.info("Database already has data, skipping initialization");
+            logger.info("Database already has data, checking for hotel owners...");
+            createHotelOwnersForExistingHotels();
             return;
         }
 
@@ -52,11 +54,14 @@ public class DataInitializer implements CommandLineRunner {
         // Create admin user if it doesn't exist
         User adminUser = createAdminUser();
 
+        // Create hotel owners
+        List<User> hotelOwners = createHotelOwners();
+
         // Create amenities
         List<Amenity> amenities = createAmenities();
 
         // Create hotels with rooms and images
-        createHotels(adminUser, amenities);
+        createHotels(hotelOwners, amenities);
 
         logger.info("Database initialization completed successfully");
     }
@@ -78,6 +83,36 @@ public class DataInitializer implements CommandLineRunner {
         adminUser = userRepository.save(adminUser);
         logger.info("Created admin user: {}", adminUser.getEmail());
         return adminUser;
+    }
+
+    private List<User> createHotelOwners() {
+        // Create 5 hotel owners
+        User luxuryOwner = createHotelOwner("luxury.owner@example.com", "Luxury", "Owner");
+        User beachOwner = createHotelOwner("beach.owner@example.com", "Beach", "Owner");
+        User boutiqueOwner = createHotelOwner("boutique.owner@example.com", "Boutique", "Owner");
+        User businessOwner = createHotelOwner("business.owner@example.com", "Business", "Owner");
+        User familyOwner = createHotelOwner("family.owner@example.com", "Family", "Owner");
+
+        return Arrays.asList(luxuryOwner, beachOwner, boutiqueOwner, businessOwner, familyOwner);
+    }
+
+    private User createHotelOwner(String email, String firstName, String lastName) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            logger.info("Hotel owner {} already exists", email);
+            return userRepository.findByEmail(email).get();
+        }
+
+        User hotelOwner = User.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.encode("owner123"))
+                .firstName(firstName)
+                .lastName(lastName)
+                .role(UserRole.HOTEL_OWNER)
+                .build();
+
+        hotelOwner = userRepository.save(hotelOwner);
+        logger.info("Created hotel owner: {}", hotelOwner.getEmail());
+        return hotelOwner;
     }
 
     private List<Amenity> createAmenities() {
@@ -109,7 +144,7 @@ public class DataInitializer implements CommandLineRunner {
         return amenities;
     }
 
-    private void createHotels(User owner, List<Amenity> allAmenities) {
+    private void createHotels(List<User> hotelOwners, List<Amenity> allAmenities) {
         // Create 5 sample hotels
 
         // 1. Luxury Hotel
@@ -134,7 +169,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("40.7128"))
                 .longitude(new BigDecimal("-74.0060"))
                 .starRating((short) 5)
-                .owner(owner)
+                .owner(hotelOwners.get(0)) // Assign luxury owner
                 .amenities(luxuryAmenities)
                 .build();
 
@@ -166,7 +201,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("25.7617"))
                 .longitude(new BigDecimal("-80.1918"))
                 .starRating((short) 4)
-                .owner(owner)
+                .owner(hotelOwners.get(1)) // Assign beach owner
                 .amenities(beachAmenities)
                 .build();
 
@@ -196,7 +231,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("48.8566"))
                 .longitude(new BigDecimal("2.3522"))
                 .starRating((short) 4)
-                .owner(owner)
+                .owner(hotelOwners.get(2)) // Assign boutique owner
                 .amenities(boutiqueAmenities)
                 .build();
 
@@ -228,7 +263,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("51.5074"))
                 .longitude(new BigDecimal("-0.1278"))
                 .starRating((short) 4)
-                .owner(owner)
+                .owner(hotelOwners.get(3)) // Assign business owner
                 .amenities(businessAmenities)
                 .build();
 
@@ -260,7 +295,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("28.5383"))
                 .longitude(new BigDecimal("-81.3792"))
                 .starRating((short) 3)
-                .owner(owner)
+                .owner(hotelOwners.get(4)) // Assign family owner
                 .amenities(familyAmenities)
                 .build();
 
@@ -273,6 +308,101 @@ public class DataInitializer implements CommandLineRunner {
         createHotelImages(familyResort, "family");
 
         logger.info("Created 5 sample hotels with rooms and images");
+    }
+
+    @Transactional
+    private void createHotelOwnersForExistingHotels() {
+        // Create hotel owners if they don't exist
+        List<User> hotelOwners = createHotelOwners();
+
+        // Specifically assign Grand Luxury Hotel to luxury.owner@example.com
+        User luxuryOwner = userRepository.findByEmail("luxury.owner@example.com")
+                .orElseThrow(() -> new RuntimeException("Luxury owner not found"));
+
+        // Find Grand Luxury Hotel
+        Optional<Hotel> luxuryHotelOpt = hotelRepository.findAll().stream()
+                .filter(h -> h.getName().contains("Grand Luxury Hotel") || h.getName().contains("Luxury"))
+                .findFirst();
+
+        if (luxuryHotelOpt.isPresent()) {
+            Hotel luxuryHotel = luxuryHotelOpt.get();
+            luxuryHotel.setOwner(luxuryOwner);
+            hotelRepository.save(luxuryHotel);
+            logger.info("Assigned luxury owner to Grand Luxury Hotel");
+        } else {
+            logger.warn("Grand Luxury Hotel not found");
+        }
+
+        // Find Seaside Paradise Resort
+        Optional<Hotel> beachHotelOpt = hotelRepository.findAll().stream()
+                .filter(h -> h.getName().contains("Seaside Paradise") || h.getName().contains("Beach"))
+                .findFirst();
+
+        if (beachHotelOpt.isPresent()) {
+            Hotel beachHotel = beachHotelOpt.get();
+            User beachOwner = userRepository.findByEmail("beach.owner@example.com")
+                    .orElseThrow(() -> new RuntimeException("Beach owner not found"));
+            beachHotel.setOwner(beachOwner);
+            hotelRepository.save(beachHotel);
+            logger.info("Assigned beach owner to Seaside Paradise Resort");
+        }
+
+        // Find Artisan Boutique Hotel
+        Optional<Hotel> boutiqueHotelOpt = hotelRepository.findAll().stream()
+                .filter(h -> h.getName().contains("Artisan Boutique") || h.getName().contains("Boutique"))
+                .findFirst();
+
+        if (boutiqueHotelOpt.isPresent()) {
+            Hotel boutiqueHotel = boutiqueHotelOpt.get();
+            User boutiqueOwner = userRepository.findByEmail("boutique.owner@example.com")
+                    .orElseThrow(() -> new RuntimeException("Boutique owner not found"));
+            boutiqueHotel.setOwner(boutiqueOwner);
+            hotelRepository.save(boutiqueHotel);
+            logger.info("Assigned boutique owner to Artisan Boutique Hotel");
+        }
+
+        // Find Executive Business Hotel
+        Optional<Hotel> businessHotelOpt = hotelRepository.findAll().stream()
+                .filter(h -> h.getName().contains("Executive Business") || h.getName().contains("Business"))
+                .findFirst();
+
+        if (businessHotelOpt.isPresent()) {
+            Hotel businessHotel = businessHotelOpt.get();
+            User businessOwner = userRepository.findByEmail("business.owner@example.com")
+                    .orElseThrow(() -> new RuntimeException("Business owner not found"));
+            businessHotel.setOwner(businessOwner);
+            hotelRepository.save(businessHotel);
+            logger.info("Assigned business owner to Executive Business Hotel");
+        }
+
+        // Find Family Fun Resort
+        Optional<Hotel> familyHotelOpt = hotelRepository.findAll().stream()
+                .filter(h -> h.getName().contains("Family Fun") || h.getName().contains("Family"))
+                .findFirst();
+
+        if (familyHotelOpt.isPresent()) {
+            Hotel familyHotel = familyHotelOpt.get();
+            User familyOwner = userRepository.findByEmail("family.owner@example.com")
+                    .orElseThrow(() -> new RuntimeException("Family owner not found"));
+            familyHotel.setOwner(familyOwner);
+            hotelRepository.save(familyHotel);
+            logger.info("Assigned family owner to Family Fun Resort");
+        }
+
+        // Assign remaining hotels to owners in a round-robin fashion
+        int ownerIndex = 0;
+        for (Hotel hotel : hotelRepository.findAll()) {
+            if (hotel.getOwner() == null) {
+                hotel.setOwner(hotelOwners.get(ownerIndex % hotelOwners.size()));
+                hotelRepository.save(hotel);
+                logger.info("Assigned owner {} to hotel {}",
+                        hotelOwners.get(ownerIndex % hotelOwners.size()).getEmail(),
+                        hotel.getName());
+                ownerIndex++;
+            }
+        }
+
+        logger.info("Finished assigning owners to existing hotels");
     }
 
     private void createRooms(Hotel hotel) {

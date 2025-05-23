@@ -53,6 +53,26 @@ public class HotelService {
     private final ReviewRepository reviewRepository;
     private final RoomRepository roomRepository;
 
+    public List<Hotel> findAll() {
+        return hotelRepository.findAll();
+    }
+
+    public Hotel findById(Long id) {
+        return hotelRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
+    }
+
+    public List<HotelResponse> findAllHotels() {
+        return hotelRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public HotelResponse findHotelById(Long id) {
+        Hotel hotel = findById(id);
+        return convertToResponse(hotel);
+    }
+
     public Page<HotelResponse> getAllHotels(Pageable pageable) {
         try {
             return hotelRepository.findAll(pageable)
@@ -99,112 +119,116 @@ public class HotelService {
     }
 
     @Transactional
-    public HotelResponse createHotel(HotelRequest request) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
+    public HotelResponse createHotel(HotelRequest hotelRequest) {
+        User owner = userRepository.findById(hotelRequest.getOwnerId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + hotelRequest.getOwnerId()));
 
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-            Set<Amenity> amenities = new HashSet<>();
-            if (request.getAmenityIds() != null && !request.getAmenityIds().isEmpty()) {
-                amenities = request.getAmenityIds().stream()
-                        .map(id -> amenityRepository.findById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Amenity not found")))
-                        .collect(Collectors.toSet());
-            }
-
-            Hotel hotel = Hotel.builder()
-                    .owner(user)
-                    .name(request.getName())
-                    .description(request.getDescription())
-                    .address(request.getAddress())
-                    .city(request.getCity())
-                    .country(request.getCountry())
-                    .postalCode(request.getPostalCode())
-                    .latitude(request.getLatitude())
-                    .longitude(request.getLongitude())
-                    .starRating(request.getStarRating())
-                    .amenities(amenities)
-                    .build();
-
-            Hotel savedHotel = hotelRepository.save(hotel);
-            return mapToHotelResponseSafely(savedHotel);
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error creating hotel", e);
-            throw e;
+        Set<Amenity> amenities = new HashSet<>();
+        if (hotelRequest.getAmenityIds() != null && !hotelRequest.getAmenityIds().isEmpty()) {
+            amenities = hotelRequest.getAmenityIds().stream()
+                    .map(amenityId -> amenityRepository.findById(amenityId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Amenity not found with id: " + amenityId)))
+                    .collect(Collectors.toSet());
         }
+
+        Hotel hotel = Hotel.builder()
+                .name(hotelRequest.getName())
+                .description(hotelRequest.getDescription())
+                .address(hotelRequest.getAddress())
+                .city(hotelRequest.getCity())
+                .country(hotelRequest.getCountry())
+                .postalCode(hotelRequest.getPostalCode())
+                .latitude(hotelRequest.getLatitude())
+                .longitude(hotelRequest.getLongitude())
+                .starRating(hotelRequest.getStarRating())
+                .owner(owner)
+                .amenities(amenities)
+                .build();
+
+        hotel = hotelRepository.save(hotel);
+        return convertToResponse(hotel);
     }
 
     @Transactional
-    public HotelResponse updateHotel(Long id, HotelRequest request) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
+    public HotelResponse updateHotel(Long id, HotelRequest hotelRequest) {
+        Hotel hotel = findById(id);
 
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-            Hotel hotel = hotelRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
-
-            if (!hotel.getOwner().getId().equals(user.getId())) {
-                throw new UnauthorizedException("You are not authorized to update this hotel");
-            }
-
-            Set<Amenity> amenities = new HashSet<>();
-            if (request.getAmenityIds() != null && !request.getAmenityIds().isEmpty()) {
-                amenities = request.getAmenityIds().stream()
-                        .map(amenityId -> amenityRepository.findById(amenityId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Amenity not found")))
-                        .collect(Collectors.toSet());
-            }
-
-            hotel.setName(request.getName());
-            hotel.setDescription(request.getDescription());
-            hotel.setAddress(request.getAddress());
-            hotel.setCity(request.getCity());
-            hotel.setCountry(request.getCountry());
-            hotel.setPostalCode(request.getPostalCode());
-            hotel.setLatitude(request.getLatitude());
-            hotel.setLongitude(request.getLongitude());
-            hotel.setStarRating(request.getStarRating());
-            hotel.setAmenities(amenities);
-
-            Hotel updatedHotel = hotelRepository.save(hotel);
-            return mapToHotelResponseSafely(updatedHotel);
-        } catch (ResourceNotFoundException | UnauthorizedException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error updating hotel: {}", id, e);
-            throw e;
+        if (hotelRequest.getOwnerId() != null) {
+            User owner = userRepository.findById(hotelRequest.getOwnerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + hotelRequest.getOwnerId()));
+            hotel.setOwner(owner);
         }
+
+        if (hotelRequest.getAmenityIds() != null) {
+            Set<Amenity> amenities = hotelRequest.getAmenityIds().stream()
+                    .map(amenityId -> amenityRepository.findById(amenityId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Amenity not found with id: " + amenityId)))
+                    .collect(Collectors.toSet());
+            hotel.setAmenities(amenities);
+        }
+
+        hotel.setName(hotelRequest.getName());
+        hotel.setDescription(hotelRequest.getDescription());
+        hotel.setAddress(hotelRequest.getAddress());
+        hotel.setCity(hotelRequest.getCity());
+        hotel.setCountry(hotelRequest.getCountry());
+        hotel.setPostalCode(hotelRequest.getPostalCode());
+        hotel.setLatitude(hotelRequest.getLatitude());
+        hotel.setLongitude(hotelRequest.getLongitude());
+        hotel.setStarRating(hotelRequest.getStarRating());
+
+        hotel = hotelRepository.save(hotel);
+        return convertToResponse(hotel);
     }
 
     @Transactional
     public void deleteHotel(Long id) {
+        Hotel hotel = findById(id);
+        hotelRepository.delete(hotel);
+    }
+
+    private HotelResponse convertToResponse(Hotel hotel) {
+        List<Image> images = imageRepository.findByEntityTypeAndEntityId("HOTEL", hotel.getId());
+        String primaryImageUrl = images.stream()
+                .filter(Image::getIsPrimary)
+                .findFirst()
+                .map(Image::getUrl)
+                .orElse("/images/hotel-placeholder.jpg");
+
+        return HotelResponse.builder()
+                .id(hotel.getId())
+                .name(hotel.getName())
+                .description(hotel.getDescription())
+                .address(hotel.getAddress())
+                .city(hotel.getCity())
+                .country(hotel.getCountry())
+                .postalCode(hotel.getPostalCode())
+                .latitude(hotel.getLatitude())
+                .longitude(hotel.getLongitude())
+                .starRating(hotel.getStarRating())
+                .ownerId(hotel.getOwner().getId())
+                .ownerName(hotel.getOwner().getFirstName() + " " + hotel.getOwner().getLastName())
+                .amenities(hotel.getAmenities().stream()
+                        .map(this::mapToAmenityResponse)
+                        .collect(Collectors.toList()))
+                .primaryImageUrl(primaryImageUrl)
+                .build();
+    }
+
+    // Add this new method to find hotels by owner ID
+    public List<Hotel> findHotelsByOwnerId(Long ownerId) {
+        return hotelRepository.findByOwnerId(ownerId);
+    }
+
+    public Page<HotelResponse> getHotelsByOwner(Long ownerId, Pageable pageable) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
+            User owner = userRepository.findById(ownerId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Owner not found"));
 
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-            Hotel hotel = hotelRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
-
-            if (!hotel.getOwner().getId().equals(user.getId())) {
-                throw new UnauthorizedException("You are not authorized to delete this hotel");
-            }
-
-            hotelRepository.delete(hotel);
-        } catch (ResourceNotFoundException | UnauthorizedException e) {
-            throw e;
+            return hotelRepository.findByOwner(owner, pageable)
+                    .map(this::mapToHotelResponseSafely);
         } catch (Exception e) {
-            logger.error("Error deleting hotel: {}", id, e);
+            logger.error("Error getting hotels by owner: {}", ownerId, e);
             throw e;
         }
     }

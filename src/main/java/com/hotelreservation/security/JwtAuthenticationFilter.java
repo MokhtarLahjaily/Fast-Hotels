@@ -39,14 +39,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         logger.debug("Processing request: {}", requestURI);
 
-        // Skip filter for static resources but NOT for HTML pages
+        // Skip filter for static resources and login processing
         if (shouldSkipFilter(requestURI)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Check if authentication is already set
+        // Check if authentication is already set (e.g., from form login)
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
                 !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
             logger.debug("Authentication already set in SecurityContext: {}",
                     SecurityContextHolder.getContext().getAuthentication().getName());
@@ -98,7 +99,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 
         // Log authentication state after the filter chain
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
             logger.debug("Authentication after filter chain: {}",
                     SecurityContextHolder.getContext().getAuthentication().getName());
         } else {
@@ -110,7 +112,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith("/css/") ||
                 path.startsWith("/js/") ||
                 path.startsWith("/images/") ||
-                path.equals("/favicon.ico");
+                path.equals("/favicon.ico") ||
+                path.equals("/login") ||
+                path.equals("/register") ||
+                path.startsWith("/api/auth/");
     }
 
     private String extractJwtFromCookies(HttpServletRequest request) {

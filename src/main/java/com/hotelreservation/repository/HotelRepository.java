@@ -57,4 +57,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             @Param("maxRating") Short maxRating,
             Pageable pageable
     );
+
+    List<Hotel> findByOwnerId(Long ownerId);
 }

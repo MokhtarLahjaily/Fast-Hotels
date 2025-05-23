@@ -69,6 +69,12 @@
                             <li><a class="dropdown-item" href="/bookings"><i class="fas fa-list me-2"></i>My Bookings</a></li>
                             <li><a class="dropdown-item" href="/favorites"><i class="fas fa-heart me-2"></i>My Favorites</a></li>
                             <li><a class="dropdown-item" href="/reviews"><i class="fas fa-star me-2"></i>My Reviews</a></li>
+                            <!-- Hotel Owner Navigation - Only visible to hotel owners -->
+                            <li sec:authorize="hasRole('HOTEL_OWNER')">
+                                <a class="dropdown-item" href="/hotel-owner/dashboard">
+                                    <i class="fas fa-building me-2"></i>My Hotels
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form th:action="@{/logout}" method="post" class="dropdown-item p-0">
