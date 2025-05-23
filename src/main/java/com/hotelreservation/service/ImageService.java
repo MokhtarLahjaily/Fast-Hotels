@@ -37,6 +37,32 @@ public class ImageService {
     private static final List<String> ALLOWED_EXTENSIONS = List.of("jpg", "jpeg", "png", "gif", "webp");
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+    /**
+     * Get all images for a specific hotel
+     *
+     * @param hotelId The ID of the hotel
+     * @return List of image responses
+     */
+    public List<ImageResponse> getHotelImages(Long hotelId) {
+        log.info("Fetching images for hotel: {}", hotelId);
+        List<ImageResponse> images = getEntityImages("HOTEL", hotelId);
+        log.info("Found {} images for hotel {}", images.size(), hotelId);
+        return images;
+    }
+
+    /**
+     * Get all images for a specific room
+     *
+     * @param roomId The ID of the room
+     * @return List of image responses
+     */
+    public List<ImageResponse> getRoomImages(Long roomId) {
+        log.info("Fetching images for room: {}", roomId);
+        List<ImageResponse> images = getEntityImages("ROOM", roomId);
+        log.info("Found {} images for room {}", images.size(), roomId);
+        return images;
+    }
+
     @Transactional
     public List<ImageResponse> uploadHotelImages(Long hotelId, List<MultipartFile> files) {
         log.info("Uploading {} images for hotel: {}", files.size(), hotelId);

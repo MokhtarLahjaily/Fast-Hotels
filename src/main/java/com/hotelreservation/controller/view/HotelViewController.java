@@ -2,12 +2,14 @@ package com.hotelreservation.controller.view;
 
 import com.hotelreservation.dto.response.AmenityResponse;
 import com.hotelreservation.dto.response.HotelResponse;
+import com.hotelreservation.dto.response.ImageResponse;
 import com.hotelreservation.dto.response.ReviewResponse;
 import com.hotelreservation.dto.response.RoomResponse;
 import com.hotelreservation.service.AiRecommendationService;
 import com.hotelreservation.service.AmenityService;
 import com.hotelreservation.service.FavoriteService;
 import com.hotelreservation.service.HotelService;
+import com.hotelreservation.service.ImageService;
 import com.hotelreservation.service.ReviewService;
 import com.hotelreservation.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ public class HotelViewController {
     private final AmenityService amenityService;
     private final AiRecommendationService aiRecommendationService;
     private final FavoriteService favoriteService;
+    private final ImageService imageService;
 
     private static final Logger logger = LoggerFactory.getLogger(HotelViewController.class);
 
@@ -43,13 +46,14 @@ public class HotelViewController {
     public HotelViewController(HotelService hotelService, RoomService roomService,
                                ReviewService reviewService, AmenityService amenityService,
                                AiRecommendationService aiRecommendationService,
-                               FavoriteService favoriteService) {
+                               FavoriteService favoriteService, ImageService imageService) {
         this.hotelService = hotelService;
         this.roomService = roomService;
         this.reviewService = reviewService;
         this.amenityService = amenityService;
         this.aiRecommendationService = aiRecommendationService;
         this.favoriteService = favoriteService;
+        this.imageService = imageService;
     }
 
     @GetMapping("/hotels")
@@ -120,6 +124,10 @@ public class HotelViewController {
             // Get hotel details
             HotelResponse hotel = hotelService.getHotelById(id);
 
+            // Get all hotel images
+            List<ImageResponse> hotelImages = imageService.getHotelImages(id);
+            logger.info("Found {} images for hotel {}", hotelImages.size(), id);
+
             // Get reviews with pagination
             Page<ReviewResponse> reviewsPage = reviewService.getHotelReviews(id, PageRequest.of(reviewPage, reviewSize));
 
@@ -150,6 +158,7 @@ public class HotelViewController {
             }
 
             model.addAttribute("hotel", hotel);
+            model.addAttribute("hotelImages", hotelImages); // Add all hotel images
             model.addAttribute("reviews", reviewsPage.getContent());
             model.addAttribute("reviewCount", reviewsPage.getTotalElements());
             model.addAttribute("reviewCurrentPage", reviewPage);

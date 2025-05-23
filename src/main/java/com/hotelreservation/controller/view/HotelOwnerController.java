@@ -2,8 +2,8 @@ package com.hotelreservation.controller.view;
 
 import com.hotelreservation.dto.request.HotelRequest;
 import com.hotelreservation.dto.response.HotelResponse;
+import com.hotelreservation.dto.response.ImageResponse;
 import com.hotelreservation.dto.response.RoomResponse;
-import com.hotelreservation.dto.response.UserResponse;
 import com.hotelreservation.exception.ResourceNotFoundException;
 import com.hotelreservation.exception.UnauthorizedException;
 import com.hotelreservation.model.Hotel;
@@ -128,15 +128,19 @@ public class HotelOwnerController {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-            if (!hotel.getOwner().getId().equals(user.getId())) {
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
                 throw new UnauthorizedException("You don't have permission to view this hotel");
             }
 
             // Get hotel rooms
             Page<RoomResponse> roomsPage = roomService.getRoomsByHotel(id, PageRequest.of(0, 20));
 
+            // Get hotel images
+            List<ImageResponse> hotelImages = imageService.getEntityImages("HOTEL", id);
+
             model.addAttribute("hotel", hotel);
             model.addAttribute("rooms", roomsPage.getContent());
+            model.addAttribute("hotelImages", hotelImages);
 
             return "hotel-owner/hotel-detail";
         } catch (Exception e) {
@@ -157,7 +161,7 @@ public class HotelOwnerController {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-            if (!hotel.getOwner().getId().equals(user.getId())) {
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
                 throw new UnauthorizedException("You don't have permission to edit this hotel");
             }
 
@@ -214,8 +218,20 @@ public class HotelOwnerController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            imageService.uploadHotelImages(id, images);
-            redirectAttributes.addFlashAttribute("successMessage", "Images uploaded successfully!");
+            // Verify ownership before allowing upload
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            HotelResponse hotel = hotelService.getHotelById(id);
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
+                throw new UnauthorizedException("You don't have permission to upload images for this hotel");
+            }
+
+            List<ImageResponse> uploadedImages = imageService.uploadHotelImages(id, images);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Successfully uploaded " + uploadedImages.size() + " image(s)!");
         } catch (Exception e) {
             log.error("Error uploading images for hotel: {}", id, e);
             redirectAttributes.addFlashAttribute("errorMessage", "Error uploading images: " + e.getMessage());
@@ -231,6 +247,17 @@ public class HotelOwnerController {
             RedirectAttributes redirectAttributes) {
 
         try {
+            // Verify ownership before allowing deletion
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            HotelResponse hotel = hotelService.getHotelById(hotelId);
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
+                throw new UnauthorizedException("You don't have permission to delete images for this hotel");
+            }
+
             imageService.deleteImage(imageId);
             redirectAttributes.addFlashAttribute("successMessage", "Image deleted successfully!");
         } catch (Exception e) {
@@ -248,6 +275,17 @@ public class HotelOwnerController {
             RedirectAttributes redirectAttributes) {
 
         try {
+            // Verify ownership before allowing primary image change
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            HotelResponse hotel = hotelService.getHotelById(hotelId);
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
+                throw new UnauthorizedException("You don't have permission to modify images for this hotel");
+            }
+
             imageService.setPrimaryImage(imageId);
             redirectAttributes.addFlashAttribute("successMessage", "Primary image updated successfully!");
         } catch (Exception e) {

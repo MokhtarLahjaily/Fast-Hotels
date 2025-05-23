@@ -53,9 +53,9 @@
                         </button>
                     </div>
                     <div class="card-body">
-                        <div th:if="${hotel.images != null && !hotel.images.empty}">
+                        <div th:if="${hotelImages != null && !hotelImages.empty}">
                             <div class="row g-3">
-                                <div class="col-md-4" th:each="image : ${hotel.images}">
+                                <div class="col-md-4" th:each="image : ${hotelImages}">
                                     <div class="position-relative">
                                         <img th:src="${image.url}"
                                              class="img-fluid rounded"
@@ -90,7 +90,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div th:if="${hotel.images == null || hotel.images.empty}" class="text-center py-5">
+                        <div th:if="${hotelImages == null || hotelImages.empty}" class="text-center py-5">
                             <i class="fas fa-images fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">No Images Uploaded</h5>
                             <p class="text-muted">Upload images to showcase your hotel to potential guests.</p>
@@ -155,7 +155,6 @@
                                         <th>Type</th>
                                         <th>Capacity</th>
                                         <th>Price/Night</th>
-                                        <th>Count</th>
                                         <th>Actions</th>
                                     </tr>
                                     </thead>
@@ -165,7 +164,6 @@
                                         <td th:text="${room.type ?: 'Standard'}">Standard</td>
                                         <td th:text="${room.capacity + ' guests'}">2 guests</td>
                                         <td th:text="${'$' + room.pricePerNight}">$120</td>
-                                        <td th:text="${room.roomCount}">5</td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <a href="#" class="btn btn-outline-primary">
@@ -201,6 +199,10 @@
                         <h5 class="card-title mb-0">Quick Stats</h5>
                     </div>
                     <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Total Images:</span>
+                            <strong th:text="${#lists.size(hotelImages)}">0</strong>
+                        </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Total Bookings:</span>
                             <strong>0</strong>

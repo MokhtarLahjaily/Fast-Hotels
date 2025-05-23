@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>My Hotels - Hotel Owner Dashboard</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/hotel-owner/dashboard">Dashboard</a></li>
+                        <li class="breadcrumb-item active">My Hotels</li>
+                    </ol>
+                </nav>
+                <h1 class="h3 mb-0">My Hotels</h1>
+                <p class="text-muted">Manage your hotel properties</p>
+            </div>
+            <a href="/hotel-owner/hotels/new" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Hotel
+            </a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage}" role="alert">
+            <span th:text="${successMessage}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show" th:if="${errorMessage}" role="alert">
+            <span th:text="${errorMessage}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Hotels List -->
+        <div th:if="${hotels != null && !hotels.empty}">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4" th:each="hotel : ${hotels}">
+                    <div class="card h-100">
+                        <img th:src="${hotel.imageUrl ?: '/images/hotel-placeholder.jpg'}"
+                             class="card-img-top"
+                             style="height: 200px; object-fit: cover;"
+                             th:alt="${hotel.name}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title" th:text="${hotel.name}">Hotel Name</h5>
+                            <p class="card-text text-muted" th:text="${hotel.city + ', ' + hotel.country}">Location</p>
+                            <p class="card-text flex-grow-1" th:text="${hotel.description}">Description</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary" th:text="${hotel.starRating + ' Stars'}">4 Stars</span>
+                                    <span th:if="${hotel.averageRating != null}" class="text-warning">
+                                        <i class="fas fa-star"></i>
+                                        <span th:text="${#numbers.formatDecimal(hotel.averageRating, 1, 1)}">4.5</span>
+                                    </span>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{'/hotel-owner/hotels/' + ${hotel.id}}" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{'/hotel-owner/hotels/' + ${hotel.id} + '/edit'}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" aria-label="Hotels pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/hotel-owner/hotels(page=${currentPage - 1})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/hotel-owner/hotels(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/hotel-owner/hotels(page=${currentPage + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${hotels == null || hotels.empty}" class="text-center py-5">
+            <i class="fas fa-hotel fa-4x text-muted mb-4"></i>
+            <h3 class="text-muted">No Hotels Found</h3>
+            <p class="text-muted mb-4">You haven't added any hotels yet. Start by adding your first hotel property.</p>
+            <a href="/hotel-owner/hotels/new" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Add Your First Hotel
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

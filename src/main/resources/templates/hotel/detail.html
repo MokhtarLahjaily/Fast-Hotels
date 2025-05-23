@@ -103,36 +103,78 @@
             </div>
         </section>
 
-        <!-- Hotel Images Gallery -->
+        <!-- FIXED Side-by-Side Hotel Images Gallery Section -->
         <section class="mb-5">
             <div class="container">
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <!-- Simplified image handling -->
-                        <img th:src="${hotel.imageUrl != null ? hotel.imageUrl : '/images/hotel-placeholder.jpg'}"
-                             class="img-fluid rounded" alt="Hotel Main Image" style="height: 400px; width: 100%; object-fit: cover;"
-                             onerror="this.src='/images/hotel-placeholder.jpg';">
+                <!-- Debug Information (you can remove this in production) -->
+                <div class="alert alert-info" th:if="${hotel.name == 'Family Fun Resort'}">
+                    <h6>Debug Info for Family Fun Resort:</h6>
+                    <p>Total Images: <span th:text="${hotelImages != null ? hotelImages.size() : 0}">0</span></p>
+                    <div th:if="${hotelImages != null}" th:each="img, iterStat : ${hotelImages}">
+                        <small>Image <span th:text="${iterStat.index}">0</span>:
+                            <span th:text="${img.url}">URL</span> -
+                            Primary: <span th:text="${img.isPrimary}">false</span> -
+                            ID: <span th:text="${img.id}">ID</span>
+                        </small><br/>
                     </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- LEFT SIDE - First Image -->
                     <div class="col-md-6">
-                        <div class="row g-2">
-                            <!-- Placeholder images since we're using simplified image handling -->
-                            <div class="col-6" th:each="i : ${#numbers.sequence(1, 4)}">
-                                <img src="/images/hotel-placeholder.jpg" class="img-fluid rounded"
-                                     th:alt="${hotel.name + ' Image ' + i}"
-                                     style="height: 195px; width: 100%; object-fit: cover;">
-                            </div>
+                        <div th:if="${hotelImages != null && !hotelImages.empty}">
+                            <!-- Show first image -->
+                            <img th:src="@{${hotelImages[0].url}}"
+                                 class="img-fluid rounded"
+                                 alt="Hotel Main Image"
+                                 style="height: 400px; width: 100%; object-fit: cover; cursor: pointer;"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#galleryModal"
+                                 data-bs-slide-to="0"
+                                 onerror="this.src='/images/hotel-placeholder.jpg';">
+                        </div>
+                        <div th:if="${hotelImages == null || hotelImages.empty}">
+                            <!-- Placeholder for first image -->
+                            <img src="/images/hotel-placeholder.jpg"
+                                 class="img-fluid rounded"
+                                 alt="Hotel Placeholder 1"
+                                 style="height: 400px; width: 100%; object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE - Second Image -->
+                    <div class="col-md-6">
+                        <div th:if="${hotelImages != null && hotelImages.size() > 1}">
+                            <!-- Show second image -->
+                            <img th:src="@{${hotelImages[1].url}}"
+                                 class="img-fluid rounded"
+                                 alt="Hotel Second Image"
+                                 style="height: 400px; width: 100%; object-fit: cover; cursor: pointer;"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#galleryModal"
+                                 data-bs-slide-to="1"
+                                 onerror="this.src='/images/hotel-placeholder.jpg';">
+                        </div>
+                        <div th:if="${hotelImages == null || hotelImages.empty || hotelImages.size() <= 1}">
+                            <!-- Placeholder for second image -->
+                            <img src="/images/hotel-placeholder.jpg"
+                                 class="img-fluid rounded"
+                                 alt="Hotel Placeholder 2"
+                                 style="height: 400px; width: 100%; object-fit: cover;">
                         </div>
                     </div>
                 </div>
-                <div class="text-center mt-2">
+
+                <!-- View all photos button -->
+                <div class="text-center mt-3" th:if="${hotelImages != null && !hotelImages.empty}">
                     <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#galleryModal">
-                        View all photos
+                        <span th:text="${'View all ' + hotelImages.size() + ' photos'}">View all photos</span>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- Gallery Modal -->
+        <!-- Gallery Modal (unchanged) -->
         <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
@@ -141,23 +183,84 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                <!-- Single image for simplicity -->
-                                <div class="carousel-item active">
-                                    <img th:src="${hotel.imageUrl != null ? hotel.imageUrl : '/images/hotel-placeholder.jpg'}"
-                                         class="d-block w-100"
-                                         th:alt="${hotel.name + ' Image'}"
-                                         style="height: 600px; object-fit: contain;"
-                                         onerror="this.src='/images/hotel-placeholder.jpg';">
+                        <div th:if="${hotelImages != null && !hotelImages.empty}">
+                            <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <!-- Carousel Indicators -->
+                                <div class="carousel-indicators" th:if="${hotelImages.size() > 1}">
+                                    <button th:each="image, iterStat : ${hotelImages}"
+                                            type="button"
+                                            data-bs-target="#galleryCarousel"
+                                            th:attr="data-bs-slide-to=${iterStat.index}"
+                                            th:classappend="${iterStat.index == 0 ? 'active' : ''}"
+                                            th:aria-label="${'Slide ' + (iterStat.index + 1)}"></button>
                                 </div>
+
+                                <!-- Carousel Items -->
+                                <div class="carousel-inner">
+                                    <div th:each="image, iterStat : ${hotelImages}"
+                                         class="carousel-item"
+                                         th:classappend="${iterStat.index == 0 ? 'active' : ''}">
+                                        <img th:src="@{${image.url}}"
+                                             class="d-block w-100"
+                                             th:alt="${hotel.name + ' Image ' + (iterStat.index + 1)}"
+                                             style="height: 600px; object-fit: contain;"
+                                             onerror="this.src='/images/hotel-placeholder.jpg';">
+                                    </div>
+                                </div>
+
+                                <!-- Carousel Controls -->
+                                <button th:if="${hotelImages.size() > 1}" class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button th:if="${hotelImages.size() > 1}" class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
                             </div>
+                        </div>
+                        <div th:if="${hotelImages == null || hotelImages.empty}">
+                            <img src="/images/hotel-placeholder.jpg" class="d-block w-100" alt="No images available"
+                                 style="height: 600px; object-fit: contain;">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- EVEN SIMPLER VERSION (Use this if you want a more basic approach) -->
+        <!--
+        <section class="mb-5">
+            <div class="container">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <img th:if="${hotelImages != null && !hotelImages.empty}"
+                             th:src="@{${hotelImages[0].url}}"
+                             class="img-fluid rounded"
+                             alt="Hotel Image 1"
+                             style="height: 400px; width: 100%; object-fit: cover;">
+                        <img th:if="${hotelImages == null || hotelImages.empty}"
+                             src="/images/hotel-placeholder.jpg"
+                             class="img-fluid rounded"
+                             alt="Hotel Placeholder 1"
+                             style="height: 400px; width: 100%; object-fit: cover;">
+                    </div>
+                    <div class="col-md-6">
+                        <img th:if="${hotelImages != null && hotelImages.size() > 1}"
+                             th:src="@{${hotelImages[1].url}}"
+                             class="img-fluid rounded"
+                             alt="Hotel Image 2"
+                             style="height: 400px; width: 100%; object-fit: cover;">
+                        <img th:if="${hotelImages == null || hotelImages.empty || hotelImages.size() <= 1}"
+                             src="/images/hotel-placeholder.jpg"
+                             class="img-fluid rounded"
+                             alt="Hotel Placeholder 2"
+                             style="height: 400px; width: 100%; object-fit: cover;">
+                    </div>
+                </div>
+            </div>
+        </section>
+        -->
         <!-- Hotel Description and Details -->
         <section class="mb-5">
             <div class="container">

@@ -467,6 +467,8 @@ public class HotelService {
                     .imageUrl(primaryImageUrl)
                     .minPrice(minPrice)
                     .amenities(amenityResponses)
+                    .owner(hotel.getOwner() != null ? mapToUserResponse(hotel.getOwner()) : null)
+                    .ownerId(hotel.getOwner() != null ? hotel.getOwner().getId() : null)
                     .build();
         } catch (Exception e) {
             logger.error("Error creating simplified response for hotel {}: {}",
