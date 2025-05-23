@@ -11,7 +11,7 @@
         <div class="container">
             <!-- Logo -->
             <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-hotel text-primary me-2"></i>FastHotels
+                <i class="fas fa-hotel text-primary me-2"></i>PFA Hotels
             </a>
 
             <!-- Mobile Toggle Button -->
@@ -35,6 +35,24 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/contact">Contact</a>
                     </li>
+                    <!-- Admin Navigation - Only visible to admins -->
+                    <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog me-1"></i>Admin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/hotels"><i class="fas fa-hotel me-2"></i>Hotels</a></li>
+                            <li><a class="dropdown-item" href="/admin/rooms"><i class="fas fa-door-open me-2"></i>Rooms</a></li>
+                            <li><a class="dropdown-item" href="/admin/bookings"><i class="fas fa-calendar-check me-2"></i>Bookings</a></li>
+                            <li><a class="dropdown-item" href="/admin/users"><i class="fas fa-users me-2"></i>Users</a></li>
+                            <li><a class="dropdown-item" href="/admin/reviews"><i class="fas fa-star me-2"></i>Reviews</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/system"><i class="fas fa-server me-2"></i>System</a></li>
+                        </ul>
+                    </li>
                 </ul>
 
                 <!-- User Authentication -->
@@ -49,6 +67,8 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>My Profile</a></li>
                             <li><a class="dropdown-item" href="/bookings"><i class="fas fa-list me-2"></i>My Bookings</a></li>
+                            <li><a class="dropdown-item" href="/favorites"><i class="fas fa-heart me-2"></i>My Favorites</a></li>
+                            <li><a class="dropdown-item" href="/reviews"><i class="fas fa-star me-2"></i>My Reviews</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form th:action="@{/logout}" method="post" class="dropdown-item p-0">

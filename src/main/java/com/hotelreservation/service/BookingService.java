@@ -47,6 +47,7 @@ public class BookingService {
     private final RoomInventoryRepository roomInventoryRepository;
     private final RoomService roomService;
     private final HotelService hotelService;
+    private final ReviewService reviewService;
 
     /**
      * Get recent bookings for the currently authenticated user
@@ -99,7 +100,13 @@ public class BookingService {
             throw new UnauthorizedException("You are not authorized to view this booking");
         }
 
-        return mapToBookingResponse(booking);
+        BookingResponse response = mapToBookingResponse(booking);
+
+        // Add review eligibility information
+        response.setEligibleForReview(isEligibleForReview(booking.getId()));
+        response.setHasReview(booking.getReview() != null);
+
+        return response;
     }
 
     public Page<BookingResponse> getBookingsByHotel(Long hotelId, Pageable pageable) {
@@ -215,6 +222,66 @@ public class BookingService {
         return mapToBookingResponse(updatedBooking);
     }
 
+    /**
+     * Check if a booking is eligible for review by the current user
+     *
+     * @param bookingId The ID of the booking to check
+     * @return true if the booking is eligible for review, false otherwise
+     */
+    public boolean isEligibleForReview(Long bookingId) {
+        log.info("Checking if booking {} is eligible for review", bookingId);
+
+        try {
+            // Get the current authenticated user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated() ||
+                    "anonymousUser".equals(authentication.getName())) {
+                log.debug("User is not authenticated");
+                return false;
+            }
+
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            // Get the booking
+            Booking booking = bookingRepository.findById(bookingId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+
+            // Check if the booking belongs to the current user
+            if (!booking.getUser().getId().equals(user.getId())) {
+                log.debug("Booking {} does not belong to user {}", bookingId, email);
+                return false;
+            }
+
+            // Check if the booking is completed
+            if (booking.getStatus() != BookingStatus.COMPLETED) {
+                log.debug("Booking {} is not completed (status: {})", bookingId, booking.getStatus());
+                return false;
+            }
+
+            // Check if the booking already has a review
+            if (booking.getReview() != null) {
+                log.debug("Booking {} already has a review", bookingId);
+                return false;
+            }
+
+            // Check if the checkout date has passed (additional safety check)
+            if (booking.getCheckOutDate().isAfter(LocalDate.now())) {
+                log.debug("Checkout date for booking {} has not passed yet", bookingId);
+                return false;
+            }
+
+            // All checks passed, booking is eligible for review
+            log.info("Booking {} is eligible for review by user {}", bookingId, email);
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error checking if booking {} is eligible for review: {}", bookingId, e.getMessage(), e);
+            return false;
+        }
+    }
+
     private void updateRoomInventory(Room room, LocalDate checkIn, LocalDate checkOut) {
         LocalDate currentDate = checkIn;
         while (!currentDate.isAfter(checkOut.minusDays(1))) {
@@ -247,6 +314,8 @@ public class BookingService {
         }
     }
 
+    // Only updating the mapToBookingResponse method to set userEmail
+
     private BookingResponse mapToBookingResponse(Booking booking) {
         try {
             RoomResponse roomResponse = roomService.getRoomById(booking.getRoom().getId());
@@ -278,9 +347,22 @@ public class BookingService {
             if (roomResponse != null) {
                 // Use the name field as type if type is null
                 response.setRoomType(roomResponse.getType() != null ? roomResponse.getType() : roomResponse.getName());
+                response.setRoomName(roomResponse.getName());
             } else {
                 response.setRoomType("N/A");
+                response.setRoomName("N/A");
             }
+
+            // Set user email for direct access in templates
+            if (booking.getUser() != null) {
+                response.setUserEmail(booking.getUser().getEmail());
+            } else {
+                response.setUserEmail("N/A");
+            }
+
+            // Add review eligibility information
+            response.setEligibleForReview(isEligibleForReview(booking.getId()));
+            response.setHasReview(booking.getReview() != null);
 
             return response;
         } catch (Exception e) {
@@ -300,11 +382,20 @@ public class BookingService {
                     .updatedAt(booking.getUpdatedAt())
                     .hotelName("Error loading hotel")
                     .roomType("Error loading room")
+                    .roomName("Error loading room")
                     .build();
+
+            // Set user email even in error case
+            if (booking.getUser() != null) {
+                response.setUserEmail(booking.getUser().getEmail());
+            } else {
+                response.setUserEmail("N/A");
+            }
 
             return response;
         }
     }
+
 
     private UserResponse mapToUserResponse(User user) {
         return UserResponse.builder()
@@ -314,5 +405,97 @@ public class BookingService {
                 .lastName(user.getLastName())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    /**
+     * Update booking status to COMPLETED for a specific booking
+     * This method is used by admin to manually mark a booking as completed
+     *
+     * @param bookingId The ID of the booking to update
+     * @return The updated booking response
+     */
+    @Transactional
+    public BookingResponse completeBooking(Long bookingId) {
+        log.info("Manually completing booking with ID: {}", bookingId);
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
+
+        // Only CONFIRMED bookings can be marked as COMPLETED
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new BadRequestException("Only confirmed bookings can be marked as completed. Current status: " + booking.getStatus());
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        log.info("Successfully marked booking {} as COMPLETED", bookingId);
+        return mapToBookingResponse(updatedBooking);
+    }
+
+    /**
+     * Get all bookings with pagination
+     *
+     * @param pageable Pagination information
+     * @return Page of booking responses
+     */
+    public Page<BookingResponse> getAllBookings(Pageable pageable) {
+        log.info("Fetching all bookings with pagination: {}", pageable);
+
+        try {
+            Page<Booking> bookings = bookingRepository.findAll(pageable);
+            log.debug("Found {} bookings", bookings.getTotalElements());
+
+            return bookings.map(this::mapToBookingResponse);
+        } catch (Exception e) {
+            log.error("Error fetching all bookings: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch bookings", e);
+        }
+    }
+
+    /**
+     * Count bookings by status
+     *
+     * @param status The booking status to count
+     * @return The number of bookings with the given status
+     */
+    public long countByStatus(BookingStatus status) {
+        log.info("Counting bookings with status: {}", status);
+
+        try {
+            long count = bookingRepository.countByStatus(status);
+            log.debug("Found {} bookings with status {}", count, status);
+
+            return count;
+        } catch (Exception e) {
+            log.error("Error counting bookings by status {}: {}", status, e.getMessage(), e);
+            throw new RuntimeException("Failed to count bookings by status", e);
+        }
+    }
+
+    /**
+     * Confirm a booking by setting its status to CONFIRMED
+     * This method is used by admin to manually confirm a booking
+     *
+     * @param bookingId The ID of the booking to confirm
+     * @return The updated booking response
+     */
+    @Transactional
+    public BookingResponse confirmBooking(Long bookingId) {
+        log.info("Manually confirming booking with ID: {}", bookingId);
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
+
+        // Only PENDING bookings can be confirmed
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new BadRequestException("Only pending bookings can be confirmed. Current status: " + booking.getStatus());
+        }
+
+        booking.setStatus(BookingStatus.CONFIRMED);
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        log.info("Successfully confirmed booking {}", bookingId);
+        return mapToBookingResponse(updatedBooking);
     }
 }

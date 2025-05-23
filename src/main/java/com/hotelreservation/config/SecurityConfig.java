@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/", "/search", "/hotels/**", "/css/**", "/js/**", "/images/**",
                                 "/login", "/register", "/about", "/contact", "/error", "/favicon.ico", "/auth-debug", "/auth-test").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 // Change from STATELESS to ALWAYS to ensure session creation for web views

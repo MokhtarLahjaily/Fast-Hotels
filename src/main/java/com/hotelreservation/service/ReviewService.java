@@ -83,6 +83,11 @@ public class ReviewService {
                 .build();
 
         Review savedReview = reviewRepository.save(review);
+
+        // Update the booking to reference the review
+        booking.setReview(savedReview);
+        bookingRepository.save(booking);
+
         return mapToReviewResponse(savedReview);
     }
 
@@ -111,8 +116,11 @@ public class ReviewService {
 
     @Transactional
     public void deleteReview(Long id) {
+        logger.info("Starting deletion process for review ID: {}", id);
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+        logger.info("User attempting deletion: {}", email);
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -120,27 +128,89 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
 
+        logger.info("Found review: ID={}, User={}, Hotel={}",
+                review.getId(),
+                review.getUser().getEmail(),
+                review.getHotel().getName());
+
         // Check if the review belongs to the current user
         if (!review.getUser().getId().equals(user.getId())) {
+            logger.warn("Unauthorized deletion attempt: review belongs to user {}, but {} is trying to delete",
+                    review.getUser().getEmail(), email);
             throw new UnauthorizedException("You are not authorized to delete this review");
         }
 
-        reviewRepository.delete(review);
+        try {
+            // First, remove the review reference from the booking
+            Booking booking = review.getBooking();
+            if (booking != null) {
+                logger.info("Removing review reference from booking ID: {}", booking.getId());
+                booking.setReview(null);
+                bookingRepository.save(booking);
+                bookingRepository.flush(); // Force immediate save
+                logger.info("Successfully removed review reference from booking");
+            }
+
+            // Now delete the review using custom query
+            logger.info("Deleting review from database using custom query");
+            reviewRepository.deleteReviewById(id);
+            logger.info("Successfully deleted review ID: {}", id);
+
+        } catch (Exception e) {
+            logger.error("Error during review deletion: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to delete review: " + e.getMessage(), e);
+        }
     }
 
     private ReviewResponse mapToReviewResponse(Review review) {
-        HotelResponse hotelResponse = hotelService.getHotelById(review.getHotel().getId());
+        try {
+            HotelResponse hotelResponse = hotelService.getHotelById(review.getHotel().getId());
 
-        return ReviewResponse.builder()
-                .id(review.getId())
-                .bookingId(review.getBooking().getId())
-                .user(mapToUserResponse(review.getUser()))
-                .hotel(hotelResponse)
-                .rating(review.getRating())
-                .comment(review.getComment())
-                .createdAt(review.getCreatedAt())
-                .updatedAt(review.getUpdatedAt())
-                .build();
+            ReviewResponse response = ReviewResponse.builder()
+                    .id(review.getId())
+                    .bookingId(review.getBooking().getId())
+                    .user(mapToUserResponse(review.getUser()))
+                    .hotel(hotelResponse)
+                    .rating(review.getRating())
+                    .comment(review.getComment())
+                    .createdAt(review.getCreatedAt())
+                    .updatedAt(review.getUpdatedAt())
+                    .build();
+
+            // Set additional fields
+            if (review.getUser() != null) {
+                response.setUserEmail(review.getUser().getEmail());
+                String userName = "";
+                if (review.getUser().getFirstName() != null) {
+                    userName += review.getUser().getFirstName();
+                }
+                if (review.getUser().getLastName() != null) {
+                    if (!userName.isEmpty()) userName += " ";
+                    userName += review.getUser().getLastName();
+                }
+                response.setUserName(userName.isEmpty() ? "Guest" : userName);
+            }
+
+            if (review.getHotel() != null) {
+                response.setHotelName(review.getHotel().getName());
+            }
+
+            return response;
+        } catch (Exception e) {
+            logger.error("Error mapping review to response: {}", e.getMessage(), e);
+            // Return a basic response if detailed mapping fails
+            return ReviewResponse.builder()
+                    .id(review.getId())
+                    .bookingId(review.getBooking() != null ? review.getBooking().getId() : null)
+                    .rating(review.getRating())
+                    .comment(review.getComment())
+                    .createdAt(review.getCreatedAt())
+                    .updatedAt(review.getUpdatedAt())
+                    .userEmail(review.getUser() != null ? review.getUser().getEmail() : "Unknown")
+                    .userName("Guest")
+                    .hotelName(review.getHotel() != null ? review.getHotel().getName() : "Unknown Hotel")
+                    .build();
+        }
     }
 
     private UserResponse mapToUserResponse(User user) {
@@ -189,6 +259,54 @@ public class ReviewService {
             throw new RuntimeException("Error retrieving reviews: " + e.getMessage());
         }
     }
+
+    /**
+     * Get a specific review by ID
+     *
+     * @param id The review ID
+     * @return ReviewResponse object
+     */
+    public ReviewResponse getReviewById(Long id) {
+        logger.info("Getting review with ID: {}", id);
+
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found with ID: " + id));
+
+        return mapToReviewResponse(review);
+    }
+
+    /**
+     * Get reviews for the current authenticated user
+     *
+     * @param pageable Pagination information
+     * @return Page of ReviewResponse objects
+     */
+    public Page<ReviewResponse> getCurrentUserReviews(Pageable pageable) {
+        logger.info("Getting reviews for current user, page: {}, size: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return reviewRepository.findByUser(user, pageable)
+                .map(this::mapToReviewResponse);
+    }
+
+    /**
+     * Check if a booking has been reviewed
+     *
+     * @param bookingId The booking ID
+     * @return true if the booking has been reviewed, false otherwise
+     */
+    public boolean hasBookingBeenReviewed(Long bookingId) {
+        logger.info("Checking if booking has been reviewed: {}", bookingId);
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+
+        return booking.getReview() != null;
+    }
 }
-
-

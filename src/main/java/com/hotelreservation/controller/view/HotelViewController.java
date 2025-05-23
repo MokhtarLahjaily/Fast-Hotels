@@ -6,18 +6,21 @@ import com.hotelreservation.dto.response.ReviewResponse;
 import com.hotelreservation.dto.response.RoomResponse;
 import com.hotelreservation.service.AiRecommendationService;
 import com.hotelreservation.service.AmenityService;
+import com.hotelreservation.service.FavoriteService;
 import com.hotelreservation.service.HotelService;
 import com.hotelreservation.service.ReviewService;
 import com.hotelreservation.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
@@ -32,18 +35,21 @@ public class HotelViewController {
     private final ReviewService reviewService;
     private final AmenityService amenityService;
     private final AiRecommendationService aiRecommendationService;
+    private final FavoriteService favoriteService;
 
     private static final Logger logger = LoggerFactory.getLogger(HotelViewController.class);
 
     @Autowired
     public HotelViewController(HotelService hotelService, RoomService roomService,
                                ReviewService reviewService, AmenityService amenityService,
-                               AiRecommendationService aiRecommendationService) {
+                               AiRecommendationService aiRecommendationService,
+                               FavoriteService favoriteService) {
         this.hotelService = hotelService;
         this.roomService = roomService;
         this.reviewService = reviewService;
         this.amenityService = amenityService;
         this.aiRecommendationService = aiRecommendationService;
+        this.favoriteService = favoriteService;
     }
 
     @GetMapping("/hotels")
@@ -104,6 +110,8 @@ public class HotelViewController {
             @RequestParam(required = false, defaultValue = "2") Integer guests,
             @RequestParam(required = false, defaultValue = "0") int reviewPage,
             @RequestParam(required = false, defaultValue = "5") int reviewSize,
+            HttpServletRequest request,
+            Authentication authentication,
             Model model) {
 
         try {
@@ -128,6 +136,19 @@ public class HotelViewController {
             // Get AI recommendation if user is authenticated
             String aiRecommendation = aiRecommendationService.getHotelRecommendation(id);
 
+            // Check if hotel is in user's favorites
+            boolean isFavorite = false;
+            if (authentication != null && authentication.isAuthenticated() &&
+                    !authentication.getName().equals("anonymousUser")) {
+                isFavorite = favoriteService.isFavorite(id);
+            }
+
+            // Create the current URL for redirect after favorite actions
+            String currentUrl = request.getRequestURI();
+            if (request.getQueryString() != null) {
+                currentUrl += "?" + request.getQueryString();
+            }
+
             model.addAttribute("hotel", hotel);
             model.addAttribute("reviews", reviewsPage.getContent());
             model.addAttribute("reviewCount", reviewsPage.getTotalElements());
@@ -138,6 +159,8 @@ public class HotelViewController {
             model.addAttribute("checkIn", checkIn);
             model.addAttribute("checkOut", checkOut);
             model.addAttribute("guests", guests);
+            model.addAttribute("isFavorite", isFavorite);
+            model.addAttribute("currentUrl", currentUrl);
 
             return "hotel/detail";
         } catch (Exception e) {

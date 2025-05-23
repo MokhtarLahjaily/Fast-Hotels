@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        .dashboard-card {
+            transition: transform 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <h1 class="mb-4">Admin Dashboard</h1>
+
+        <!-- Alerts -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card bg-primary text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Total Users</h6>
+                                <h2 class="mb-0" th:text="${totalUsers}">0</h2>
+                            </div>
+                            <i class="fas fa-users fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/users" class="text-white text-decoration-none small">
+                            View Details <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card bg-success text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Total Hotels</h6>
+                                <h2 class="mb-0" th:text="${totalHotels}">0</h2>
+                            </div>
+                            <i class="fas fa-hotel fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/hotels" class="text-white text-decoration-none small">
+                            View Details <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card bg-info text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Total Bookings</h6>
+                                <h2 class="mb-0" th:text="${totalBookings}">0</h2>
+                            </div>
+                            <i class="fas fa-calendar-check fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/bookings" class="text-white text-decoration-none small">
+                            View Details <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card bg-warning text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Total Reviews</h6>
+                                <h2 class="mb-0" th:text="${totalReviews}">0</h2>
+                            </div>
+                            <i class="fas fa-star fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/reviews" class="text-white text-decoration-none small">
+                            View Details <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Status Cards -->
+        <h4 class="mb-3">Booking Status</h4>
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-warning">Pending</h6>
+                                <h3 class="mb-0" th:text="${pendingBookings}">0</h3>
+                            </div>
+                            <i class="fas fa-clock fa-2x text-warning opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-primary">Confirmed</h6>
+                                <h3 class="mb-0" th:text="${confirmedBookings}">0</h3>
+                            </div>
+                            <i class="fas fa-check-circle fa-2x text-primary opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-success">Completed</h6>
+                                <h3 class="mb-0" th:text="${completedBookings}">0</h3>
+                            </div>
+                            <i class="fas fa-check-double fa-2x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card dashboard-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-danger">Cancelled</h6>
+                                <h3 class="mb-0" th:text="${cancelledBookings}">0</h3>
+                            </div>
+                            <i class="fas fa-times-circle fa-2x text-danger opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <h4 class="mb-3">Quick Actions</h4>
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card dashboard-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Update Booking Statuses</h5>
+                        <p class="card-text">Update all booking statuses based on check-in and check-out dates.</p>
+                        <form th:action="@{/admin/bookings/update-statuses}" method="post">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sync-alt me-1"></i> Update Statuses
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card dashboard-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Add New Hotel</h5>
+                        <p class="card-text">Create a new hotel listing with rooms and amenities.</p>
+                        <a href="/admin/hotels/create" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i> Add Hotel
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card dashboard-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Manage Reviews</h5>
+                        <p class="card-text">Moderate and manage customer reviews.</p>
+                        <a href="/admin/reviews" class="btn btn-warning">
+                            <i class="fas fa-star me-1"></i> Manage Reviews
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

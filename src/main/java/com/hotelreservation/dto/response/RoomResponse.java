@@ -25,4 +25,6 @@ public class RoomResponse {
     private Integer availableCount; // Added missing property
     private String type;
 
+    // Additional fields for admin views
+    private String hotelName;
 }

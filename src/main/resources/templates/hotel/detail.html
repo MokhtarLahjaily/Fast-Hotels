@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/base}">
 <head>
     <title th:text="${hotel != null ? hotel.name + ' - Hotel Reservation System' : 'Hotel Details - Hotel Reservation System'}">Hotel Name - Hotel Reservation System</title>
@@ -10,6 +11,12 @@
     <!-- Error Alert -->
     <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
         An error occurred while loading the hotel details.
+    </div>
+
+    <!-- Success Alert -->
+    <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage != null}" role="alert">
+        <span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <div th:if="${hotel != null}">
@@ -44,6 +51,27 @@
                                         (120 reviews)
                                     </span>
                             </div>
+
+                            <!-- Favorite Button -->
+                            <div sec:authorize="isAuthenticated()">
+                                <form th:if="${isFavorite == null || isFavorite == false}"
+                                      th:action="@{/favorites/add/{id}(id=${hotel.id})}" method="post" class="d-inline">
+                                    <input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="far fa-heart"></i> Add to Favorites
+                                    </button>
+                                </form>
+                                <form th:if="${isFavorite != null && isFavorite == true}"
+                                      th:action="@{/favorites/remove/{id}(id=${hotel.id})}" method="post" class="d-inline">
+                                    <input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-heart"></i> Remove from Favorites
+                                    </button>
+                                </form>
+                            </div>
+                            <a sec:authorize="!isAuthenticated()" href="/login" class="btn btn-sm btn-outline-danger">
+                                <i class="far fa-heart"></i> Add to Favorites
+                            </a>
                         </div>
 
                         <!-- Amenities -->
@@ -195,11 +223,19 @@
                                     <div class="d-flex mb-3">
                                         <div class="flex-shrink-0">
                                             <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                                <span th:text="${review.userName != null && !review.userName.isEmpty() ? #strings.substring(review.userName, 0, 1).toUpperCase() : 'G'}">J</span>
+                                                <!-- Fixed userName access -->
+                                                <span th:if="${review.user != null && review.user.firstName != null}"
+                                                      th:text="${#strings.substring(review.user.firstName, 0, 1).toUpperCase()}">J</span>
+                                                <span th:unless="${review.user != null && review.user.firstName != null}">G</span>
                                             </div>
                                         </div>
                                         <div class="ms-3">
-                                            <h5 class="mb-1" th:text="${review.userName != null ? review.userName : 'Guest'}">John Doe</h5>
+                                            <!-- Fixed userName display -->
+                                            <h5 class="mb-1" th:if="${review.user != null}"
+                                                th:text="${(review.user.firstName != null ? review.user.firstName : '') + ' ' +
+                                                          (review.user.lastName != null ? review.user.lastName : '')}">John Doe</h5>
+                                            <h5 class="mb-1" th:unless="${review.user != null}">Guest</h5>
+
                                             <div class="d-flex align-items-center mb-2">
                                                 <div class="me-2">
                                                     <i class="fas fa-star text-warning" th:each="i : ${#numbers.sequence(1, review.rating != null ? review.rating : 0)}"></i>
@@ -458,6 +494,21 @@
                         checkOutDate.value = nextDay;
                     }
                 });
+            }
+        });
+
+        // Favorite functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check favorite status via API
+            const hotelId = /*[[${hotel != null ? hotel.id : null}]]*/ null;
+
+            if (hotelId) {
+                fetch(`/api/favorites/status/${hotelId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Favorite status:', data.isFavorite);
+                    })
+                    .catch(error => console.error('Error checking favorite status:', error));
             }
         });
     </script>

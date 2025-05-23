@@ -20,4 +20,9 @@ public class ReviewResponse {
     private String comment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Additional fields for admin views and templates
+    private String userEmail;
+    private String hotelName;
+    private String userName; // Added for hotel detail template
 }

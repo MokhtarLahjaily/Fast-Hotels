@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>My Reviews - Hotel Reservation System</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">My Reviews</h1>
+
+                <!-- Alerts -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${successMessage}">Success message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorMessage}">Error message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Reviews List -->
+                <div th:if="${reviews != null && !reviews.empty}" class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm mb-4" th:each="review : ${reviews}">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0" th:text="${review.hotel != null ? review.hotel.name : 'Unknown Hotel'}">Hotel Name</h5>
+                                    <small class="text-muted" th:text="${'Reviewed on ' + #temporals.format(review.createdAt, 'MMM dd, yyyy')}">Reviewed on Jan 01, 2025</small>
+                                </div>
+                                <div class="d-flex">
+                                    <a th:href="@{/reviews/edit/{id}(id=${review.id})}" class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <!-- Delete Button with Confirmation Modal -->
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="'#deleteModal' + ${review.id}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="me-2">
+                                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                                  th:class="${i <= review.rating ? 'fas fa-star text-warning' : 'far fa-star text-muted'}"></span>
+                                        </div>
+                                        <span class="fw-bold" th:text="${review.rating + '/5'}">5/5</span>
+                                    </div>
+                                    <p class="card-text" th:text="${review.comment}">Review comment text...</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a th:href="@{/hotels/{id}(id=${review.hotel != null ? review.hotel.id : 0})}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-hotel"></i> View Hotel
+                                    </a>
+                                    <a th:href="@{/bookings/{id}(id=${review.bookingId})}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-receipt"></i> View Booking
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Delete Confirmation Modal -->
+                            <div class="modal fade" th:id="'deleteModal' + ${review.id}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete this review?</p>
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                This action cannot be undone.
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form th:action="@{/reviews/delete/{id}(id=${review.id})}" method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-trash me-1"></i> Delete Review
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/reviews(page=${currentPage - 1})}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                        th:classappend="${currentPage == i ? 'active' : ''}">
+                                        <a class="page-link" th:href="@{/reviews(page=${i})}" th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/reviews(page=${currentPage + 1})}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Reviews -->
+                <div th:if="${reviews == null || reviews.empty}" class="text-center py-5">
+                    <i class="fas fa-comment-slash fa-4x text-muted mb-3"></i>
+                    <h4>No Reviews Yet</h4>
+                    <p class="text-muted">You haven't written any reviews yet. After completing a stay, you can share your experience.</p>
+                    <a href="/bookings" class="btn btn-primary mt-3">
+                        <i class="fas fa-list me-2"></i>View My Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

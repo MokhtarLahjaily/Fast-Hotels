@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>System Settings</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <h1 class="mb-4">System Settings</h1>
+
+        <!-- Alerts -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <!-- General Settings -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">General Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/system/general" method="post">
+                            <div class="mb-3">
+                                <label for="siteName" class="form-label">Site Name</label>
+                                <input type="text" class="form-control" id="siteName" name="siteName" value="PFA Hotels">
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactEmail" class="form-label">Contact Email</label>
+                                <input type="email" class="form-control" id="contactEmail" name="contactEmail" value="contact@pfahotels.com">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" value="+1 (555) 123-4567">
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <textarea class="form-control" id="address" name="address" rows="3">123 Main Street, New York, NY 10001</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <!-- Email Settings -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Email Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/system/email" method="post">
+                            <div class="mb-3">
+                                <label for="smtpHost" class="form-label">SMTP Host</label>
+                                <input type="text" class="form-control" id="smtpHost" name="smtpHost" value="smtp.example.com">
+                            </div>
+                            <div class="mb-3">
+                                <label for="smtpPort" class="form-label">SMTP Port</label>
+                                <input type="number" class="form-control" id="smtpPort" name="smtpPort" value="587">
+                            </div>
+                            <div class="mb-3">
+                                <label for="smtpUsername" class="form-label">SMTP Username</label>
+                                <input type="text" class="form-control" id="smtpUsername" name="smtpUsername" value="noreply@pfahotels.com">
+                            </div>
+                            <div class="mb-3">
+                                <label for="smtpPassword" class="form-label">SMTP Password</label>
+                                <input type="password" class="form-control" id="smtpPassword" name="smtpPassword" value="********">
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="enableTls" name="enableTls" checked>
+                                <label class="form-check-label" for="enableTls">Enable TLS</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <!-- Booking Settings -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Booking Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/system/booking" method="post">
+                            <div class="mb-3">
+                                <label for="checkInTime" class="form-label">Default Check-in Time</label>
+                                <input type="time" class="form-control" id="checkInTime" name="checkInTime" value="14:00">
+                            </div>
+                            <div class="mb-3">
+                                <label for="checkOutTime" class="form-label">Default Check-out Time</label>
+                                <input type="time" class="form-control" id="checkOutTime" name="checkOutTime" value="11:00">
+                            </div>
+                            <div class="mb-3">
+                                <label for="maxAdvanceBookingDays" class="form-label">Max Advance Booking Days</label>
+                                <input type="number" class="form-control" id="maxAdvanceBookingDays" name="maxAdvanceBookingDays" value="365">
+                            </div>
+                            <div class="mb-3">
+                                <label for="cancellationPeriodHours" class="form-label">Cancellation Period (Hours)</label>
+                                <input type="number" class="form-control" id="cancellationPeriodHours" name="cancellationPeriodHours" value="48">
+                                <div class="form-text">Number of hours before check-in when cancellation is allowed without penalty.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <!-- System Maintenance -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">System Maintenance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6>Database Backup</h6>
+                            <p>Create a backup of the database.</p>
+                            <form action="/admin/system/backup" method="post" class="mb-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-database me-1"></i> Create Backup
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6>Clear Cache</h6>
+                            <p>Clear the application cache.</p>
+                            <form action="/admin/system/clear-cache" method="post" class="mb-3">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-broom me-1"></i> Clear Cache
+                                </button>
+                            </form>
+                        </div>
+
+                        <div>
+                            <h6>System Information</h6>
+                            <table class="table table-sm">
+                                <tbody>
+                                <tr>
+                                    <th>Java Version</th>
+                                    <td>17.0.2</td>
+                                </tr>
+                                <tr>
+                                    <th>Spring Boot Version</th>
+                                    <td>3.1.0</td>
+                                </tr>
+                                <tr>
+                                    <th>Database</th>
+                                    <td>MySQL 8.0.28</td>
+                                </tr>
+                                <tr>
+                                    <th>Server Time</th>
+                                    <td>2023-05-23 12:25:51</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

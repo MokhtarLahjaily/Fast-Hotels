@@ -35,4 +35,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // New method for finding recent bookings for a user
     List<Booking> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+
+    // Method to find bookings with a specific status and check-out date before a given date
+    List<Booking> findByStatusAndCheckOutDateBefore(BookingStatus status, LocalDate date);
+
+    // Method to find bookings with a specific status and check-in date before a given date
+    List<Booking> findByStatusAndCheckInDateBefore(BookingStatus status, LocalDate date);
+
+    // Method to find bookings with a specific status and check-in date before and check-out date after a given date
+    List<Booking> findByStatusAndCheckInDateBeforeAndCheckOutDateAfter(
+            BookingStatus status, LocalDate checkInThreshold, LocalDate checkOutThreshold);
+
+    // Method to count bookings by status
+    Long countByStatus(BookingStatus status);
 }

@@ -44,6 +44,9 @@ public class Room {
     @Column(name = "room_count", nullable = false)
     private Integer roomCount;
 
+    @Column(name = "type")
+    private String type;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

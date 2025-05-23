@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingResponse {
+
     private Long id;
     private UserResponse user;
     private RoomResponse room;
@@ -27,7 +28,14 @@ public class BookingResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Adding these convenience properties to match what the template expects
+    // Convenience fields for templates
     private String hotelName;
+    private String roomName;
     private String roomType;
+    private String userEmail;
+
+    // Review-related fields
+    private boolean eligibleForReview;
+    private boolean hasReview;
+    private ReviewResponse review;
 }

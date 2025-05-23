@@ -2,6 +2,7 @@ package com.hotelreservation.controller.view;
 
 import com.hotelreservation.dto.response.BookingResponse;
 import com.hotelreservation.service.BookingService;
+import com.hotelreservation.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class BookingsViewController {
 
     private static final Logger logger = LoggerFactory.getLogger(BookingsViewController.class);
     private final BookingService bookingService;
+    private final ReviewService reviewService;
 
     @GetMapping
     public String listBookings(
@@ -57,6 +59,15 @@ public class BookingsViewController {
         try {
             BookingResponse booking = bookingService.getBookingById(id);
             model.addAttribute("booking", booking);
+
+            // Check if the booking is eligible for review
+            boolean isEligibleForReview = bookingService.isEligibleForReview(id);
+            model.addAttribute("isEligibleForReview", isEligibleForReview);
+
+            // Check if the booking already has a review
+            boolean hasReview = reviewService.hasBookingBeenReviewed(id);
+            model.addAttribute("hasReview", hasReview);
+
             return "booking/detail";
         } catch (Exception e) {
             logger.error("Error loading booking details", e);

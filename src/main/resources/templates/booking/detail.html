@@ -4,6 +4,38 @@
       layout:decorate="~{layout/base}">
 <head>
     <title>Booking Details - Hotel Reservation System</title>
+    <style>
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        .rating > input {
+            display: none;
+        }
+        .rating > label {
+            position: relative;
+            width: 1.1em;
+            font-size: 2rem;
+            color: #FFD700;
+            cursor: pointer;
+        }
+        .rating > label::before {
+            content: "\2605";
+            position: absolute;
+            opacity: 0;
+        }
+        .rating > label:hover:before,
+        .rating > label:hover ~ label:before {
+            opacity: 1 !important;
+        }
+        .rating > input:checked ~ label:before {
+            opacity: 1;
+        }
+        .rating:hover > input:checked ~ label:before {
+            opacity: 0.4;
+        }
+    </style>
 </head>
 <body>
 <div layout:fragment="content">
@@ -15,6 +47,12 @@
                 <li class="breadcrumb-item active" aria-current="page">Booking Details</li>
             </ol>
         </nav>
+
+        <!-- Success Message -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
         <!-- Error Message -->
         <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -38,7 +76,8 @@
                         <span th:class="${'badge ' +
                             (booking.status == 'CONFIRMED' ? 'bg-success' :
                             (booking.status == 'PENDING' ? 'bg-warning' :
-                            (booking.status == 'CANCELLED' ? 'bg-danger' : 'bg-secondary')))}"
+                            (booking.status == 'CANCELLED' ? 'bg-danger' :
+                            (booking.status == 'COMPLETED' ? 'bg-info' : 'bg-secondary'))))}"
                               th:text="${booking.status}">Status</span>
                     </div>
                 </div>
@@ -124,13 +163,85 @@
                     <a th:href="@{/bookings}" class="btn btn-outline-primary">
                         <i class="fas fa-arrow-left me-2"></i>Back to Bookings
                     </a>
-                    <a th:if="${booking.status == 'CONFIRMED'}"
-                       th:href="@{/bookings/{id}/cancel(id=${booking.id})}"
-                       class="btn btn-danger"
-                       onclick="return confirm('Are you sure you want to cancel this booking?');">
-                        <i class="fas fa-times me-2"></i>Cancel Booking
-                    </a>
+
+                    <!-- Action buttons based on booking status -->
+                    <div>
+                        <!-- Cancel button for confirmed bookings -->
+                        <a th:if="${booking.status == 'CONFIRMED'}"
+                           th:href="@{/bookings/{id}/cancel(id=${booking.id})}"
+                           class="btn btn-danger"
+                           onclick="return confirm('Are you sure you want to cancel this booking?');">
+                            <i class="fas fa-times me-2"></i>Cancel Booking
+                        </a>
+
+                        <!-- Review button for completed bookings -->
+                        <a th:if="${booking.status == 'COMPLETED' && booking.eligibleForReview}"
+                           href="#reviewForm"
+                           class="btn btn-success"
+                           data-bs-toggle="collapse"
+                           aria-expanded="false"
+                           aria-controls="reviewForm">
+                            <i class="fas fa-star me-2"></i>Write a Review
+                        </a>
+
+                        <!-- View review button if already reviewed -->
+                        <a th:if="${booking.status == 'COMPLETED' && booking.hasReview}"
+                           th:href="@{/reviews}"
+                           class="btn btn-outline-success">
+                            <i class="fas fa-check-circle me-2"></i>Already Reviewed
+                        </a>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Review Form (Collapsed by default) -->
+        <div th:if="${booking != null && booking.status == 'COMPLETED' && booking.eligibleForReview}"
+             class="card shadow-sm mb-4 collapse" id="reviewForm">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Write a Review</h4>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/reviews/submit}" method="post">
+                    <input type="hidden" name="bookingId" th:value="${booking.id}" />
+
+                    <div class="mb-4">
+                        <label class="form-label">Hotel</label>
+                        <p class="form-control-plaintext fw-bold" th:text="${booking.hotel != null ? booking.hotel.name : 'N/A'}">Hotel Name</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Your Rating</label>
+                        <div class="rating">
+                            <input type="radio" id="star5" name="rating" value="5" required />
+                            <label for="star5" title="5 stars"></label>
+                            <input type="radio" id="star4" name="rating" value="4" />
+                            <label for="star4" title="4 stars"></label>
+                            <input type="radio" id="star3" name="rating" value="3" />
+                            <label for="star3" title="3 stars"></label>
+                            <input type="radio" id="star2" name="rating" value="2" />
+                            <label for="star2" title="2 stars"></label>
+                            <input type="radio" id="star1" name="rating" value="1" />
+                            <label for="star1" title="1 star"></label>
+                        </div>
+                        <div class="form-text">Click on a star to rate your experience</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="comment" class="form-label">Your Review</label>
+                        <textarea id="comment" name="comment" class="form-control" rows="5"
+                                  placeholder="Share your experience with this hotel..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#reviewForm">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Review
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 

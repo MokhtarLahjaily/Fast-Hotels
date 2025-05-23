@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Review Management</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <h1 class="mb-4">Review Management</h1>
+
+        <!-- Alerts -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form action="/admin/reviews" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="hotel" class="form-label">Hotel</label>
+                        <select class="form-select" id="hotel" name="hotelId">
+                            <option value="">All Hotels</option>
+                            <option th:each="hotel : ${hotels}"
+                                    th:value="${hotel.id}"
+                                    th:text="${hotel.name}"
+                                    th:selected="${param.hotelId != null && param.hotelId[0] == hotel.id.toString()}">
+                                Hotel Name
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="rating" class="form-label">Rating</label>
+                        <select class="form-select" id="rating" name="rating">
+                            <option value="">All Ratings</option>
+                            <option th:selected="${param.rating != null && param.rating[0] == '5'}" value="5">5 Stars</option>
+                            <option th:selected="${param.rating != null && param.rating[0] == '4'}" value="4">4 Stars</option>
+                            <option th:selected="${param.rating != null && param.rating[0] == '3'}" value="3">3 Stars</option>
+                            <option th:selected="${param.rating != null && param.rating[0] == '2'}" value="2">2 Stars</option>
+                            <option th:selected="${param.rating != null && param.rating[0] == '1'}" value="1">1 Star</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">All Statuses</option>
+                            <option th:selected="${param.status != null && param.status[0] == 'APPROVED'}" value="APPROVED">Approved</option>
+                            <option th:selected="${param.status != null && param.status[0] == 'PENDING'}" value="PENDING">Pending</option>
+                            <option th:selected="${param.status != null && param.status[0] == 'REJECTED'}" value="REJECTED">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Reviews Table -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hotel</th>
+                            <th>User</th>
+                            <th>Rating</th>
+                            <th>Comment</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${reviews == null || reviews.empty}">
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No reviews found</p>
+                            </td>
+                        </tr>
+                        <tr th:each="review : ${reviews}" th:if="${reviews != null && !reviews.empty}">
+                            <td th:text="${review.id}">1</td>
+                            <td th:text="${review.hotel != null ? review.hotel.name : 'N/A'}">Grand Hotel</td>
+                            <td th:text="${review.user != null ? (review.user.firstName + ' ' + review.user.lastName) : 'N/A'}">John Doe</td>
+                            <td>
+                                <div class="text-warning" th:if="${review.rating != null}">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                                    </th:block>
+                                </div>
+                                <span th:unless="${review.rating != null}">N/A</span>
+                            </td>
+                            <td>
+                                <span th:text="${review.comment != null ? #strings.abbreviate(review.comment, 50) : 'N/A'}">Great hotel with excellent service!</span>
+                            </td>
+                            <td th:text="${review.createdAt != null ? #temporals.format(review.createdAt, 'yyyy-MM-dd') : 'N/A'}">2023-04-15</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/admin/reviews/{id}(id=${review.id})}" class="btn btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{/admin/reviews/{id}/edit(id=${review.id})}" class="btn btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="'#deleteModal' + ${review.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav th:if="${reviews != null && reviews.totalPages > 1}" aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${reviews.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/reviews(page=${reviews.number - 1}, size=${reviews.size}, hotelId=${param.hotelId}, rating=${param.rating}, status=${param.status})}" tabindex="-1" th:aria-disabled="${reviews.first}">Previous</a>
+                        </li>
+
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, reviews.totalPages - 1)}"
+                            th:classappend="${i == reviews.number ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/admin/reviews(page=${i}, size=${reviews.size}, hotelId=${param.hotelId}, rating=${param.rating}, status=${param.status})}"
+                               th:text="${i + 1}">1</a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${reviews.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/reviews(page=${reviews.number + 1}, size=${reviews.size}, hotelId=${param.hotelId}, rating=${param.rating}, status=${param.status})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

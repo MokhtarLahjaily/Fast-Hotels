@@ -34,4 +34,7 @@ public class HotelResponse {
     private List<RoomResponse> rooms; // Added to store room information
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Additional field for admin views
+    private String ownerName;
 }

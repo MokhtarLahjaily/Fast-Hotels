@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Write a Review - Hotel Reservation System</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0" th:text="${isEdit ? 'Edit Review' : 'Write a Review'}">Write a Review</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Alerts -->
+                        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span th:text="${successMessage}">Success message</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${errorMessage}">Error message</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Booking details -->
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h5 class="mb-3">Booking Details</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Hotel:</strong> <span th:text="${booking.hotelName}">Hotel Name</span></p>
+                                    <p class="mb-1"><strong>Room:</strong> <span th:text="${booking.roomType}">Room Type</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Check-in:</strong> <span th:text="${#temporals.format(booking.checkInDate, 'MMM dd, yyyy')}">Jan 01, 2025</span></p>
+                                    <p class="mb-1"><strong>Check-out:</strong> <span th:text="${#temporals.format(booking.checkOutDate, 'MMM dd, yyyy')}">Jan 05, 2025</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Review Form -->
+                        <form th:action="${isEdit ? '/reviews/update/' + review.id : '/reviews/submit'}" th:object="${reviewRequest}" method="post">
+                            <input type="hidden" th:field="*{bookingId}">
+
+                            <!-- Star Rating -->
+                            <div class="mb-4">
+                                <label class="form-label">Your Rating</label>
+                                <div class="star-rating">
+                                    <div class="d-flex">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" th:field="*{rating}" id="rating1" value="1" required>
+                                            <label class="form-check-label" for="rating1">
+                                                <i class="fas fa-star text-warning"></i>
+                                                <span class="ms-1">Poor</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" th:field="*{rating}" id="rating2" value="2">
+                                            <label class="form-check-label" for="rating2">
+                                                <i class="fas fa-star text-warning"></i>
+                                                <span class="ms-1">Fair</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" th:field="*{rating}" id="rating3" value="3">
+                                            <label class="form-check-label" for="rating3">
+                                                <i class="fas fa-star text-warning"></i>
+                                                <span class="ms-1">Good</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" th:field="*{rating}" id="rating4" value="4">
+                                            <label class="form-check-label" for="rating4">
+                                                <i class="fas fa-star text-warning"></i>
+                                                <span class="ms-1">Very Good</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" th:field="*{rating}" id="rating5" value="5">
+                                            <label class="form-check-label" for="rating5">
+                                                <i class="fas fa-star text-warning"></i>
+                                                <span class="ms-1">Excellent</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}">
+                                        Please select a rating.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Review Comment -->
+                            <div class="mb-4">
+                                <label for="comment" class="form-label">Your Review</label>
+                                <textarea class="form-control" th:field="*{comment}" id="comment" rows="5"
+                                          placeholder="Share your experience with this hotel..."></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}">
+                                    Comment error
+                                </div>
+                                <div class="form-text">Your review will help other travelers make better choices.</div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="${isEdit ? '/reviews' : '/bookings/' + booking.id}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary" th:text="${isEdit ? 'Update Review' : 'Submit Review'}">Submit Review</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="jsResources">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhance star rating UI
+            const starLabels = document.querySelectorAll('.star-rating label');
+            const starInputs = document.querySelectorAll('.star-rating input');
+
+            // Update stars on hover
+            starLabels.forEach((label, index) => {
+                label.addEventListener('mouseenter', () => {
+                    // Fill stars up to current
+                    for (let i = 0; i <= index; i++) {
+                        starLabels[i].querySelector('i').classList.add('fas');
+                        starLabels[i].querySelector('i').classList.remove('far');
+                    }
+                    // Empty stars after current
+                    for (let i = index + 1; i < starLabels.length; i++) {
+                        starLabels[i].querySelector('i').classList.add('far');
+                        starLabels[i].querySelector('i').classList.remove('fas');
+                    }
+                });
+            });
+
+            // Reset stars on mouse leave
+            document.querySelector('.star-rating').addEventListener('mouseleave', () => {
+                // Find selected rating
+                let selectedIndex = -1;
+                starInputs.forEach((input, index) => {
+                    if (input.checked) {
+                        selectedIndex = index;
+                    }
+                });
+
+                // Reset stars based on selection
+                starLabels.forEach((label, index) => {
+                    if (index <= selectedIndex) {
+                        label.querySelector('i').classList.add('fas');
+                        label.querySelector('i').classList.remove('far');
+                    } else {
+                        label.querySelector('i').classList.add('far');
+                        label.querySelector('i').classList.remove('fas');
+                    }
+                });
+            });
+
+            // Update stars when a rating is selected
+            starInputs.forEach((input, index) => {
+                input.addEventListener('change', () => {
+                    if (input.checked) {
+                        // Fill stars up to selected
+                        for (let i = 0; i <= index; i++) {
+                            starLabels[i].querySelector('i').classList.add('fas');
+                            starLabels[i].querySelector('i').classList.remove('far');
+                        }
+                        // Empty stars after selected
+                        for (let i = index + 1; i < starLabels.length; i++) {
+                            starLabels[i].querySelector('i').classList.add('far');
+                            starLabels[i].querySelector('i').classList.remove('fas');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>
