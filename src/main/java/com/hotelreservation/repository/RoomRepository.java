@@ -42,4 +42,14 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     );
 
     List<Room> findByHotelId(Long id);
+
+    // Admin filtering methods
+    Page<Room> findByHotelIdAndType(Long hotelId, String type, Pageable pageable);
+
+    Page<Room> findByType(String type, Pageable pageable);
+
+    @Query("SELECT r FROM Room r WHERE " +
+            "(:hotelId IS NULL OR r.hotel.id = :hotelId) AND " +
+            "(:roomType IS NULL OR :roomType = '' OR LOWER(r.type) LIKE LOWER(CONCAT('%', :roomType, '%')))")
+    Page<Room> findRoomsWithFilters(@Param("hotelId") Long hotelId, @Param("roomType") String roomType, Pageable pageable);
 }

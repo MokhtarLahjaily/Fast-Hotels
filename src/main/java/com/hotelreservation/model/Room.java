@@ -68,4 +68,10 @@ public class Room {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private Set<RoomInventory> inventory = new HashSet<>();
+
+    public Object isAvailable() {
+        // This method should return a boolean or some indication of availability
+        // For now, we will return true as a placeholder
+        return true; // Placeholder for actual availability logic
+    }
 }

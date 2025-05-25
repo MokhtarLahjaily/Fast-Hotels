@@ -32,6 +32,12 @@ spring:
       static-locations: classpath:/static/
       cache:
         period: 0
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
+    baseline-description: "Initial baseline"
+    locations: classpath:db/migration
+    enabled: true
 
 server:
   port: 8080

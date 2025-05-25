@@ -36,7 +36,7 @@
                             <option th:each="hotel : ${hotels}"
                                     th:value="${hotel.id}"
                                     th:text="${hotel.name}"
-                                    th:selected="${param.hotelId != null && param.hotelId[0] == hotel.id.toString()}">
+                                    th:selected="${selectedHotelId != null && selectedHotelId == hotel.id}">
                                 Hotel Name
                             </option>
                         </select>
@@ -45,17 +45,19 @@
                         <label for="roomType" class="form-label">Room Type</label>
                         <select class="form-select" id="roomType" name="roomType">
                             <option value="">All Types</option>
-                            <option th:selected="${param.roomType != null && param.roomType[0] == 'STANDARD'}" value="STANDARD">Standard</option>
-                            <option th:selected="${param.roomType != null && param.roomType[0] == 'DELUXE'}" value="DELUXE">Deluxe</option>
-                            <option th:selected="${param.roomType != null && param.roomType[0] == 'SUITE'}" value="SUITE">Suite</option>
+                            <option th:selected="${selectedRoomType != null && selectedRoomType == 'Standard'}" value="Standard">Standard</option>
+                            <option th:selected="${selectedRoomType != null && selectedRoomType == 'Deluxe'}" value="Deluxe">Deluxe</option>
+                            <option th:selected="${selectedRoomType != null && selectedRoomType == 'Suite'}" value="Suite">Suite</option>
+                            <option th:selected="${selectedRoomType != null && selectedRoomType == 'Family'}" value="Family">Family</option>
+                            <option th:selected="${selectedRoomType != null && selectedRoomType == 'Executive'}" value="Executive">Executive</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label for="status" class="form-label">Status</label>
                         <select class="form-select" id="status" name="status">
                             <option value="">All Statuses</option>
-                            <option th:selected="${param.status != null && param.status[0] == 'AVAILABLE'}" value="AVAILABLE">Available</option>
-                            <option th:selected="${param.status != null && param.status[0] == 'UNAVAILABLE'}" value="UNAVAILABLE">Unavailable</option>
+                            <option th:selected="${selectedStatus != null && selectedStatus == 'AVAILABLE'}" value="AVAILABLE">Available</option>
+                            <option th:selected="${selectedStatus != null && selectedStatus == 'UNAVAILABLE'}" value="UNAVAILABLE">Unavailable</option>
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
@@ -77,6 +79,7 @@
                             <th>ID</th>
                             <th>Hotel</th>
                             <th>Room Name</th>
+                            <th>Type</th>
                             <th>Price</th>
                             <th>Capacity</th>
                             <th>Count</th>
@@ -85,7 +88,7 @@
                         </thead>
                         <tbody>
                         <tr th:if="${rooms == null || rooms.empty}">
-                            <td colspan="7" class="text-center py-4">
+                            <td colspan="8" class="text-center py-4">
                                 <i class="fas fa-bed fa-3x text-muted mb-3"></i>
                                 <p class="text-muted">No rooms found</p>
                             </td>
@@ -94,6 +97,17 @@
                             <td th:text="${room.id}">1</td>
                             <td th:text="${room.hotelName ?: 'N/A'}">Grand Hotel</td>
                             <td th:text="${room.name ?: 'N/A'}">Standard Room</td>
+                            <td>
+                                    <span class="badge"
+                                          th:classappend="${room.type == 'Standard' ? 'bg-secondary' :
+                                                          room.type == 'Deluxe' ? 'bg-primary' :
+                                                          room.type == 'Suite' ? 'bg-success' :
+                                                          room.type == 'Family' ? 'bg-info' :
+                                                          room.type == 'Executive' ? 'bg-warning' : 'bg-light'}"
+                                          th:text="${room.type ?: 'Standard'}">
+                                        Standard
+                                    </span>
+                            </td>
                             <td th:text="${room.pricePerNight != null ? '$' + room.pricePerNight : 'N/A'}">$120</td>
                             <td th:text="${room.capacity ?: 'N/A'}">2</td>
                             <td th:text="${room.roomCount ?: 'N/A'}">5</td>
@@ -121,17 +135,17 @@
                 <nav th:if="${rooms != null && rooms.totalPages > 1}" aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${rooms.first ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/rooms(page=${rooms.number - 1}, size=${rooms.size}, hotelId=${param.hotelId}, roomType=${param.roomType}, status=${param.status})}" tabindex="-1" th:aria-disabled="${rooms.first}">Previous</a>
+                            <a class="page-link" th:href="@{/admin/rooms(page=${rooms.number - 1}, size=${rooms.size}, hotelId=${selectedHotelId}, roomType=${selectedRoomType}, status=${selectedStatus})}" tabindex="-1" th:aria-disabled="${rooms.first}">Previous</a>
                         </li>
 
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, rooms.totalPages - 1)}"
                             th:classappend="${i == rooms.number ? 'active' : ''}">
-                            <a class="page-link" th:href="@{/admin/rooms(page=${i}, size=${rooms.size}, hotelId=${param.hotelId}, roomType=${param.roomType}, status=${param.status})}"
+                            <a class="page-link" th:href="@{/admin/rooms(page=${i}, size=${rooms.size}, hotelId=${selectedHotelId}, roomType=${selectedRoomType}, status=${selectedStatus})}"
                                th:text="${i + 1}">1</a>
                         </li>
 
                         <li class="page-item" th:classappend="${rooms.last ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/rooms(page=${rooms.number + 1}, size=${rooms.size}, hotelId=${param.hotelId}, roomType=${param.roomType}, status=${param.status})}">Next</a>
+                            <a class="page-link" th:href="@{/admin/rooms(page=${rooms.number + 1}, size=${rooms.size}, hotelId=${selectedHotelId}, roomType=${selectedRoomType}, status=${selectedStatus})}">Next</a>
                         </li>
                     </ul>
                 </nav>

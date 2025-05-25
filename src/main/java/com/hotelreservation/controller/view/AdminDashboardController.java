@@ -120,7 +120,7 @@ public class AdminDashboardController {
             @RequestParam(required = false) String roomType,
             @RequestParam(required = false) String status,
             Model model) {
-        log.info("Accessing admin rooms page - page: {}, size: {}", page, size);
+        log.info("Accessing admin rooms page - page: {}, size: {}, hotelId: {}, roomType: {}", page, size, hotelId, roomType);
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -134,9 +134,14 @@ public class AdminDashboardController {
                 model.addAttribute("hotels", java.util.Collections.emptyList());
             }
 
-            // Get rooms with pagination
-            Page<RoomResponse> roomsPage = adminService.getAllRooms(pageable);
+            // Get rooms with pagination and filters
+            Page<RoomResponse> roomsPage = adminService.getAllRooms(pageable, hotelId, roomType, status);
             model.addAttribute("rooms", roomsPage);
+            model.addAttribute("selectedHotelId", hotelId);
+            model.addAttribute("selectedRoomType", roomType);
+            model.addAttribute("selectedStatus", status);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", roomsPage.getTotalPages());
             model.addAttribute("pageTitle", "Room Management");
 
             log.info("Loaded {} rooms for admin page", roomsPage.getTotalElements());

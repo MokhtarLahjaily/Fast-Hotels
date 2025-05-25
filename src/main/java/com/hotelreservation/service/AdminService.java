@@ -9,6 +9,7 @@ import com.hotelreservation.exception.ResourceNotFoundException;
 import com.hotelreservation.model.Booking;
 import com.hotelreservation.model.BookingStatus;
 import com.hotelreservation.model.Hotel;
+import com.hotelreservation.model.Room;
 import com.hotelreservation.repository.BookingRepository;
 import com.hotelreservation.repository.HotelRepository;
 import com.hotelreservation.repository.ReviewRepository;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -91,15 +94,15 @@ public class AdminService {
 
             // Use different repository methods based on available filters
             if (search != null && !search.isEmpty() && statusEnum != null && startDate != null) {
-                bookingsPage = bookingRepository.findByUserEmailContainingIgnoreCaseAndStatusAndCreatedAtAfter(search, statusEnum, startDate, pageable);
+                bookingsPage = bookingRepository.findByIdOrUserEmailContainingAndStatusAndCreatedAtAfter(search, statusEnum, startDate, pageable);
             } else if (search != null && !search.isEmpty() && statusEnum != null) {
-                bookingsPage = bookingRepository.findByUserEmailContainingIgnoreCaseAndStatus(search, statusEnum, pageable);
+                bookingsPage = bookingRepository.findByIdOrUserEmailContainingAndStatus(search, statusEnum, pageable);
             } else if (search != null && !search.isEmpty() && startDate != null) {
-                bookingsPage = bookingRepository.findByUserEmailContainingIgnoreCaseAndCreatedAtAfter(search, startDate, pageable);
+                bookingsPage = bookingRepository.findByIdOrUserEmailContainingAndCreatedAtAfter(search, startDate, pageable);
             } else if (statusEnum != null && startDate != null) {
                 bookingsPage = bookingRepository.findByStatusAndCreatedAtAfter(statusEnum, startDate, pageable);
             } else if (search != null && !search.isEmpty()) {
-                bookingsPage = bookingRepository.findByUserEmailContainingIgnoreCase(search, pageable);
+                bookingsPage = bookingRepository.findByIdOrUserEmailContaining(search, pageable);
             } else if (statusEnum != null) {
                 bookingsPage = bookingRepository.findByStatus(statusEnum, pageable);
             } else if (startDate != null) {
@@ -249,6 +252,41 @@ public class AdminService {
                         return response;
                     }
                 });
+    }
+
+    public Page<RoomResponse> getAllRooms(Pageable pageable, Long hotelId, String roomType, String status) {
+        log.info("Getting rooms with filters - hotelId: {}, roomType: {}, status: {}", hotelId, roomType, status);
+
+        Page<Room> roomsPage = roomRepository.findRoomsWithFilters(hotelId, roomType, pageable);
+
+        return roomsPage.map(room -> {
+            try {
+                return roomService.getRoomById(room.getId());
+            } catch (Exception e) {
+                log.warn("Error getting room details for ID {}: {}", room.getId(), e.getMessage());
+
+                // Create a basic response if detailed mapping fails
+                RoomResponse response = RoomResponse.builder()
+                        .id(room.getId())
+                        .hotelId(room.getHotel() != null ? room.getHotel().getId() : null)
+                        .name(room.getName())
+                        .description(room.getDescription())
+                        .capacity(room.getCapacity())
+                        .pricePerNight(room.getPricePerNight())
+                        .roomCount(room.getRoomCount())
+                        .type(room.getType() != null ? room.getType() : "Standard")
+                        .build();
+
+                // Set hotel name separately
+                if (room.getHotel() != null) {
+                    response.setHotelName(room.getHotel().getName());
+                } else {
+                    response.setHotelName("N/A");
+                }
+
+                return response;
+            }
+        });
     }
 
     public Page<ReviewResponse> getAllReviews(Pageable pageable, Long hotelId, Integer rating, String status) {
