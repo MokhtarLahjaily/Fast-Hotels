@@ -168,10 +168,15 @@
                 <div class="card dashboard-card shadow-sm h-100">
                     <div class="card-body">
                         <h5 class="card-title">Update Booking Statuses</h5>
-                        <p class="card-text">Update all booking statuses based on check-in and check-out dates.</p>
-                        <form th:action="@{/admin/bookings/update-statuses}" method="post">
+                        <p class="card-text">Automatically update booking statuses based on check-in and check-out dates.</p>
+                        <form th:action="@{/admin/bookings/update-statuses}" method="post" class="mb-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-sync-alt me-1"></i> Update Statuses
+                                <i class="fas fa-sync-alt me-1"></i> Auto Update
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/bookings/complete-eligible}" method="post">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check-double me-1"></i> Complete Eligible
                             </button>
                         </form>
                     </div>

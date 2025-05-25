@@ -88,13 +88,18 @@ public class AdminDashboardController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String status,
             Model model) {
-        log.info("Accessing admin hotels page - page: {}, size: {}", page, size);
+        log.info("Accessing admin hotels page - page: {}, size: {}, search: {}", page, size, search);
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-            Page<HotelResponse> hotelsPage = adminService.getAllHotelsForApproval(pageable);
+            Page<HotelResponse> hotelsPage = adminService.getAllHotelsForApproval(pageable, search, city, status);
 
             model.addAttribute("hotels", hotelsPage);
+            model.addAttribute("search", search);
+            model.addAttribute("city", city);
+            model.addAttribute("status", status);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", hotelsPage.getTotalPages());
             model.addAttribute("pageTitle", "Hotel Management");
 
             log.info("Loaded {} hotels for admin page", hotelsPage.getTotalElements());
@@ -153,13 +158,18 @@ public class AdminDashboardController {
             @RequestParam(required = false) String role,
             @RequestParam(required = false) String status,
             Model model) {
-        log.info("Accessing admin users page - page: {}, size: {}", page, size);
+        log.info("Accessing admin users page - page: {}, size: {}, search: {}", page, size, search);
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-            Page<UserResponse> usersPage = adminService.getAllUsers(pageable);
+            Page<UserResponse> usersPage = adminService.getAllUsers(pageable, search, role, status);
 
             model.addAttribute("users", usersPage);
+            model.addAttribute("search", search);
+            model.addAttribute("role", role);
+            model.addAttribute("status", status);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", usersPage.getTotalPages());
             model.addAttribute("pageTitle", "User Management");
 
             log.info("Loaded {} users for admin page", usersPage.getTotalElements());
@@ -180,12 +190,11 @@ public class AdminDashboardController {
             @RequestParam(required = false) Integer rating,
             @RequestParam(required = false) String status,
             Model model) {
-        log.info("Accessing admin reviews page - page: {}, size: {}", page, size);
+        log.info("Accessing admin reviews page - page: {}, size: {}, hotelId: {}", page, size, hotelId);
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-            // Get all hotels for the dropdown
             try {
                 Page<HotelResponse> hotelsPage = hotelService.getAllHotels(PageRequest.of(0, 100));
                 model.addAttribute("hotels", hotelsPage.getContent());
@@ -194,9 +203,13 @@ public class AdminDashboardController {
                 model.addAttribute("hotels", java.util.Collections.emptyList());
             }
 
-            // Get reviews with pagination
-            Page<ReviewResponse> reviewsPage = adminService.getAllReviews(pageable);
+            Page<ReviewResponse> reviewsPage = adminService.getAllReviews(pageable, hotelId, rating, status);
             model.addAttribute("reviews", reviewsPage);
+            model.addAttribute("hotelId", hotelId);
+            model.addAttribute("rating", rating);
+            model.addAttribute("status", status);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", reviewsPage.getTotalPages());
             model.addAttribute("pageTitle", "Review Management");
 
             log.info("Loaded {} reviews for admin page", reviewsPage.getTotalElements());

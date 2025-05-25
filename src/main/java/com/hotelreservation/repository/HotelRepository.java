@@ -59,4 +59,24 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     );
 
     List<Hotel> findByOwnerId(Long ownerId);
+
+    // Fixed query using native SQL to handle bytea columns properly
+    @Query(value = "SELECT h.* FROM hotels h WHERE " +
+            "(:search IS NULL OR :search = '' OR " +
+            "LOWER(h.name::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(h.address::text) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+            "(:city IS NULL OR :city = '' OR " +
+            "LOWER(h.city::text) LIKE LOWER(CONCAT('%', :city, '%'))) " +
+            "ORDER BY h.id DESC",
+            countQuery = "SELECT COUNT(*) FROM hotels h WHERE " +
+                    "(:search IS NULL OR :search = '' OR " +
+                    "LOWER(h.name::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                    "LOWER(h.address::text) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+                    "(:city IS NULL OR :city = '' OR " +
+                    "LOWER(h.city::text) LIKE LOWER(CONCAT('%', :city, '%')))",
+            nativeQuery = true)
+    Page<Hotel> findHotelsWithFilters(@Param("search") String search,
+                                      @Param("city") String city,
+                                      @Param("status") String status,
+                                      Pageable pageable);
 }

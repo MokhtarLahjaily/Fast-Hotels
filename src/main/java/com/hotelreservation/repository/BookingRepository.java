@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -48,4 +49,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Method to count bookings by status
     Long countByStatus(BookingStatus status);
+
+    // Simplified method using Spring Data JPA method names for better compatibility
+    Page<Booking> findByUserEmailContainingIgnoreCase(String email, Pageable pageable);
+
+    Page<Booking> findByStatus(BookingStatus status, Pageable pageable);
+
+    Page<Booking> findByCreatedAtAfter(LocalDateTime date, Pageable pageable);
+
+    Page<Booking> findByUserEmailContainingIgnoreCaseAndStatus(String email, BookingStatus status, Pageable pageable);
+
+    Page<Booking> findByStatusAndCreatedAtAfter(BookingStatus status, LocalDateTime date, Pageable pageable);
+
+    Page<Booking> findByUserEmailContainingIgnoreCaseAndCreatedAtAfter(String email, LocalDateTime date, Pageable pageable);
+
+    Page<Booking> findByUserEmailContainingIgnoreCaseAndStatusAndCreatedAtAfter(String email, BookingStatus status, LocalDateTime date, Pageable pageable);
 }

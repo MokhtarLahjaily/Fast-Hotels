@@ -28,7 +28,7 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
 
-    @Value("${app.upload.dir:src/main/resources/static/images/uploads}")
+    @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
     @Value("${app.upload.max-file-size:5MB}")
@@ -67,9 +67,6 @@ public class ImageService {
     public List<ImageResponse> uploadHotelImages(Long hotelId, List<MultipartFile> files) {
         log.info("Uploading {} images for hotel: {}", files.size(), hotelId);
 
-        // Create upload directory if it doesn't exist
-        createUploadDirectory();
-
         return files.stream()
                 .filter(file -> !file.isEmpty())
                 .map(file -> uploadSingleImage(hotelId, "HOTEL", file))
@@ -79,9 +76,6 @@ public class ImageService {
     @Transactional
     public List<ImageResponse> uploadRoomImages(Long roomId, List<MultipartFile> files) {
         log.info("Uploading {} images for room: {}", files.size(), roomId);
-
-        // Create upload directory if it doesn't exist
-        createUploadDirectory();
 
         return files.stream()
                 .filter(file -> !file.isEmpty())
@@ -99,25 +93,46 @@ public class ImageService {
             String extension = getFileExtension(originalFilename);
             String filename = UUID.randomUUID().toString() + "." + extension;
 
+            // Get the actual upload path
+            Path actualUploadPath = getActualUploadPath();
+
+            // Ensure directory exists
+            if (!Files.exists(actualUploadPath)) {
+                Files.createDirectories(actualUploadPath);
+                log.info("Created upload directory: {}", actualUploadPath.toAbsolutePath());
+            }
+
             // Save file to disk
-            Path uploadPath = Paths.get(uploadDir);
-            Path filePath = uploadPath.resolve(filename);
+            Path filePath = actualUploadPath.resolve(filename);
+            log.info("Saving file to: {}", filePath.toAbsolutePath());
+
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Verify file was created
+            if (Files.exists(filePath)) {
+                log.info("File successfully saved: {}", filePath.toAbsolutePath());
+            } else {
+                log.error("File was not created: {}", filePath.toAbsolutePath());
+                throw new RuntimeException("File was not saved to disk");
+            }
 
             // Check if this is the first image (make it primary)
             List<Image> existingImages = imageRepository.findByEntityTypeAndEntityId(entityType, entityId);
             boolean isPrimary = existingImages.isEmpty();
 
             // Save image record to database
+            String imageUrl = "/images/uploads/" + filename;
+            log.info("Saving image URL to database: {}", imageUrl);
+
             Image image = Image.builder()
                     .entityType(entityType)
                     .entityId(entityId)
-                    .url("/images/uploads/" + filename)
+                    .url(imageUrl)
                     .isPrimary(isPrimary)
                     .build();
 
             Image savedImage = imageRepository.save(image);
-            log.info("Successfully uploaded image: {} for {} {}", filename, entityType, entityId);
+            log.info("Successfully uploaded image: {} for {} {} with URL: {}", filename, entityType, entityId, imageUrl);
 
             return mapToImageResponse(savedImage);
         } catch (IOException e) {
@@ -136,8 +151,15 @@ public class ImageService {
         try {
             // Delete file from disk
             String filename = image.getUrl().substring(image.getUrl().lastIndexOf("/") + 1);
-            Path filePath = Paths.get(uploadDir, filename);
-            Files.deleteIfExists(filePath);
+            Path actualUploadPath = getActualUploadPath();
+            Path filePath = actualUploadPath.resolve(filename);
+
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                log.info("Deleted file: {}", filePath.toAbsolutePath());
+            } else {
+                log.warn("File not found for deletion: {}", filePath.toAbsolutePath());
+            }
 
             // Delete from database
             imageRepository.delete(image);
@@ -191,6 +213,27 @@ public class ImageService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get the actual upload path, handling both development and production environments
+     */
+    private Path getActualUploadPath() {
+        // For development: use src/main/resources/static/images/uploads
+        // For production: use classpath-relative path
+
+        Path devPath = Paths.get("src/main/resources/static/images", uploadDir);
+
+        // Check if we're in development environment
+        if (Files.exists(Paths.get("src/main/resources"))) {
+            log.debug("Using development upload path: {}", devPath.toAbsolutePath());
+            return devPath;
+        } else {
+            // Production environment - use relative path
+            Path prodPath = Paths.get("static/images", uploadDir);
+            log.debug("Using production upload path: {}", prodPath.toAbsolutePath());
+            return prodPath;
+        }
+    }
+
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new BadRequestException("File is empty");
@@ -216,19 +259,6 @@ public class ImageService {
             throw new BadRequestException("Invalid file extension");
         }
         return filename.substring(filename.lastIndexOf(".") + 1);
-    }
-
-    private void createUploadDirectory() {
-        try {
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-                log.info("Created upload directory: {}", uploadPath);
-            }
-        } catch (IOException e) {
-            log.error("Error creating upload directory: {}", e.getMessage());
-            throw new RuntimeException("Failed to create upload directory");
-        }
     }
 
     private ImageResponse mapToImageResponse(Image image) {

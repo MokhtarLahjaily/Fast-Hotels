@@ -31,7 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,6 +106,28 @@ public class BookingService {
 
         // Add review eligibility information
         response.setEligibleForReview(isEligibleForReview(booking.getId()));
+        response.setHasReview(booking.getReview() != null);
+
+        return response;
+    }
+
+    /**
+     * Get booking by ID for admin use (bypasses authorization checks)
+     * This method should only be used by admin services
+     *
+     * @param id The booking ID
+     * @return BookingResponse
+     */
+    public BookingResponse getBookingByIdForAdmin(Long id) {
+        log.debug("Admin fetching booking with ID: {}", id);
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+
+        BookingResponse response = mapToBookingResponse(booking);
+
+        // Add review eligibility information (but don't check current user since this is admin)
+        response.setEligibleForReview(false); // Admin doesn't review
         response.setHasReview(booking.getReview() != null);
 
         return response;
@@ -396,6 +420,29 @@ public class BookingService {
         }
     }
 
+    /**
+     * Update booking status for a specific booking
+     * This method is used by admin to manually update booking status
+     *
+     * @param bookingId The ID of the booking to update
+     * @param newStatus The new status to set
+     */
+    @Transactional
+    public void updateBookingStatus(Long bookingId, BookingStatus newStatus) {
+        log.info("Updating booking {} status to {}", bookingId, newStatus);
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+
+        BookingStatus oldStatus = booking.getStatus();
+        booking.setStatus(newStatus);
+        booking.setUpdatedAt(LocalDateTime.now());
+
+        bookingRepository.save(booking);
+
+        log.info("Successfully updated booking {} status from {} to {}",
+                bookingId, oldStatus, newStatus);
+    }
 
     private UserResponse mapToUserResponse(User user) {
         return UserResponse.builder()
@@ -421,12 +468,14 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
 
-        // Only CONFIRMED bookings can be marked as COMPLETED
+        // Allow completing CONFIRMED bookings
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new BadRequestException("Only confirmed bookings can be marked as completed. Current status: " + booking.getStatus());
+            log.warn("Attempting to complete booking {} with status {}", bookingId, booking.getStatus());
+            // Don't throw exception, just update the status anyway for admin flexibility
         }
 
         booking.setStatus(BookingStatus.COMPLETED);
+        booking.setUpdatedAt(LocalDateTime.now());
         Booking updatedBooking = bookingRepository.save(booking);
 
         log.info("Successfully marked booking {} as COMPLETED", bookingId);
@@ -460,7 +509,7 @@ public class BookingService {
      * @return The number of bookings with the given status
      */
     public long countByStatus(BookingStatus status) {
-        log.info("Counting bookings with status: {}", status);
+        log.debug("Counting bookings with status: {}", status);
 
         try {
             long count = bookingRepository.countByStatus(status);
@@ -469,7 +518,7 @@ public class BookingService {
             return count;
         } catch (Exception e) {
             log.error("Error counting bookings by status {}: {}", status, e.getMessage(), e);
-            throw new RuntimeException("Failed to count bookings by status", e);
+            return 0; // Return 0 instead of throwing exception for counts
         }
     }
 
@@ -487,12 +536,14 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found with ID: " + bookingId));
 
-        // Only PENDING bookings can be confirmed
+        // Allow confirming PENDING bookings, but be flexible for admin
         if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new BadRequestException("Only pending bookings can be confirmed. Current status: " + booking.getStatus());
+            log.warn("Attempting to confirm booking {} with status {}", bookingId, booking.getStatus());
+            // Don't throw exception, just update the status anyway for admin flexibility
         }
 
         booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setUpdatedAt(LocalDateTime.now());
         Booking updatedBooking = bookingRepository.save(booking);
 
         log.info("Successfully confirmed booking {}", bookingId);

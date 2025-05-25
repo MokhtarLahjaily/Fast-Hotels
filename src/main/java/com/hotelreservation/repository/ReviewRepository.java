@@ -27,4 +27,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT r FROM Review r WHERE r.id = :reviewId AND r.user.id = :userId")
     Review findByIdAndUserId(@Param("reviewId") Long reviewId, @Param("userId") Long userId);
+
+    @Query("SELECT r FROM Review r WHERE " +
+            "(:hotelId IS NULL OR r.booking.room.hotel.id = :hotelId) AND " +
+            "(:rating IS NULL OR r.rating = :rating)")
+    Page<Review> findReviewsWithFilters(@Param("hotelId") Long hotelId,
+                                        @Param("rating") Integer rating,
+                                        @Param("status") String status,
+                                        Pageable pageable);
 }

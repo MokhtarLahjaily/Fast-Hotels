@@ -46,11 +46,11 @@ public class BookingStatusUpdateService {
         int totalUpdated = 0;
 
         try {
-            // Update CONFIRMED bookings with past check-out dates to COMPLETED
+            // Update CONFIRMED bookings with check-out dates today or in the past to COMPLETED
             List<Booking> completedBookings = bookingRepository.findByStatusAndCheckOutDateBefore(
-                    BookingStatus.CONFIRMED, today);
+                    BookingStatus.CONFIRMED, today.plusDays(1)); // Include today
 
-            log.info("Found {} CONFIRMED bookings with past check-out dates to mark as COMPLETED",
+            log.info("Found {} CONFIRMED bookings with check-out dates today or past to mark as COMPLETED",
                     completedBookings.size());
 
             for (Booking booking : completedBookings) {
@@ -69,15 +69,22 @@ public class BookingStatusUpdateService {
             log.info("Found {} CONFIRMED bookings that are currently active", activeBookings.size());
 
             for (Booking booking : activeBookings) {
-                booking.setStatus(BookingStatus.ACTIVE);
+                // For admin convenience, also mark these as completed if check-out is today
+                if (booking.getCheckOutDate().equals(today) || booking.getCheckOutDate().isBefore(today)) {
+                    booking.setStatus(BookingStatus.COMPLETED);
+                    totalUpdated++;
+                    log.debug("Updated booking {} from CONFIRMED to COMPLETED (check-in: {}, check-out: {})",
+                            booking.getId(), booking.getCheckInDate(), booking.getCheckOutDate());
+                } else {
+                    booking.setStatus(BookingStatus.ACTIVE);
+                    totalUpdated++;
+                    log.debug("Updated booking {} from CONFIRMED to ACTIVE (check-in: {}, check-out: {})",
+                            booking.getId(), booking.getCheckInDate(), booking.getCheckOutDate());
+                }
                 bookingRepository.save(booking);
-                totalUpdated++;
-                log.debug("Updated booking {} from CONFIRMED to ACTIVE (check-in: {}, check-out: {})",
-                        booking.getId(), booking.getCheckInDate(), booking.getCheckOutDate());
             }
 
             // Optional: Update PENDING bookings with past check-in dates to CANCELLED
-            // (if guest didn't show up and booking wasn't confirmed)
             List<Booking> expiredPendingBookings = bookingRepository.findByStatusAndCheckInDateBefore(
                     BookingStatus.PENDING, today.minusDays(1)); // Grace period of 1 day
 
@@ -136,6 +143,45 @@ public class BookingStatusUpdateService {
                 BookingStatus.PENDING, today.minusDays(1)).size();
 
         return new BookingStatusUpdateSummary(completedCount, activeCount, expiredPendingCount);
+    }
+
+    /**
+     * Mark all eligible bookings as completed.
+     * This is more aggressive than the date-based update and will complete
+     * any CONFIRMED booking that has passed its check-out date.
+     *
+     * @return the number of bookings marked as completed
+     */
+    @Transactional
+    public int markAllEligibleBookingsAsCompleted() {
+        log.info("Starting bulk completion of eligible bookings");
+
+        LocalDate today = LocalDate.now();
+        int completedCount = 0;
+
+        try {
+            // Find all CONFIRMED bookings where check-out date has passed (including today)
+            List<Booking> eligibleBookings = bookingRepository.findByStatusAndCheckOutDateBefore(
+                    BookingStatus.CONFIRMED, today.plusDays(1));
+
+            log.info("Found {} CONFIRMED bookings eligible for completion", eligibleBookings.size());
+
+            for (Booking booking : eligibleBookings) {
+                booking.setStatus(BookingStatus.COMPLETED);
+                bookingRepository.save(booking);
+                completedCount++;
+                log.debug("Marked booking {} as COMPLETED (check-out: {})",
+                        booking.getId(), booking.getCheckOutDate());
+            }
+
+            log.info("Successfully marked {} bookings as COMPLETED", completedCount);
+
+        } catch (Exception e) {
+            log.error("Error occurred while marking bookings as completed: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to mark bookings as completed", e);
+        }
+
+        return completedCount;
     }
 
     /**
