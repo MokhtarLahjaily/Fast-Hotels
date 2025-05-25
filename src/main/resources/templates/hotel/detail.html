@@ -106,18 +106,6 @@
         <!-- FIXED Side-by-Side Hotel Images Gallery Section -->
         <section class="mb-5">
             <div class="container">
-                <!-- Debug Information (you can remove this in production) -->
-                <div class="alert alert-info" th:if="${hotel.name == 'Family Fun Resort'}">
-                    <h6>Debug Info for Family Fun Resort:</h6>
-                    <p>Total Images: <span th:text="${hotelImages != null ? hotelImages.size() : 0}">0</span></p>
-                    <div th:if="${hotelImages != null}" th:each="img, iterStat : ${hotelImages}">
-                        <small>Image <span th:text="${iterStat.index}">0</span>:
-                            <span th:text="${img.url}">URL</span> -
-                            Primary: <span th:text="${img.isPrimary}">false</span> -
-                            ID: <span th:text="${img.id}">ID</span>
-                        </small><br/>
-                    </div>
-                </div>
 
                 <div class="row g-3">
                     <!-- LEFT SIDE - First Image -->
@@ -490,10 +478,37 @@
                 <!-- Room Cards -->
                 <div class="card shadow-sm mb-4" th:each="room : ${availableRooms}" th:if="${room != null}">
                     <div class="row g-0">
-                        <div class="col-md-4">
-                            <!-- Simplified image handling -->
-                            <img src="/images/room-placeholder.jpg"
-                                 class="img-fluid rounded-start h-100" alt="Room Image" style="object-fit: cover;">
+                        <!-- Replace this section -->
+                        <div class="col-md-4 position-relative">
+                            <div th:if="${room.images != null && !room.images.empty}">
+                                <!-- Find primary image or use first image -->
+                                <div th:with="primaryImage=${#lists.isEmpty(room.images) ? null : room.images[0]}">
+                                    <!-- Check for primary image in the list -->
+                                    <div th:each="img : ${room.images}" th:if="${img.isPrimary != null && img.isPrimary}" th:with="primaryImage=${img}">
+                                    </div>
+
+                                    <img th:src="@{${primaryImage.url}}"
+                                         class="img-fluid rounded-start h-100"
+                                         th:alt="${room.name + ' Image'}"
+                                         style="object-fit: cover; cursor: pointer; position: relative;"
+                                         data-bs-toggle="modal"
+                                         data-bs-target="#roomGalleryModal"
+                                         th:data-room-id="${room.id}"
+                                         onerror="this.src='/images/room-placeholder.jpg';">
+
+                                    <!-- Image count badge -->
+                                    <div class="position-absolute bottom-0 start-0 m-2" style="z-index: 10;">
+                                        <span class="badge bg-dark bg-opacity-75 text-white" th:text="${#lists.size(room.images) + ' photos'}">3 photos</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fallback to placeholder if no images -->
+                            <div th:if="${room.images == null || room.images.empty}">
+                                <img src="/images/room-placeholder.jpg"
+                                     class="img-fluid rounded-start h-100"
+                                     th:alt="${room.name + ' Image'}"
+                                     style="object-fit: cover;">
+                            </div>
                         </div>
                         <div class="col-md-8">
                             <div class="card-body d-flex flex-column h-100">
@@ -538,6 +553,33 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Room Gallery Modal -->
+    <div class="modal fade" id="roomGalleryModal" tabindex="-1" aria-labelledby="roomGalleryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="roomGalleryModalLabel">Room Gallery</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="roomGalleryCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner" id="roomCarouselInner">
+                            <!-- Room images will be loaded here via JavaScript -->
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#roomGalleryCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#roomGalleryCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -612,6 +654,43 @@
                         console.log('Favorite status:', data.isFavorite);
                     })
                     .catch(error => console.error('Error checking favorite status:', error));
+            }
+        });
+
+        // Add this to the existing JavaScript section
+        // Room gallery functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const roomGalleryModal = document.getElementById('roomGalleryModal');
+            if (roomGalleryModal) {
+                roomGalleryModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const roomId = button.getAttribute('data-room-id');
+
+                    // Find the room data from the page
+                    const rooms = /*[[${availableRooms}]]*/ [];
+                    const room = rooms.find(r => r.id == roomId);
+
+                    if (room && room.images && room.images.length > 0) {
+                        const carouselInner = document.getElementById('roomCarouselInner');
+                        carouselInner.innerHTML = '';
+
+                        room.images.forEach((image, index) => {
+                            const carouselItem = document.createElement('div');
+                            carouselItem.className = 'carousel-item' + (index === 0 ? ' active' : '');
+                            carouselItem.innerHTML = `
+                                <img src="${image.url}"
+                                     class="d-block w-100"
+                                     alt="${room.name} Image ${index + 1}"
+                                     style="height: 600px; object-fit: contain;"
+                                     onerror="this.src='/images/room-placeholder.jpg';">
+                            `;
+                            carouselInner.appendChild(carouselItem);
+                        });
+
+                        // Update modal title
+                        document.getElementById('roomGalleryModalLabel').textContent = room.name + ' - Photo Gallery';
+                    }
+                });
             }
         });
     </script>

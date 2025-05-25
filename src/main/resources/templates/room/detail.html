@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title th:text="${room.name + ' - ' + hotel.name}">Room Details</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/hotels">Hotels</a></li>
+                <li class="breadcrumb-item"><a th:href="@{'/hotels/' + ${hotel.id}}" th:text="${hotel.name}">Hotel</a></li>
+                <li class="breadcrumb-item active" th:text="${room.name}">Room</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <!-- Image Gallery -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-0">
+                        <div th:if="${room.images != null && !room.images.empty}">
+                            <!-- Main Image -->
+                            <div class="mb-3">
+                                <div th:each="image : ${room.images}" th:if="${image.isPrimary}" class="position-relative">
+                                    <img th:src="${image.url}"
+                                         class="img-fluid w-100 rounded-top"
+                                         style="height: 400px; object-fit: cover;"
+                                         th:alt="${room.name + ' Main Image'}">
+                                </div>
+                                <!-- Fallback if no primary image -->
+                                <div th:unless="${#lists.?[isPrimary].size() > 0}">
+                                    <img th:src="${room.images[0].url}"
+                                         class="img-fluid w-100 rounded-top"
+                                         style="height: 400px; object-fit: cover;"
+                                         th:alt="${room.name + ' Image'}">
+                                </div>
+                            </div>
+
+                            <!-- Thumbnail Gallery -->
+                            <div class="px-3 pb-3" th:if="${#lists.size(room.images) > 1}">
+                                <div class="row g-2">
+                                    <div class="col-3" th:each="image, iterStat : ${room.images}" th:if="${iterStat.index < 4}">
+                                        <img th:src="${image.url}"
+                                             class="img-fluid rounded shadow-sm"
+                                             style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;"
+                                             th:alt="${room.name + ' Thumbnail'}"
+                                             data-bs-toggle="modal"
+                                             data-bs-target="#galleryModal"
+                                             th:onclick="'showGalleryImage(' + ${iterStat.index} + ')'">
+                                    </div>
+                                    <div class="col-3" th:if="${#lists.size(room.images) > 4}">
+                                        <div class="position-relative">
+                                            <img th:src="${room.images[4].url}"
+                                                 class="img-fluid rounded shadow-sm"
+                                                 style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;"
+                                                 data-bs-toggle="modal"
+                                                 data-bs-target="#galleryModal"
+                                                 onclick="showGalleryImage(4)">
+                                            <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 rounded d-flex align-items-center justify-content-center text-white"
+                                                 style="cursor: pointer;"
+                                                 data-bs-toggle="modal"
+                                                 data-bs-target="#galleryModal"
+                                                 onclick="showGalleryImage(4)">
+                                                <span th:text="'+' + ${#lists.size(room.images) - 4}">+2</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Placeholder if no images -->
+                        <div th:unless="${room.images != null && !room.images.empty}" class="text-center py-5">
+                            <img src="/images/room-placeholder.jpg"
+                                 class="img-fluid rounded"
+                                 style="height: 400px; width: 100%; object-fit: cover;"
+                                 alt="Room Placeholder">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Room Description -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 th:text="${room.name}">Room Name</h3>
+                        <p class="text-muted mb-3" th:text="${room.description ?: 'No description available.'}">Room description...</p>
+
+                        <!-- Amenities -->
+                        <div th:if="${room.amenities != null && !room.amenities.empty}">
+                            <h5>Amenities</h5>
+                            <div class="row">
+                                <div class="col-md-6" th:each="amenity : ${room.amenities}">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i th:class="${amenity.icon ?: 'fas fa-check'}" class="text-primary me-2"></i>
+                                        <span th:text="${amenity.name}">Amenity</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Sidebar -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0" th:text="${'$' + room.pricePerNight}">$120</h4>
+                            <small class="text-muted">per night</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="badge bg-primary me-2" th:text="${room.type ?: 'Standard'}">Standard</span>
+                            <span class="text-muted" th:text="${room.capacity + ' guests'}">2 guests</span>
+                        </div>
+
+                        <!-- Booking Form -->
+                        <form th:action="@{/booking/create}" method="post">
+                            <input type="hidden" name="roomId" th:value="${room.id}">
+
+                            <div class="mb-3">
+                                <label for="checkIn" class="form-label">Check-in</label>
+                                <input type="date" class="form-control" id="checkIn" name="checkIn" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="checkOut" class="form-label">Check-out</label>
+                                <input type="date" class="form-control" id="checkOut" name="checkOut" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="guests" class="form-label">Guests</label>
+                                <select class="form-select" id="guests" name="guestCount" required>
+                                    <option th:each="i : ${#numbers.sequence(1, room.capacity)}"
+                                            th:value="${i}"
+                                            th:text="${i + ' guest' + (i > 1 ? 's' : '')}">1 guest</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-calendar-check me-2"></i>Book Now
+                            </button>
+                        </form>
+
+                        <div class="text-center">
+                            <small class="text-muted">Free cancellation • No booking fees</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="galleryModalLabel" th:text="${room.name + ' Gallery'}">Room Gallery</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="roomCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <div th:each="image, iterStat : ${room.images}"
+                                 class="carousel-item"
+                                 th:classappend="${iterStat.first ? 'active' : ''}">
+                                <img th:src="${image.url}"
+                                     class="d-block w-100"
+                                     style="height: 500px; object-fit: cover;"
+                                     th:alt="${room.name + ' Image ' + (iterStat.index + 1)}">
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="jsResources">
+    <script>
+        // Gallery modal functionality
+        function showGalleryImage(index) {
+            const carousel = new bootstrap.Carousel(document.getElementById('roomCarousel'));
+            carousel.to(index);
+        }
+
+        // Set minimum date for check-in to today
+        document.getElementById('checkIn').min = new Date().toISOString().split('T')[0];
+
+        // Update check-out minimum date when check-in changes
+        document.getElementById('checkIn').addEventListener('change', function() {
+            const checkInDate = new Date(this.value);
+            checkInDate.setDate(checkInDate.getDate() + 1);
+            document.getElementById('checkOut').min = checkInDate.toISOString().split('T')[0];
+        });
+    </script>
+</th:block>
+</body>
+</html>

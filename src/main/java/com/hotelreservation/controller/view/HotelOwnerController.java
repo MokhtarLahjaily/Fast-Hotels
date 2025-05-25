@@ -295,4 +295,131 @@ public class HotelOwnerController {
 
         return "redirect:/hotel-owner/hotels/" + hotelId;
     }
+
+    @GetMapping("/hotels/{hotelId}/rooms/{roomId}")
+    public String viewRoom(@PathVariable Long hotelId, @PathVariable Long roomId, Model model) {
+        try {
+            // Verify hotel ownership
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            HotelResponse hotel = hotelService.getHotelById(hotelId);
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
+                throw new UnauthorizedException("You don't have permission to view this room");
+            }
+
+            RoomResponse room = roomService.getRoomById(roomId);
+            if (!room.getHotelId().equals(hotelId)) {
+                throw new UnauthorizedException("Room does not belong to this hotel");
+            }
+
+            // Get room images
+            List<ImageResponse> roomImages = imageService.getRoomImages(roomId);
+
+            model.addAttribute("hotel", hotel);
+            model.addAttribute("room", room);
+            model.addAttribute("roomImages", roomImages);
+
+            return "hotel-owner/room-detail";
+        } catch (Exception e) {
+            log.error("Error viewing room: {}", roomId, e);
+            model.addAttribute("errorMessage", "Error loading room details");
+            return "redirect:/hotel-owner/hotels/" + hotelId;
+        }
+    }
+
+    @PostMapping("/hotels/{hotelId}/rooms/{roomId}/images/upload")
+    public String uploadRoomImages(
+            @PathVariable Long hotelId,
+            @PathVariable Long roomId,
+            @RequestParam("images") List<MultipartFile> images,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Verify ownership
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            HotelResponse hotel = hotelService.getHotelById(hotelId);
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
+                throw new UnauthorizedException("You don't have permission to upload images for this room");
+            }
+
+            RoomResponse room = roomService.getRoomById(roomId);
+            if (!room.getHotelId().equals(hotelId)) {
+                throw new UnauthorizedException("Room does not belong to this hotel");
+            }
+
+            List<ImageResponse> uploadedImages = imageService.uploadRoomImages(roomId, images);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Successfully uploaded " + uploadedImages.size() + " image(s)!");
+        } catch (Exception e) {
+            log.error("Error uploading images for room: {}", roomId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error uploading images: " + e.getMessage());
+        }
+
+        return "redirect:/hotel-owner/hotels/" + hotelId + "/rooms/" + roomId;
+    }
+
+    @PostMapping("/hotels/{hotelId}/rooms/{roomId}/images/{imageId}/delete")
+    public String deleteRoomImage(
+            @PathVariable Long hotelId,
+            @PathVariable Long roomId,
+            @PathVariable Long imageId,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Verify ownership
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            HotelResponse hotel = hotelService.getHotelById(hotelId);
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
+                throw new UnauthorizedException("You don't have permission to delete images for this room");
+            }
+
+            imageService.deleteImage(imageId);
+            redirectAttributes.addFlashAttribute("successMessage", "Image deleted successfully!");
+        } catch (Exception e) {
+            log.error("Error deleting room image: {}", imageId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting image: " + e.getMessage());
+        }
+
+        return "redirect:/hotel-owner/hotels/" + hotelId + "/rooms/" + roomId;
+    }
+
+    @PostMapping("/hotels/{hotelId}/rooms/{roomId}/images/{imageId}/set-primary")
+    public String setPrimaryRoomImage(
+            @PathVariable Long hotelId,
+            @PathVariable Long roomId,
+            @PathVariable Long imageId,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Verify ownership
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            HotelResponse hotel = hotelService.getHotelById(hotelId);
+            if (hotel.getOwner() == null || !hotel.getOwner().getId().equals(user.getId())) {
+                throw new UnauthorizedException("You don't have permission to modify images for this room");
+            }
+
+            imageService.setPrimaryImage(imageId);
+            redirectAttributes.addFlashAttribute("successMessage", "Primary image updated successfully!");
+        } catch (Exception e) {
+            log.error("Error setting primary room image: {}", imageId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error setting primary image: " + e.getMessage());
+        }
+
+        return "redirect:/hotel-owner/hotels/" + hotelId + "/rooms/" + roomId;
+    }
 }

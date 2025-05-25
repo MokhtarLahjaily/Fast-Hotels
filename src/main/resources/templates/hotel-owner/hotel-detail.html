@@ -166,11 +166,14 @@
                                         <td th:text="${'$' + room.pricePerNight}">$120</td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="#" class="btn btn-outline-primary">
+                                                <a th:href="@{'/hotel-owner/hotels/' + ${hotel.id} + '/rooms/' + ${room.id}}" class="btn btn-outline-primary">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <a href="#" class="btn btn-outline-secondary">
                                                     <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a th:href="@{'/hotel-owner/hotels/' + ${hotel.id} + '/rooms/' + ${room.id}}" class="btn btn-outline-info" title="Manage Images">
+                                                    <i class="fas fa-images"></i>
                                                 </a>
                                             </div>
                                         </td>
