@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(requestHandler)
                         // Ignore CSRF for stateless API endpoints that use JWT in Authorization header
-                        .ignoringRequestMatchers("/api/auth/**", "/api/chat/**"))
+                        .ignoringRequestMatchers("/api/auth/**"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/api/auth/**", "/", "/search", "/hotels/**", "/css/**", "/js/**",

@@ -1,4 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // CSRF token helper - reads from cookie set by Spring Security
+    function getCsrfToken() {
+        const name = "XSRF-TOKEN="
+        const decodedCookie = decodeURIComponent(document.cookie)
+        const cookies = decodedCookie.split(";")
+        for (let cookie of cookies) {
+            cookie = cookie.trim()
+            if (cookie.startsWith(name)) {
+                return cookie.substring(name.length)
+            }
+        }
+        return null
+    }
+
     // Chat elements
     const chatFab = document.getElementById("chat-fab")
     const chatContainer = document.getElementById("chat-container")
@@ -92,11 +106,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Send message to server
+        const csrfToken = getCsrfToken()
+        const headers = {
+            "Content-Type": "application/json",
+        }
+        if (csrfToken) {
+            headers["X-XSRF-TOKEN"] = csrfToken
+        }
+
         fetch("/api/chat/support", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: headers,
             body: JSON.stringify({
                 message: message,
                 sessionId: sessionId,
