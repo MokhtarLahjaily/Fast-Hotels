@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             // Process URLs, line breaks, and markdown-like formatting
             const processedMessage = message
-                .replace(/\n/g, "<br>")
+                .replaceAll("\n", "<br>")
                 .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
                 // Bold text between asterisks
                 .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const imageUrl = hotel.imageUrl || "/images/hotel-placeholder.jpg"
             const price = hotel.minPrice ? `$${hotel.minPrice}` : "Price on request"
             const rating = hotel.rating
-                ? `<div class="chat-hotel-rating">${"★".repeat(Math.round(hotel.rating))}${hotel.rating.toFixed(1)}</div>`
+                ? `<div class="chat-hotel-rating">${"★".repeat(Math.round(hotel.rating))}${Number.parseFloat(hotel.rating).toFixed(1)}</div>`
                 : ""
 
             card.innerHTML = `

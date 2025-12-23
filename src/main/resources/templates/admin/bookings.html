@@ -150,7 +150,8 @@
                                     </td>
                                 </tr>
                                 <tr th:each="booking : ${bookings.content}" class="booking-row"
-                                    th:onclick="'toggleBookingDetail(' + ${booking.id} + ')'">
+                                    th:onclick="'toggleBookingDetail(' + ${booking.id} + ')'" role="button" tabindex="0"
+                                    th:onkeydown="'if(event.key === \'Enter\' || event.key === \' \') { toggleBookingDetail(' + ${booking.id} + '); event.preventDefault(); }'">
                                     <td>
                                         <strong th:text="${'#' + booking.id}">#1</strong>
                                         <br>

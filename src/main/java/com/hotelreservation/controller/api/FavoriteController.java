@@ -30,7 +30,12 @@ public class FavoriteController {
         }
 
         String userEmail = authentication.getName();
-        return ResponseEntity.ok(favoriteService.toggleFavorite(userEmail, hotelId));
+        FavoriteResponse response = favoriteService.toggleFavorite(userEmail, hotelId);
+
+        if (response.isFavorite()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(response);
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/status/{hotelId}")

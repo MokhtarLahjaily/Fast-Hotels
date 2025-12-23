@@ -193,7 +193,8 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3" th:if="${hotel != null}">
                                 <img th:src="${hotel.imageUrl != null ? hotel.imageUrl : (hotel.primaryImageUrl != null ? hotel.primaryImageUrl : '/images/hotel-placeholder.jpg')}"
-                                    class="img-fluid rounded me-3" alt="Hotel Image"
+                                    class="img-fluid rounded me-3"
+                                    th:alt="${hotel != null ? 'View of ' + hotel.name : 'Hotel view'}"
                                     style="width: 80px; height: 80px; object-fit: cover;"
                                     onerror="this.onerror=null; this.src='/images/hotel-placeholder.jpg';">
                                 <div>

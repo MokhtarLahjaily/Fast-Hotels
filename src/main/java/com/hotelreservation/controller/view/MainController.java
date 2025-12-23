@@ -1,6 +1,7 @@
 package com.hotelreservation.controller.view;
 
 import com.hotelreservation.util.AppConstants;
+import com.hotelreservation.util.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -34,7 +35,8 @@ public class MainController {
             @RequestParam("message") String message,
             RedirectAttributes redirectAttributes) {
 
-        logger.info("Contact form submission received from: {}, email: {}, subject: {}", name, email, subject);
+        logger.info("Contact form submission received from: {}, email: {}, subject: {}",
+                LogSanitizer.sanitize(name), LogSanitizer.sanitize(email), LogSanitizer.sanitize(subject));
 
         // In a real application, you would process the form data here
         // For example, send an email or save to database

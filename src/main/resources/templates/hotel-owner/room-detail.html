@@ -80,11 +80,13 @@
                                 <div class="row g-3">
                                     <div class="col-md-4" th:each="image : ${roomImages}">
                                         <div class="position-relative">
-                                            <img th:src="${image.url}" class="img-fluid rounded shadow-sm"
-                                                style="height: 200px; width: 100%; object-fit: cover; cursor: pointer;"
-                                                th:alt="${room.name}" data-bs-toggle="modal"
-                                                data-bs-target="#imagePreviewModal" th:data-image-url="${image.url}"
-                                                onclick="showImagePreview(this.dataset.imageUrl)">
+                                            <button type="button" class="btn p-0 border-0 w-100" data-bs-toggle="modal"
+                                                data-bs-target="#imagePreviewModal"
+                                                th:onclick="'showImagePreview(\'' + ${image.url} + '\')'">
+                                                <img th:src="${image.url}" class="img-fluid rounded shadow-sm"
+                                                    style="height: 200px; width: 100%; object-fit: cover;"
+                                                    th:alt="${room.name}">
+                                            </button>
 
                                             <!-- Primary Badge -->
                                             <span th:if="${image.isPrimary}"

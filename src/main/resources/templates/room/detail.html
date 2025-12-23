@@ -45,23 +45,28 @@
                                     <div class="row g-2">
                                         <div class="col-3" th:each="image, iterStat : ${room.images}"
                                             th:if="${iterStat.index < 4}">
-                                            <img th:src="${image.url}" class="img-fluid rounded shadow-sm"
-                                                style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;"
-                                                th:alt="${room.name + ' - Thumbnail'}" data-bs-toggle="modal"
+                                            <button type="button" class="btn p-0 border-0 w-100" data-bs-toggle="modal"
                                                 data-bs-target="#galleryModal"
-                                                th:onclick="'showGalleryImage(' + ${iterStat.index} + ')'">
+                                                th:onclick="'showGalleryImage(' + ${iterStat.index} + ')'"
+                                                th:aria-label="'View image ' + ${iterStat.index + 1}">
+                                                <img th:src="${image.url}" class="img-fluid rounded shadow-sm"
+                                                    style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;"
+                                                    th:alt="${room.name + ' - View ' + (iterStat.index + 1)}">
+                                            </button>
                                         </div>
                                         <div class="col-3" th:if="${#lists.size(room.images) > 4}">
                                             <div class="position-relative">
-                                                <img th:src="${room.images[4].url}" class="img-fluid rounded shadow-sm"
-                                                    style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;"
+                                                <button type="button" class="btn p-0 border-0 w-100"
                                                     data-bs-toggle="modal" data-bs-target="#galleryModal"
-                                                    onclick="showGalleryImage(4)">
-                                                <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 rounded d-flex align-items-center justify-content-center text-white"
-                                                    style="cursor: pointer;" data-bs-toggle="modal"
-                                                    data-bs-target="#galleryModal" onclick="showGalleryImage(4)">
-                                                    <span th:text="'+' + ${#lists.size(room.images) - 4}">+2</span>
-                                                </div>
+                                                    onclick="showGalleryImage(4)" aria-label="View more images">
+                                                    <img th:src="${room.images[4].url}"
+                                                        class="img-fluid rounded shadow-sm"
+                                                        style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;">
+                                                    <div
+                                                        class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 rounded d-flex align-items-center justify-content-center text-white">
+                                                        <span th:text="'+' + ${#lists.size(room.images) - 4}">+2</span>
+                                                    </div>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -165,7 +170,7 @@
                                     th:classappend="${iterStat.first ? 'active' : ''}">
                                     <img th:src="${image.url}" class="d-block w-100"
                                         style="height: 500px; object-fit: cover;"
-                                        th:alt="${room.name + ' - Photo ' + (iterStat.index + 1)}">
+                                        th:alt="${room.name + ' - View ' + (iterStat.index + 1)}">
                                 </div>
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel"

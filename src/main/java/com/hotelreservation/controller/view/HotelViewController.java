@@ -28,6 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
+import com.hotelreservation.util.LogSanitizer;
 
 @Controller
 public class HotelViewController {
@@ -44,9 +45,9 @@ public class HotelViewController {
 
     @Autowired
     public HotelViewController(HotelService hotelService, RoomService roomService,
-                               ReviewService reviewService, AmenityService amenityService,
-                               AiRecommendationService aiRecommendationService,
-                               FavoriteService favoriteService, ImageService imageService) {
+            ReviewService reviewService, AmenityService amenityService,
+            AiRecommendationService aiRecommendationService,
+            FavoriteService favoriteService, ImageService imageService) {
         this.hotelService = hotelService;
         this.roomService = roomService;
         this.reviewService = reviewService;
@@ -71,7 +72,7 @@ public class HotelViewController {
         try {
             // Log search parameters
             logger.info("Listing hotels with destination: {}, sortBy: {}, page: {}, size: {}",
-                    destination, sortBy, page, size);
+                    LogSanitizer.sanitize(destination), LogSanitizer.sanitize(sortBy), page, size);
 
             // Get hotels with filters
             Page<HotelResponse> hotelsPage = hotelService.searchHotels(
@@ -129,7 +130,8 @@ public class HotelViewController {
             logger.info("Found {} images for hotel {}", hotelImages.size(), id);
 
             // Get reviews with pagination
-            Page<ReviewResponse> reviewsPage = reviewService.getHotelReviews(id, PageRequest.of(reviewPage, reviewSize));
+            Page<ReviewResponse> reviewsPage = reviewService.getHotelReviews(id,
+                    PageRequest.of(reviewPage, reviewSize));
 
             // Default dates if not provided
             LocalDate today = LocalDate.now();

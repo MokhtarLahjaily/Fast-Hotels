@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.hotelreservation.util.LogSanitizer;
 
 @Service
 @RequiredArgsConstructor
@@ -263,7 +264,7 @@ public class HotelService {
                         allHotels.add(response);
                     }
                 } catch (Exception e) {
-                    logger.error("Error mapping hotel with ID {}: {}", hotel.getId(), e.getMessage(), e);
+                    logger.error("Error mapping hotel with ID {}", hotel.getId(), e);
                     // Continue with next hotel
                 }
             }
@@ -292,7 +293,8 @@ public class HotelService {
             String sortBy,
             Pageable pageable) {
 
-        logger.info("Searching hotels with destination: {}, sortBy: {}", destination, sortBy);
+        logger.info("Searching hotels with destination: {}, sortBy: {}", LogSanitizer.sanitize(destination),
+                LogSanitizer.sanitize(sortBy));
 
         try {
             Short[] ratings = getRatingRange(starRating);
@@ -307,7 +309,7 @@ public class HotelService {
             return hotelPage.map(this::createSimplifiedHotelResponse);
 
         } catch (Exception e) {
-            logger.error("Error searching hotels: {}", e.getMessage(), e);
+            logger.error("Error searching hotels", e);
             return Page.empty(pageable);
         }
     }
@@ -320,7 +322,8 @@ public class HotelService {
         }
 
         try {
-            logger.debug("Creating simplified response for hotel: ID={}, Name={}", hotel.getId(), hotel.getName());
+            logger.debug("Creating simplified response for hotel: ID={}, Name={}", hotel.getId(),
+                    LogSanitizer.sanitize(hotel.getName()));
 
             String primaryImageUrl = getPrimaryImageUrl(hotel.getId());
             BigDecimal minPrice = getMinPrice(hotel.getId());
@@ -343,8 +346,8 @@ public class HotelService {
                     .ownerId(hotel.getOwner() != null ? hotel.getOwner().getId() : null)
                     .build();
         } catch (Exception e) {
-            logger.error("Error creating simplified response for hotel {}: {}",
-                    hotel != null ? hotel.getId() : "null", e.getMessage(), e);
+            logger.error("Error creating simplified response for hotel {}",
+                    hotel != null ? hotel.getId() : "null", e);
 
             // Return an absolute minimum response to prevent null pointer exceptions in the
             // view
@@ -467,10 +470,9 @@ public class HotelService {
                     .filter(img -> img != null && Boolean.TRUE.equals(img.getIsPrimary()))
                     .map(Image::getUrl)
                     .findFirst()
-                    .orElseGet(() -> images.get(0).getUrl() != null ? images.get(0).getUrl()
                             : "/images/hotel-placeholder.jpg");
         } catch (Exception e) {
-            logger.error("Error fetching images for hotel {}: {}", hotelId, e.getMessage());
+            logger.error("Error fetching images for hotel {}", hotelId, e);
             return "/images/hotel-placeholder.jpg";
         }
     }
@@ -488,7 +490,7 @@ public class HotelService {
                     .min(Comparator.naturalOrder())
                     .orElse(defaultPrice);
         } catch (Exception e) {
-            logger.error("Error calculating minimum price for hotel {}: {}", hotelId, e.getMessage());
+            logger.error("Error calculating minimum price for hotel {}", hotelId, e);
             return defaultPrice;
         }
     }
@@ -508,7 +510,7 @@ public class HotelService {
                     .map(this::mapToAmenityResponse)
                     .toList();
         } catch (Exception e) {
-            logger.error("Error mapping amenities for hotel {}: {}", hotelId, e.getMessage());
+            logger.error("Error mapping amenities for hotel {}", hotelId, e);
             return new ArrayList<>();
         }
     }
@@ -517,7 +519,7 @@ public class HotelService {
         try {
             return reviewRepository.getAverageRatingForHotel(hotelId);
         } catch (Exception e) {
-            logger.error("Error fetching average rating for hotel {}: {}", hotelId, e.getMessage());
+            logger.error("Error fetching average rating for hotel {}", hotelId, e);
             return null;
         }
     }

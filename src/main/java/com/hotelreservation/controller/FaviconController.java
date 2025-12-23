@@ -1,6 +1,5 @@
 package com.hotelreservation.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -24,8 +23,11 @@ public class FaviconController {
 
     private static final Logger logger = LoggerFactory.getLogger(FaviconController.class);
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
+
+    public FaviconController(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     /**
      * Serves the favicon.ico file with appropriate caching headers
