@@ -3,7 +3,7 @@ package com.hotelreservation.controller.view;
 import com.hotelreservation.dto.response.HotelResponse;
 import com.hotelreservation.service.FavoriteService;
 import com.hotelreservation.service.HotelService;
-import com.hotelreservation.util.Constants;
+import com.hotelreservation.util.AppConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +33,8 @@ public class FavoriteViewController {
     @GetMapping
     public String viewFavorites(Model model, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated() ||
-                authentication.getName().equals("anonymousUser")) {
-            return "redirect:/login";
+                authentication.getName().equals(AppConstants.Attributes.ANONYMOUS_USER)) {
+            return "redirect:" + AppConstants.Routes.LOGIN;
         }
 
         try {
@@ -45,7 +45,8 @@ public class FavoriteViewController {
             return "favorites/list";
         } catch (Exception e) {
             logger.error("Error viewing favorites", e);
-            model.addAttribute(Constants.ATTR_ERROR_MSG, "An error occurred while loading your favorites.");
+            model.addAttribute(AppConstants.Attributes.ERROR_MESSAGE,
+                    "An error occurred while loading your favorites.");
             return "favorites/list";
         }
     }
@@ -58,19 +59,21 @@ public class FavoriteViewController {
             Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated() ||
-                authentication.getName().equals("anonymousUser")) {
-            return "redirect:/login";
+                authentication.getName().equals(AppConstants.Attributes.ANONYMOUS_USER)) {
+            return "redirect:" + AppConstants.Routes.LOGIN;
         }
 
         try {
             favoriteService.addFavorite(hotelId);
-            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Hotel added to favorites!");
+            redirectAttributes.addFlashAttribute(AppConstants.Attributes.SUCCESS_MESSAGE, "Hotel added to favorites!");
         } catch (Exception e) {
             logger.error("Error adding favorite", e);
-            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Failed to add hotel to favorites.");
+            redirectAttributes.addFlashAttribute(AppConstants.Attributes.ERROR_MESSAGE,
+                    "Failed to add hotel to favorites.");
         }
 
-        return isValidRedirectUrl(redirectUrl) ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
+        return isValidRedirectUrl(redirectUrl) ? "redirect:" + redirectUrl
+                : "redirect:" + AppConstants.Routes.API_HOTELS + "/" + hotelId;
     }
 
     @PostMapping("/remove/{hotelId}")
@@ -81,19 +84,22 @@ public class FavoriteViewController {
             Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated() ||
-                authentication.getName().equals("anonymousUser")) {
-            return "redirect:/login";
+                authentication.getName().equals(AppConstants.Attributes.ANONYMOUS_USER)) {
+            return "redirect:" + AppConstants.Routes.LOGIN;
         }
 
         try {
             favoriteService.removeFavorite(hotelId);
-            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Hotel removed from favorites!");
+            redirectAttributes.addFlashAttribute(AppConstants.Attributes.SUCCESS_MESSAGE,
+                    "Hotel removed from favorites!");
         } catch (Exception e) {
             logger.error("Error removing favorite", e);
-            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Failed to remove hotel from favorites.");
+            redirectAttributes.addFlashAttribute(AppConstants.Attributes.ERROR_MESSAGE,
+                    "Failed to remove hotel from favorites.");
         }
 
-        return isValidRedirectUrl(redirectUrl) ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
+        return isValidRedirectUrl(redirectUrl) ? "redirect:" + redirectUrl
+                : "redirect:" + AppConstants.Routes.API_HOTELS + "/" + hotelId;
     }
 
     private boolean isValidRedirectUrl(String url) {
@@ -109,12 +115,12 @@ public class FavoriteViewController {
 
         // Optional: List of allowed base paths for even stricter security
         List<String> allowedPrefixes = List.of(
-                "/hotels",
+                AppConstants.Routes.API_HOTELS,
                 "/favorites",
                 "/profile",
-                "/bookings",
-                "/search",
-                "/admin",
+                AppConstants.Routes.API_BOOKINGS,
+                AppConstants.Routes.SEARCH,
+                AppConstants.Routes.API_ADMIN,
                 "/owner");
 
         return allowedPrefixes.stream().anyMatch(url::startsWith);

@@ -295,15 +295,13 @@ public class AiChatService {
 
     private ConversationContext extractConversationContext(String sessionId) {
         List<Map<String, String>> history = conversationHistory.getOrDefault(sessionId, new ArrayList<>());
-        String previousUserMessage = "";
         String previousBotMessage = "";
 
         if (history.size() >= 3) {
-            previousUserMessage = findPreviousMessage(history, "user");
             previousBotMessage = findPreviousMessage(history, "assistant");
         }
 
-        return new ConversationContext(previousUserMessage, previousBotMessage);
+        return new ConversationContext(previousBotMessage);
     }
 
     private String findPreviousMessage(List<Map<String, String>> history, String role) {
@@ -328,11 +326,9 @@ public class AiChatService {
     // ========== Inner Classes ==========
 
     private static class ConversationContext {
-        final String previousUserMessage;
         final String previousBotMessage;
 
-        ConversationContext(String previousUserMessage, String previousBotMessage) {
-            this.previousUserMessage = previousUserMessage;
+        ConversationContext(String previousBotMessage) {
             this.previousBotMessage = previousBotMessage;
         }
     }

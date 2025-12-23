@@ -4,7 +4,7 @@ import com.hotelreservation.dto.request.LoginRequest;
 import com.hotelreservation.dto.request.RegisterRequest;
 import com.hotelreservation.dto.response.AuthResponse;
 import com.hotelreservation.service.UserService;
-import com.hotelreservation.util.Constants;
+import com.hotelreservation.util.AppConstants;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -41,15 +41,15 @@ public class AuthViewController {
     private final UserDetailsService userDetailsService;
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
-    @GetMapping("/login")
+    @GetMapping(AppConstants.Routes.LOGIN)
     public String showLoginForm(Model model) {
         if (!model.containsAttribute("loginRequest")) {
             model.addAttribute("loginRequest", new LoginRequest());
         }
-        return Constants.VIEW_AUTH_LOGIN;
+        return AppConstants.Views.AUTH_LOGIN;
     }
 
-    @PostMapping("/login")
+    @PostMapping(AppConstants.Routes.LOGIN)
     public String processLogin(@Valid @ModelAttribute("loginRequest") LoginRequest loginRequest,
             BindingResult result, HttpServletRequest request, HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
@@ -57,7 +57,7 @@ public class AuthViewController {
 
         if (result.hasErrors()) {
             logger.warn("Login form validation failed: {}", result.getAllErrors());
-            return Constants.VIEW_AUTH_LOGIN;
+            return AppConstants.Views.AUTH_LOGIN;
         }
 
         try {
@@ -65,7 +65,7 @@ public class AuthViewController {
             AuthResponse authResponse = userService.login(loginRequest);
 
             // Set JWT token as a cookie
-            Cookie cookie = new Cookie("jwt_token", authResponse.getToken());
+            Cookie cookie = new Cookie(AppConstants.Attributes.JWT_COOKIE_NAME, authResponse.getToken());
             cookie.setHttpOnly(true);
             cookie.setPath("/");
             cookie.setMaxAge(24 * 60 * 60); // 1 day
@@ -91,24 +91,24 @@ public class AuthViewController {
 
             logger.info("Authentication set in SecurityContext for user: {}", loginRequest.getEmail());
 
-            return Constants.REDIRECT_HOME;
+            return "redirect:" + AppConstants.Routes.API_HOTELS; // Default to hotels/home
         } catch (Exception e) {
             logger.error("Login failed for user: {}", loginRequest.getEmail(), e);
-            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Invalid email or password");
+            redirectAttributes.addFlashAttribute(AppConstants.Attributes.ERROR_MESSAGE, "Invalid email or password");
             redirectAttributes.addFlashAttribute("loginRequest", loginRequest);
-            return Constants.REDIRECT_LOGIN;
+            return "redirect:" + AppConstants.Routes.LOGIN;
         }
     }
 
-    @GetMapping("/register")
+    @GetMapping(AppConstants.Routes.REGISTER)
     public String showRegistrationForm(Model model) {
         if (!model.containsAttribute("registerRequest")) {
             model.addAttribute("registerRequest", new RegisterRequest());
         }
-        return Constants.VIEW_AUTH_REGISTER;
+        return AppConstants.Views.AUTH_REGISTER;
     }
 
-    @PostMapping("/register")
+    @PostMapping(AppConstants.Routes.REGISTER)
     public String processRegistration(@Valid @ModelAttribute("registerRequest") RegisterRequest registerRequest,
             BindingResult result, HttpServletRequest request, HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
@@ -116,7 +116,7 @@ public class AuthViewController {
 
         if (result.hasErrors()) {
             logger.warn("Registration form validation failed: {}", result.getAllErrors());
-            return Constants.VIEW_AUTH_REGISTER;
+            return AppConstants.Views.AUTH_REGISTER;
         }
 
         try {
@@ -124,7 +124,7 @@ public class AuthViewController {
             AuthResponse authResponse = userService.register(registerRequest);
 
             // Set JWT token as a cookie
-            Cookie cookie = new Cookie("jwt_token", authResponse.getToken());
+            Cookie cookie = new Cookie(AppConstants.Attributes.JWT_COOKIE_NAME, authResponse.getToken());
             cookie.setHttpOnly(true);
             cookie.setPath("/");
             cookie.setMaxAge(24 * 60 * 60); // 1 day
@@ -151,12 +151,13 @@ public class AuthViewController {
             logger.info("Authentication set in SecurityContext for newly registered user: {}",
                     registerRequest.getEmail());
 
-            return Constants.REDIRECT_HOME;
+            return "redirect:" + AppConstants.Routes.API_HOTELS;
         } catch (Exception e) {
             logger.error("Registration failed for user: {}", registerRequest.getEmail(), e);
-            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Registration failed: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(AppConstants.Attributes.ERROR_MESSAGE,
+                    "Registration failed: " + e.getMessage());
             redirectAttributes.addFlashAttribute("registerRequest", registerRequest);
-            return Constants.REDIRECT_REGISTER;
+            return "redirect:" + AppConstants.Routes.REGISTER;
         }
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,6 +29,7 @@ public class FaviconController {
 
     /**
      * Serves the favicon.ico file with appropriate caching headers
+     * 
      * @return ResponseEntity containing the favicon resource
      */
     @GetMapping("/favicon.ico")

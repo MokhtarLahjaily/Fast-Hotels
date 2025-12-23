@@ -1,72 +1,81 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Footer Fragment</title>
 </head>
+
 <body>
-<footer th:fragment="footer" class="bg-dark text-white py-5 mt-5">
-    <div class="container">
-        <div class="row g-4">
-            <!-- Company Info -->
-            <div class="col-lg-4">
-                <h5 class="mb-3 text-white">EasyStay</h5>
-                <p class="mb-3 text-white">Find your perfect accommodation with our premium hotel booking service. We offer the best prices and exceptional customer support.</p>
-                <div class="social-icons d-flex gap-2">
-                    <a href="#" class="text-white"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+    <footer th:fragment="footer" class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Company Info -->
+                <div class="col-lg-4">
+                    <h5 class="mb-3 text-white">EasyStay</h5>
+                    <p class="mb-3 text-white">Find your perfect accommodation with our premium hotel booking service.
+                        We offer the best prices and exceptional customer support.</p>
+                    <div class="social-icons d-flex gap-2">
+                        <a href="#" class="text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-4">
+                    <h5 class="mb-3 text-white">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                        <li class="mb-2"><a href="/hotels" class="text-white text-decoration-none">Hotels</a></li>
+                        <li class="mb-2"><a href="/about" class="text-white text-decoration-none">About Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-2 col-md-4">
+                    <h5 class="mb-3 text-white">Support</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/support/help" class="text-white text-decoration-none">Help Center</a>
+                        </li>
+                        <li class="mb-2"><a href="/faq" class="text-white text-decoration-none">FAQs</a></li>
+                        <li class="mb-2"><a href="/privacy-policy" class="text-white text-decoration-none">Privacy
+                                Policy</a></li>
+                        <li class="mb-2"><a href="/terms-of-service" class="text-white text-decoration-none">Terms of
+                                Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="col-lg-4 col-md-4">
+                    <h5 class="mb-3 text-white">Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 text-white"><i class="fas fa-map-marker-alt me-2"></i>La Grande École des
+                            Sciences de l'Ingénieur, Casablanca, Maroc</li>
+                        <li class="mb-2 text-white"><i class="fas fa-phone me-2"></i>+212 (0) 77097-8336</li>
+                        <li class="mb-2 text-white"><i class="fas fa-envelope me-2"></i>info@pfahotels.com</li>
+                    </ul>
+                    <div class="mt-3">
+                        <a href="/contact" class="btn btn-outline-light btn-sm">Send us a message</a>
+                    </div>
                 </div>
             </div>
 
-            <!-- Quick Links -->
-            <div class="col-lg-2 col-md-4">
-                <h5 class="mb-3 text-white">Quick Links</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="/" class="text-white text-decoration-none">Home</a></li>
-                    <li class="mb-2"><a href="/hotels" class="text-white text-decoration-none">Hotels</a></li>
-                    <li class="mb-2"><a href="/about" class="text-white text-decoration-none">About Us</a></li>
-                </ul>
-            </div>
+            <hr class="my-4 bg-light">
 
-            <!-- Support -->
-            <div class="col-lg-2 col-md-4">
-                <h5 class="mb-3 text-white">Support</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="/support/help" class="text-white text-decoration-none">Help Center</a></li>
-                    <li class="mb-2"><a href="/faq" class="text-white text-decoration-none">FAQs</a></li>
-                    <li class="mb-2"><a href="/privacy-policy" class="text-white text-decoration-none">Privacy Policy</a></li>
-                    <li class="mb-2"><a href="/terms-of-service" class="text-white text-decoration-none">Terms of Service</a></li>
-                </ul>
-            </div>
-
-            <!-- Contact Info -->
-            <div class="col-lg-4 col-md-4">
-                <h5 class="mb-3 text-white">Contact Us</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2 text-white"><i class="fas fa-map-marker-alt me-2"></i>La Grande École des Sciences de l'Ingénieur, Casablanca, Maroc</li>
-                    <li class="mb-2 text-white"><i class="fas fa-phone me-2"></i>+212 (0) 77097-8336</li>
-                    <li class="mb-2 text-white"><i class="fas fa-envelope me-2"></i>info@pfahotels.com</li>
-                </ul>
-                <div class="mt-3">
-                    <a href="/contact" class="btn btn-outline-light btn-sm">Send us a message</a>
+            <!-- Copyright -->
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0 text-white">&copy; 2025 PFA Hotels. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-white">Designed with <i class="fas fa-heart text-danger"></i> by FETHEDDINE And
+                        LAHJAILY</p>
                 </div>
             </div>
         </div>
-
-        <hr class="my-4 bg-light">
-
-        <!-- Copyright -->
-        <div class="row">
-            <div class="col-md-6">
-                <p class="mb-0 text-white">&copy; 2025 PFA Hotels. All rights reserved.</p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <p class="mb-0 text-white">Designed with <i class="fas fa-heart text-danger"></i> by FETHEDDINE And LAHJAILY</p>
-            </div>
-        </div>
-    </div>
-</footer>
+    </footer>
 </body>
+
 </html>

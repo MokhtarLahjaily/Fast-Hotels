@@ -1,21 +1,16 @@
 package com.hotelreservation.controller.api;
 
+import com.hotelreservation.dto.response.FavoriteResponse;
+import com.hotelreservation.exception.NotAuthenticatedException;
 import com.hotelreservation.service.FavoriteService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/favorites")
 public class FavoriteController {
-
-    private static final Logger logger = LoggerFactory.getLogger(FavoriteController.class);
 
     private final FavoriteService favoriteService;
 
@@ -25,59 +20,34 @@ public class FavoriteController {
     }
 
     @PostMapping("/{hotelId}")
-    public ResponseEntity<Map<String, Object>> toggleFavorite(
+    public ResponseEntity<FavoriteResponse> toggleFavorite(
             @PathVariable Long hotelId,
             Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated() ||
                 authentication.getName().equals("anonymousUser")) {
-            return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
+            throw new NotAuthenticatedException("User not authenticated");
         }
 
-        try {
-            String userEmail = authentication.getName();
-            boolean isFavorite = favoriteService.isFavorite(userEmail, hotelId);
-
-            Map<String, Object> response = new HashMap<>();
-
-            if (isFavorite) {
-                favoriteService.removeFromFavorites(userEmail, hotelId);
-                response.put("status", "removed");
-                response.put("message", "Hotel removed from favorites");
-            } else {
-                favoriteService.addToFavorites(userEmail, hotelId);
-                response.put("status", "added");
-                response.put("message", "Hotel added to favorites");
-            }
-
-            response.put("hotelId", hotelId);
-            response.put("isFavorite", !isFavorite);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Error toggling favorite for hotel {}: {}", hotelId, e.getMessage());
-            return ResponseEntity.status(500).body(Map.of("error", "Error toggling favorite status"));
-        }
+        String userEmail = authentication.getName();
+        return ResponseEntity.ok(favoriteService.toggleFavorite(userEmail, hotelId));
     }
 
     @GetMapping("/status/{hotelId}")
-    public ResponseEntity<Map<String, Object>> checkFavoriteStatus(
+    public ResponseEntity<FavoriteResponse> checkFavoriteStatus(
             @PathVariable Long hotelId,
             Authentication authentication) {
 
-        if (authentication == null || !authentication.isAuthenticated() ||
-                authentication.getName().equals("anonymousUser")) {
-            return ResponseEntity.ok(Map.of("isFavorite", false));
-        }
-
-        try {
+        boolean isFavorite = false;
+        if (authentication != null && authentication.isAuthenticated() &&
+                !authentication.getName().equals("anonymousUser")) {
             String userEmail = authentication.getName();
-            boolean isFavorite = favoriteService.isFavorite(userEmail, hotelId);
-
-            return ResponseEntity.ok(Map.of("isFavorite", isFavorite));
-        } catch (Exception e) {
-            logger.error("Error checking favorite status for hotel {}: {}", hotelId, e.getMessage());
-            return ResponseEntity.ok(Map.of("isFavorite", false));
+            isFavorite = favoriteService.isFavorite(userEmail, hotelId);
         }
+
+        return ResponseEntity.ok(FavoriteResponse.builder()
+                .hotelId(hotelId)
+                .isFavorite(isFavorite)
+                .build());
     }
 }

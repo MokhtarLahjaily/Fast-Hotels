@@ -1,223 +1,222 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      layout:decorate="~{layout/base}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout/base}">
+
 <head>
-    <title th:text="${hotel != null ? hotel.name + ' - Hotel Reservation System' : 'Hotel Details - Hotel Reservation System'}">Hotel Name - Hotel Reservation System</title>
+    <title
+        th:text="${hotel != null ? hotel.name + ' - Hotel Reservation System' : 'Hotel Details - Hotel Reservation System'}">
+        Hotel Name - Hotel Reservation System</title>
 </head>
+
 <body>
-<div layout:fragment="content">
-    <!-- Error Alert -->
-    <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
-        An error occurred while loading the hotel details.
-    </div>
+    <div layout:fragment="content">
+        <!-- Error Alert -->
+        <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
+            An error occurred while loading the hotel details.
+        </div>
 
-    <!-- Success Alert -->
-    <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage != null}" role="alert">
-        <span th:text="${successMessage}">Success message</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <!-- Success Alert -->
+        <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage != null}" role="alert">
+            <span th:text="${successMessage}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
-    <div th:if="${hotel != null}">
-        <!-- Hotel Header Section -->
-        <section class="bg-light py-4 mb-4">
-            <div class="container">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-3">
-                        <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
-                        <li class="breadcrumb-item"><a th:href="@{/hotels}">Hotels</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" th:text="${hotel.name}">Hotel Name</li>
-                    </ol>
-                </nav>
+        <div th:if="${hotel != null}">
+            <!-- Hotel Header Section -->
+            <section class="bg-light py-4 mb-4">
+                <div class="container">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-3">
+                            <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/hotels}">Hotels</a></li>
+                            <li class="breadcrumb-item active" aria-current="page" th:text="${hotel.name}">Hotel Name
+                            </li>
+                        </ol>
+                    </nav>
 
-                <div class="row align-items-center">
-                    <div class="col-lg-8">
-                        <h1 class="mb-2" th:text="${hotel.name}">Hotel Name</h1>
-                        <p class="mb-2">
-                            <i class="fas fa-map-marker-alt me-1"></i>
-                            <span th:text="${(hotel.address != null ? hotel.address : '') +
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h1 class="mb-2" th:text="${hotel.name}">Hotel Name</h1>
+                            <p class="mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                <span th:text="${(hotel.address != null ? hotel.address : '') +
                                             (hotel.city != null ? ', ' + hotel.city : '') +
                                             (hotel.country != null ? ', ' + hotel.country : '')}">Location</span>
-                        </p>
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="me-3">
-                                <span class="badge bg-primary" th:text="${hotel.starRating + ' Stars'}">4 Stars</span>
-                            </div>
-                            <div class="me-3">
-                                <i class="fas fa-star text-warning"></i>
-                                <span class="fw-bold" th:text="${hotel.averageRating != null ? #numbers.formatDecimal(hotel.averageRating, 1, 1) : 'New'}">4.5</span>
-                                <span class="text-muted" th:text="${'(' + (reviewCount != null ? reviewCount : 0) + ' reviews)'}">
+                            </p>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="me-3">
+                                    <span class="badge bg-primary" th:text="${hotel.starRating + ' Stars'}">4
+                                        Stars</span>
+                                </div>
+                                <div class="me-3">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <span class="fw-bold"
+                                        th:text="${hotel.averageRating != null ? #numbers.formatDecimal(hotel.averageRating, 1, 1) : 'New'}">4.5</span>
+                                    <span class="text-muted"
+                                        th:text="${'(' + (reviewCount != null ? reviewCount : 0) + ' reviews)'}">
                                         (120 reviews)
                                     </span>
+                                </div>
+
+                                <!-- Favorite Button -->
+                                <div sec:authorize="isAuthenticated()">
+                                    <form th:if="${isFavorite == null || isFavorite == false}"
+                                        th:action="@{/favorites/add/{id}(id=${hotel.id})}" method="post"
+                                        class="d-inline">
+                                        <input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="far fa-heart"></i> Add to Favorites
+                                        </button>
+                                    </form>
+                                    <form th:if="${isFavorite != null && isFavorite == true}"
+                                        th:action="@{/favorites/remove/{id}(id=${hotel.id})}" method="post"
+                                        class="d-inline">
+                                        <input type="hidden" name="redirectUrl" th:value="${currentUrl}">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-heart"></i> Remove from Favorites
+                                        </button>
+                                    </form>
+                                </div>
+                                <a sec:authorize="!isAuthenticated()" href="/login"
+                                    class="btn btn-sm btn-outline-danger">
+                                    <i class="far fa-heart"></i> Add to Favorites
+                                </a>
                             </div>
 
-                            <!-- Favorite Button -->
-                            <div sec:authorize="isAuthenticated()">
-                                <form th:if="${isFavorite == null || isFavorite == false}"
-                                      th:action="@{/favorites/add/{id}(id=${hotel.id})}" method="post" class="d-inline">
-                                    <input type="hidden" name="redirectUrl" th:value="${currentUrl}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="far fa-heart"></i> Add to Favorites
-                                    </button>
-                                </form>
-                                <form th:if="${isFavorite != null && isFavorite == true}"
-                                      th:action="@{/favorites/remove/{id}(id=${hotel.id})}" method="post" class="d-inline">
-                                    <input type="hidden" name="redirectUrl" th:value="${currentUrl}">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="fas fa-heart"></i> Remove from Favorites
-                                    </button>
-                                </form>
-                            </div>
-                            <a sec:authorize="!isAuthenticated()" href="/login" class="btn btn-sm btn-outline-danger">
-                                <i class="far fa-heart"></i> Add to Favorites
-                            </a>
-                        </div>
-
-                        <!-- Amenities -->
-                        <div th:if="${hotel.amenities != null && !hotel.amenities.empty}">
-                            <span class="badge bg-light text-dark me-1 mb-1"
-                                  th:each="amenity : ${hotel.amenities}"
-                                  th:if="${amenity != null && amenity.name != null}"
-                                  th:text="${amenity.name}">
-                                Amenity
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                        <div class="d-flex flex-column align-items-lg-end">
-                            <!-- Simplified price display to avoid complex stream operations -->
-                            <div class="mb-2" th:if="${hotel.minPrice != null}">
-                                <span class="fs-4 fw-bold text-primary" th:text="${'From $' + hotel.minPrice}">
-                                    From $120
+                            <!-- Amenities -->
+                            <div th:if="${hotel.amenities != null && !hotel.amenities.empty}">
+                                <span class="badge bg-light text-dark me-1 mb-1" th:each="amenity : ${hotel.amenities}"
+                                    th:if="${amenity != null && amenity.name != null}" th:text="${amenity.name}">
+                                    Amenity
                                 </span>
-                                <small class="text-muted">/night</small>
                             </div>
-                            <a href="#rooms" class="btn btn-primary">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                Check Availability
-                            </a>
+                        </div>
+                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                            <div class="d-flex flex-column align-items-lg-end">
+                                <!-- Simplified price display to avoid complex stream operations -->
+                                <div class="mb-2" th:if="${hotel.minPrice != null}">
+                                    <span class="fs-4 fw-bold text-primary" th:text="${'From $' + hotel.minPrice}">
+                                        From $120
+                                    </span>
+                                    <small class="text-muted">/night</small>
+                                </div>
+                                <a href="#rooms" class="btn btn-primary">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    Check Availability
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- FIXED Side-by-Side Hotel Images Gallery Section -->
-        <section class="mb-5">
-            <div class="container">
+            <!-- FIXED Side-by-Side Hotel Images Gallery Section -->
+            <section class="mb-5">
+                <div class="container">
 
-                <div class="row g-3">
-                    <!-- LEFT SIDE - First Image -->
-                    <div class="col-md-6">
-                        <div th:if="${hotelImages != null && !hotelImages.empty}">
-                            <!-- Show first image -->
-                            <img th:src="@{${hotelImages[0].url}}"
-                                 class="img-fluid rounded"
-                                 alt="Hotel Main Image"
-                                 style="height: 400px; width: 100%; object-fit: cover; cursor: pointer;"
-                                 data-bs-toggle="modal"
-                                 data-bs-target="#galleryModal"
-                                 data-bs-slide-to="0"
-                                 onerror="this.src='/images/hotel-placeholder.jpg';">
+                    <div class="row g-3">
+                        <!-- LEFT SIDE - First Image -->
+                        <div class="col-md-6">
+                            <div th:if="${hotelImages != null && !hotelImages.empty}">
+                                <!-- Show first image -->
+                                <img th:src="@{${hotelImages[0].url}}" class="img-fluid rounded"
+                                    th:alt="${hotel.name + ' - Main'}"
+                                    style="height: 400px; width: 100%; object-fit: cover; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#galleryModal" data-bs-slide-to="0"
+                                    onerror="this.src='/images/hotel-placeholder.jpg';">
+                            </div>
+                            <div th:if="${hotelImages == null || hotelImages.empty}">
+                                <!-- Placeholder for first image -->
+                                <img src="/images/hotel-placeholder.jpg" class="img-fluid rounded"
+                                    alt="Hotel Placeholder 1" style="height: 400px; width: 100%; object-fit: cover;">
+                            </div>
                         </div>
-                        <div th:if="${hotelImages == null || hotelImages.empty}">
-                            <!-- Placeholder for first image -->
-                            <img src="/images/hotel-placeholder.jpg"
-                                 class="img-fluid rounded"
-                                 alt="Hotel Placeholder 1"
-                                 style="height: 400px; width: 100%; object-fit: cover;">
+
+                        <!-- RIGHT SIDE - Second Image -->
+                        <div class="col-md-6">
+                            <div th:if="${hotelImages != null && hotelImages.size() > 1}">
+                                <!-- Show second image -->
+                                <img th:src="@{${hotelImages[1].url}}" class="img-fluid rounded"
+                                    th:alt="${hotel.name + ' - Second'}"
+                                    style="height: 400px; width: 100%; object-fit: cover; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#galleryModal" data-bs-slide-to="1"
+                                    onerror="this.src='/images/hotel-placeholder.jpg';">
+                            </div>
+                            <div th:if="${hotelImages == null || hotelImages.empty || hotelImages.size() <= 1}">
+                                <!-- Placeholder for second image -->
+                                <img src="/images/hotel-placeholder.jpg" class="img-fluid rounded"
+                                    alt="Hotel Placeholder 2" style="height: 400px; width: 100%; object-fit: cover;">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- RIGHT SIDE - Second Image -->
-                    <div class="col-md-6">
-                        <div th:if="${hotelImages != null && hotelImages.size() > 1}">
-                            <!-- Show second image -->
-                            <img th:src="@{${hotelImages[1].url}}"
-                                 class="img-fluid rounded"
-                                 alt="Hotel Second Image"
-                                 style="height: 400px; width: 100%; object-fit: cover; cursor: pointer;"
-                                 data-bs-toggle="modal"
-                                 data-bs-target="#galleryModal"
-                                 data-bs-slide-to="1"
-                                 onerror="this.src='/images/hotel-placeholder.jpg';">
-                        </div>
-                        <div th:if="${hotelImages == null || hotelImages.empty || hotelImages.size() <= 1}">
-                            <!-- Placeholder for second image -->
-                            <img src="/images/hotel-placeholder.jpg"
-                                 class="img-fluid rounded"
-                                 alt="Hotel Placeholder 2"
-                                 style="height: 400px; width: 100%; object-fit: cover;">
-                        </div>
+                    <!-- View all photos button -->
+                    <div class="text-center mt-3" th:if="${hotelImages != null && !hotelImages.empty}">
+                        <button type="button" class="btn btn-link" data-bs-toggle="modal"
+                            data-bs-target="#galleryModal">
+                            <span th:text="${'View all ' + hotelImages.size() + ' photos'}">View all photos</span>
+                        </button>
                     </div>
                 </div>
+            </section>
 
-                <!-- View all photos button -->
-                <div class="text-center mt-3" th:if="${hotelImages != null && !hotelImages.empty}">
-                    <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#galleryModal">
-                        <span th:text="${'View all ' + hotelImages.size() + ' photos'}">View all photos</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Gallery Modal (unchanged) -->
-        <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="galleryModalLabel" th:text="${hotel.name + ' - Photo Gallery'}">Hotel Name - Photo Gallery</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div th:if="${hotelImages != null && !hotelImages.empty}">
-                            <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <!-- Carousel Indicators -->
-                                <div class="carousel-indicators" th:if="${hotelImages.size() > 1}">
-                                    <button th:each="image, iterStat : ${hotelImages}"
-                                            type="button"
+            <!-- Gallery Modal (unchanged) -->
+            <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="galleryModalLabel" th:text="${hotel.name + ' - Photo Gallery'}">
+                                Hotel Name - Photo Gallery</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div th:if="${hotelImages != null && !hotelImages.empty}">
+                                <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
+                                    <!-- Carousel Indicators -->
+                                    <div class="carousel-indicators" th:if="${hotelImages.size() > 1}">
+                                        <button th:each="image, iterStat : ${hotelImages}" type="button"
                                             data-bs-target="#galleryCarousel"
                                             th:attr="data-bs-slide-to=${iterStat.index}"
                                             th:classappend="${iterStat.index == 0 ? 'active' : ''}"
                                             th:aria-label="${'Slide ' + (iterStat.index + 1)}"></button>
-                                </div>
-
-                                <!-- Carousel Items -->
-                                <div class="carousel-inner">
-                                    <div th:each="image, iterStat : ${hotelImages}"
-                                         class="carousel-item"
-                                         th:classappend="${iterStat.index == 0 ? 'active' : ''}">
-                                        <img th:src="@{${image.url}}"
-                                             class="d-block w-100"
-                                             th:alt="${hotel.name + ' Image ' + (iterStat.index + 1)}"
-                                             style="height: 600px; object-fit: contain;"
-                                             onerror="this.src='/images/hotel-placeholder.jpg';">
                                     </div>
-                                </div>
 
-                                <!-- Carousel Controls -->
-                                <button th:if="${hotelImages.size() > 1}" class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button th:if="${hotelImages.size() > 1}" class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
+                                    <!-- Carousel Items -->
+                                    <div class="carousel-inner">
+                                        <div th:each="image, iterStat : ${hotelImages}" class="carousel-item"
+                                            th:classappend="${iterStat.index == 0 ? 'active' : ''}">
+                                            <img th:src="@{${image.url}}" class="d-block w-100"
+                                                th:alt="${hotel.name + ' - Photo ' + (iterStat.index + 1)}"
+                                                style="height: 600px; object-fit: contain;"
+                                                onerror="this.src='/images/hotel-placeholder.jpg';">
+                                        </div>
+                                    </div>
+
+                                    <!-- Carousel Controls -->
+                                    <button th:if="${hotelImages.size() > 1}" class="carousel-control-prev"
+                                        type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button th:if="${hotelImages.size() > 1}" class="carousel-control-next"
+                                        type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div th:if="${hotelImages == null || hotelImages.empty}">
-                            <img src="/images/hotel-placeholder.jpg" class="d-block w-100" alt="No images available"
-                                 style="height: 600px; object-fit: contain;">
+                            <div th:if="${hotelImages == null || hotelImages.empty}">
+                                <img src="/images/hotel-placeholder.jpg" class="d-block w-100" alt="No images available"
+                                    style="height: 600px; object-fit: contain;">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- EVEN SIMPLER VERSION (Use this if you want a more basic approach) -->
-        <!--
+            <!-- EVEN SIMPLER VERSION (Use this if you want a more basic approach) -->
+            <!--
         <section class="mb-5">
             <div class="container">
                 <div class="row g-3">
@@ -249,451 +248,492 @@
             </div>
         </section>
         -->
-        <!-- Hotel Description and Details -->
-        <section class="mb-5">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-white">
-                                <h3 class="mb-0">About This Hotel</h3>
+            <!-- Hotel Description and Details -->
+            <section class="mb-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-white">
+                                    <h3 class="mb-0">About This Hotel</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"
+                                        th:text="${hotel.description != null ? hotel.description : 'No description available.'}">
+                                        Hotel description...
+                                    </p>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <p class="card-text" th:text="${hotel.description != null ? hotel.description : 'No description available.'}">
-                                    Hotel description...
-                                </p>
-                            </div>
-                        </div>
 
-                        <!-- Amenities Section -->
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-white">
-                                <h3 class="mb-0">Amenities</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- Simplified amenities display -->
-                                    <div th:if="${hotel.amenities != null && !hotel.amenities.empty}">
-                                        <div class="row">
-                                            <div class="col-md-6" th:each="amenity, iterStat : ${hotel.amenities}"
-                                                 th:if="${amenity != null && amenity.name != null}">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                                    <span th:text="${amenity.name}">Amenity Name</span>
+                            <!-- Amenities Section -->
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-white">
+                                    <h3 class="mb-0">Amenities</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <!-- Simplified amenities display -->
+                                        <div th:if="${hotel.amenities != null && !hotel.amenities.empty}">
+                                            <div class="row">
+                                                <div class="col-md-6" th:each="amenity, iterStat : ${hotel.amenities}"
+                                                    th:if="${amenity != null && amenity.name != null}">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                                        <span th:text="${amenity.name}">Amenity Name</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-12" th:if="${hotel.amenities == null || hotel.amenities.empty}">
-                                        <p class="text-muted">No amenities listed for this hotel.</p>
+                                        <div class="col-12" th:if="${hotel.amenities == null || hotel.amenities.empty}">
+                                            <p class="text-muted">No amenities listed for this hotel.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Reviews Section -->
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <h3 class="mb-0">Guest Reviews</h3>
-                                <div>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <span class="fw-bold" th:text="${hotel.averageRating != null ? #numbers.formatDecimal(hotel.averageRating, 1, 1) : 'New'}">4.5</span>
-                                    <span class="text-muted" th:text="${'(' + (reviewCount != null ? reviewCount : 0) + ' reviews)'}">
+                            <!-- Reviews Section -->
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <h3 class="mb-0">Guest Reviews</h3>
+                                    <div>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <span class="fw-bold"
+                                            th:text="${hotel.averageRating != null ? #numbers.formatDecimal(hotel.averageRating, 1, 1) : 'New'}">4.5</span>
+                                        <span class="text-muted"
+                                            th:text="${'(' + (reviewCount != null ? reviewCount : 0) + ' reviews)'}">
                                             (120 reviews)
                                         </span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <!-- No Reviews Message -->
-                                <div class="alert alert-info" th:if="${reviews == null || reviews.empty}">
-                                    <p class="mb-0">No reviews yet. Be the first to review this hotel!</p>
-                                </div>
-
-                                <!-- Review Items -->
-                                <div class="mb-4 pb-4 border-bottom" th:each="review : ${reviews}" th:if="${review != null}">
-                                    <div class="d-flex mb-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                                <!-- Fixed userName access -->
-                                                <span th:if="${review.user != null && review.user.firstName != null}"
-                                                      th:text="${#strings.substring(review.user.firstName, 0, 1).toUpperCase()}">J</span>
-                                                <span th:unless="${review.user != null && review.user.firstName != null}">G</span>
-                                            </div>
-                                        </div>
-                                        <div class="ms-3">
-                                            <!-- Fixed userName display -->
-                                            <h5 class="mb-1" th:if="${review.user != null}"
-                                                th:text="${(review.user.firstName != null ? review.user.firstName : '') + ' ' +
-                                                          (review.user.lastName != null ? review.user.lastName : '')}">John Doe</h5>
-                                            <h5 class="mb-1" th:unless="${review.user != null}">Guest</h5>
-
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="me-2">
-                                                    <i class="fas fa-star text-warning" th:each="i : ${#numbers.sequence(1, review.rating != null ? review.rating : 0)}"></i>
-                                                    <i class="far fa-star text-warning" th:each="i : ${#numbers.sequence(review.rating != null ? review.rating + 1 : 1, 5)}"></i>
-                                                </div>
-                                                <span class="text-muted" th:text="${review.createdAt != null ? #temporals.format(review.createdAt, 'MMM d, yyyy') : 'Unknown date'}">May 15, 2025</span>
-                                            </div>
-                                            <p class="mb-0" th:text="${review.comment != null ? review.comment : 'No comment provided.'}">Review comment...</p>
-                                        </div>
                                     </div>
                                 </div>
+                                <div class="card-body">
+                                    <!-- No Reviews Message -->
+                                    <div class="alert alert-info" th:if="${reviews == null || reviews.empty}">
+                                        <p class="mb-0">No reviews yet. Be the first to review this hotel!</p>
+                                    </div>
 
-                                <!-- Pagination for Reviews -->
-                                <nav aria-label="Review pagination" th:if="${reviewTotalPages != null && reviewTotalPages > 1}">
-                                    <ul class="pagination justify-content-center">
-                                        <li class="page-item" th:classappend="${reviewCurrentPage == 0 ? 'disabled' : ''}">
-                                            <a class="page-link" th:href="@{'/hotels/' + ${hotel.id}(reviewPage=${reviewCurrentPage - 1}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}" aria-label="Previous">
-                                                <span aria-hidden="true">&laquo;</span>
-                                            </a>
-                                        </li>
-                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, reviewTotalPages - 1)}" th:classappend="${reviewCurrentPage == i ? 'active' : ''}">
-                                            <a class="page-link" th:href="@{'/hotels/' + ${hotel.id}(reviewPage=${i}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}" th:text="${i + 1}">1</a>
-                                        </li>
-                                        <li class="page-item" th:classappend="${reviewCurrentPage == reviewTotalPages - 1 ? 'disabled' : ''}">
-                                            <a class="page-link" th:href="@{'/hotels/' + ${hotel.id}(reviewPage=${reviewCurrentPage + 1}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}" aria-label="Next">
-                                                <span aria-hidden="true">&raquo;</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                                    <!-- Review Items -->
+                                    <div class="mb-4 pb-4 border-bottom" th:each="review : ${reviews}"
+                                        th:if="${review != null}">
+                                        <div class="d-flex mb-3">
+                                            <div class="flex-shrink-0">
+                                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                                    style="width: 50px; height: 50px;">
+                                                    <!-- Fixed userName access -->
+                                                    <span
+                                                        th:if="${review.user != null && review.user.firstName != null}"
+                                                        th:text="${#strings.substring(review.user.firstName, 0, 1).toUpperCase()}">J</span>
+                                                    <span
+                                                        th:unless="${review.user != null && review.user.firstName != null}">G</span>
+                                                </div>
+                                            </div>
+                                            <div class="ms-3">
+                                                <!-- Fixed userName display -->
+                                                <h5 class="mb-1" th:if="${review.user != null}" th:text="${(review.user.firstName != null ? review.user.firstName : '') + ' ' +
+                                                          (review.user.lastName != null ? review.user.lastName : '')}">
+                                                    John Doe</h5>
+                                                <h5 class="mb-1" th:unless="${review.user != null}">Guest</h5>
+
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div class="me-2">
+                                                        <i class="fas fa-star text-warning"
+                                                            th:each="i : ${#numbers.sequence(1, review.rating != null ? review.rating : 0)}"></i>
+                                                        <i class="far fa-star text-warning"
+                                                            th:each="i : ${#numbers.sequence(review.rating != null ? review.rating + 1 : 1, 5)}"></i>
+                                                    </div>
+                                                    <span class="text-muted"
+                                                        th:text="${review.createdAt != null ? #temporals.format(review.createdAt, 'MMM d, yyyy') : 'Unknown date'}">May
+                                                        15, 2025</span>
+                                                </div>
+                                                <p class="mb-0"
+                                                    th:text="${review.comment != null ? review.comment : 'No comment provided.'}">
+                                                    Review comment...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pagination for Reviews -->
+                                    <nav aria-label="Review pagination"
+                                        th:if="${reviewTotalPages != null && reviewTotalPages > 1}">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item"
+                                                th:classappend="${reviewCurrentPage == 0 ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    th:href="@{'/hotels/' + ${hotel.id}(reviewPage=${reviewCurrentPage - 1}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}"
+                                                    aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item"
+                                                th:each="i : ${#numbers.sequence(0, reviewTotalPages - 1)}"
+                                                th:classappend="${reviewCurrentPage == i ? 'active' : ''}">
+                                                <a class="page-link"
+                                                    th:href="@{'/hotels/' + ${hotel.id}(reviewPage=${i}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}"
+                                                    th:text="${i + 1}">1</a>
+                                            </li>
+                                            <li class="page-item"
+                                                th:classappend="${reviewCurrentPage == reviewTotalPages - 1 ? 'disabled' : ''}">
+                                                <a class="page-link"
+                                                    th:href="@{'/hotels/' + ${hotel.id}(reviewPage=${reviewCurrentPage + 1}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}"
+                                                    aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Map and Location Info -->
-                    <div class="col-lg-4">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-white">
-                                <h3 class="mb-0">Location</h3>
-                            </div>
-                            <div class="card-body p-0">
-                                <div id="map" style="height: 300px;"></div>
-                                <div class="p-3">
-                                    <p class="mb-2">
-                                        <i class="fas fa-map-marker-alt me-2"></i>
-                                        <span th:text="${(hotel.address != null ? hotel.address : '') +
+                        <!-- Map and Location Info -->
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-white">
+                                    <h3 class="mb-0">Location</h3>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="map" style="height: 300px;"></div>
+                                    <div class="p-3">
+                                        <p class="mb-2">
+                                            <i class="fas fa-map-marker-alt me-2"></i>
+                                            <span th:text="${(hotel.address != null ? hotel.address : '') +
                                                         (hotel.city != null ? ', ' + hotel.city : '') +
                                                         (hotel.country != null ? ', ' + hotel.country : '')}">
                                                 123 Main St, City, Country
                                             </span>
-                                    </p>
-                                    <p class="mb-0">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        <span>Great location - show map</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- AI Recommendations -->
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-white">
-                                <h3 class="mb-0">Why You'll Love It</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex align-items-start mb-3">
-                                    <i class="fas fa-robot text-primary me-2 mt-1"></i>
-                                    <div>
-                                        <h5 class="mb-1">AI Recommendation</h5>
-                                        <p class="mb-0" th:text="${aiRecommendation != null ? aiRecommendation : 'Based on your preferences, this hotel is a great match for your stay!'}">
-                                            AI recommendation text...
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <span>Great location - show map</span>
                                         </p>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-start mb-3">
-                                    <i class="fas fa-map-marker-alt text-primary me-2 mt-1"></i>
-                                    <div>
-                                        <h5 class="mb-1">Perfect Location</h5>
-                                        <p class="mb-0">Located in the heart of the city, close to major attractions.</p>
-                                    </div>
+                            </div>
+
+                            <!-- AI Recommendations -->
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-white">
+                                    <h3 class="mb-0">Why You'll Love It</h3>
                                 </div>
-                                <div class="d-flex align-items-start">
-                                    <i class="fas fa-thumbs-up text-primary me-2 mt-1"></i>
-                                    <div>
-                                        <h5 class="mb-1">Top Rated</h5>
-                                        <p class="mb-0">Highly rated by previous guests for cleanliness and service.</p>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <i class="fas fa-robot text-primary me-2 mt-1"></i>
+                                        <div>
+                                            <h5 class="mb-1">AI Recommendation</h5>
+                                            <p class="mb-0"
+                                                th:text="${aiRecommendation != null ? aiRecommendation : 'Based on your preferences, this hotel is a great match for your stay!'}">
+                                                AI recommendation text...
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start mb-3">
+                                        <i class="fas fa-map-marker-alt text-primary me-2 mt-1"></i>
+                                        <div>
+                                            <h5 class="mb-1">Perfect Location</h5>
+                                            <p class="mb-0">Located in the heart of the city, close to major
+                                                attractions.</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-thumbs-up text-primary me-2 mt-1"></i>
+                                        <div>
+                                            <h5 class="mb-1">Top Rated</h5>
+                                            <p class="mb-0">Highly rated by previous guests for cleanliness and service.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Available Rooms Section -->
-        <section id="rooms" class="mb-5">
-            <div class="container">
-                <h2 class="mb-4">Available Rooms</h2>
+            <!-- Available Rooms Section -->
+            <section id="rooms" class="mb-5">
+                <div class="container">
+                    <h2 class="mb-4">Available Rooms</h2>
 
-                <!-- Date Selection Form -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <form th:action="@{'/hotels/' + ${hotel.id}}" method="get" class="row g-3 align-items-end">
-                            <div class="col-md-4">
-                                <label for="checkInDate" class="form-label">Check-in Date</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                    <input type="date" class="form-control" id="checkInDate" name="checkIn"
-                                           th:value="${checkIn}" th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="checkOutDate" class="form-label">Check-out Date</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                    <input type="date" class="form-control" id="checkOutDate" name="checkOut"
-                                           th:value="${checkOut}" th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <label for="guests" class="form-label">Guests</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <select class="form-select" id="guests" name="guests">
-                                        <option value="1" th:selected="${guests == 1}">1 Guest</option>
-                                        <option value="2" th:selected="${guests == 2}">2 Guests</option>
-                                        <option value="3" th:selected="${guests == 3}">3 Guests</option>
-                                        <option value="4" th:selected="${guests == 4}">4 Guests</option>
-                                        <option value="5" th:selected="${guests == 5}">5+ Guests</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-search me-1"></i>
-                                    Check Availability
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- No Rooms Available Message -->
-                <div class="alert alert-info" th:if="${availableRooms == null || availableRooms.empty}">
-                    <p class="mb-0">No rooms available for the selected dates. Please try different dates or contact the hotel directly.</p>
-                </div>
-
-                <!-- Room Cards -->
-                <div class="card shadow-sm mb-4" th:each="room : ${availableRooms}" th:if="${room != null}">
-                    <div class="row g-0">
-                        <!-- Replace this section -->
-                        <div class="col-md-4 position-relative">
-                            <div th:if="${room.images != null && !room.images.empty}">
-                                <!-- Find primary image or use first image -->
-                                <div th:with="primaryImage=${#lists.isEmpty(room.images) ? null : room.images[0]}">
-                                    <!-- Check for primary image in the list -->
-                                    <div th:each="img : ${room.images}" th:if="${img.isPrimary != null && img.isPrimary}" th:with="primaryImage=${img}">
-                                    </div>
-
-                                    <img th:src="@{${primaryImage.url}}"
-                                         class="img-fluid rounded-start h-100"
-                                         th:alt="${room.name + ' Image'}"
-                                         style="object-fit: cover; cursor: pointer; position: relative;"
-                                         data-bs-toggle="modal"
-                                         data-bs-target="#roomGalleryModal"
-                                         th:data-room-id="${room.id}"
-                                         onerror="this.src='/images/room-placeholder.jpg';">
-
-                                    <!-- Image count badge -->
-                                    <div class="position-absolute bottom-0 start-0 m-2" style="z-index: 10;">
-                                        <span class="badge bg-dark bg-opacity-75 text-white" th:text="${#lists.size(room.images) + ' photos'}">3 photos</span>
+                    <!-- Date Selection Form -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <form th:action="@{'/hotels/' + ${hotel.id}}" method="get" class="row g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label for="checkInDate" class="form-label">Check-in Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        <input type="date" class="form-control" id="checkInDate" name="checkIn"
+                                            th:value="${checkIn}"
+                                            th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Fallback to placeholder if no images -->
-                            <div th:if="${room.images == null || room.images.empty}">
-                                <img src="/images/room-placeholder.jpg"
-                                     class="img-fluid rounded-start h-100"
-                                     th:alt="${room.name + ' Image'}"
-                                     style="object-fit: cover;">
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="checkOutDate" class="form-label">Check-out Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        <input type="date" class="form-control" id="checkOutDate" name="checkOut"
+                                            th:value="${checkOut}"
+                                            th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="guests" class="form-label">Guests</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <select class="form-select" id="guests" name="guests">
+                                            <option value="1" th:selected="${guests == 1}">1 Guest</option>
+                                            <option value="2" th:selected="${guests == 2}">2 Guests</option>
+                                            <option value="3" th:selected="${guests == 3}">3 Guests</option>
+                                            <option value="4" th:selected="${guests == 4}">4 Guests</option>
+                                            <option value="5" th:selected="${guests == 5}">5+ Guests</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-1"></i>
+                                        Check Availability
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="col-md-8">
-                            <div class="card-body d-flex flex-column h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h4 class="card-title" th:text="${room.name}">Room Name</h4>
-                                    <!-- Fixed availableCount check -->
-                                    <span class="badge bg-success" th:if="${room.availableCount != null && room.availableCount > 5}">Available</span>
-                                    <span class="badge bg-warning text-dark" th:if="${room.availableCount != null && room.availableCount <= 5 && room.availableCount > 0}">
+                    </div>
+
+                    <!-- No Rooms Available Message -->
+                    <div class="alert alert-info" th:if="${availableRooms == null || availableRooms.empty}">
+                        <p class="mb-0">No rooms available for the selected dates. Please try different dates or contact
+                            the hotel directly.</p>
+                    </div>
+
+                    <!-- Room Cards -->
+                    <div class="card shadow-sm mb-4" th:each="room : ${availableRooms}" th:if="${room != null}">
+                        <div class="row g-0">
+                            <!-- Replace this section -->
+                            <div class="col-md-4 position-relative">
+                                <div th:if="${room.images != null && !room.images.empty}">
+                                    <!-- Find primary image or use first image -->
+                                    <div th:with="primaryImage=${#lists.isEmpty(room.images) ? null : room.images[0]}">
+                                        <!-- Check for primary image in the list -->
+                                        <div th:each="img : ${room.images}"
+                                            th:if="${img.isPrimary != null && img.isPrimary}"
+                                            th:with="primaryImage=${img}">
+                                        </div>
+
+                                        <img th:src="@{${primaryImage.url}}" class="img-fluid rounded-start h-100"
+                                            th:alt="${room.name}"
+                                            style="object-fit: cover; cursor: pointer; position: relative;"
+                                            data-bs-toggle="modal" data-bs-target="#roomGalleryModal"
+                                            th:data-room-id="${room.id}"
+                                            onerror="this.src='/images/room-placeholder.jpg';">
+
+                                        <!-- Image count badge -->
+                                        <div class="position-absolute bottom-0 start-0 m-2" style="z-index: 10;">
+                                            <span class="badge bg-dark bg-opacity-75 text-white"
+                                                th:text="${#lists.size(room.images) + ' photos'}">3 photos</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Fallback to placeholder if no images -->
+                                <div th:if="${room.images == null || room.images.empty}">
+                                    <img src="/images/room-placeholder.jpg" class="img-fluid rounded-start h-100"
+                                        th:alt="${room.name}" style="object-fit: cover;">
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body d-flex flex-column h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h4 class="card-title" th:text="${room.name}">Room Name</h4>
+                                        <!-- Fixed availableCount check -->
+                                        <span class="badge bg-success"
+                                            th:if="${room.availableCount != null && room.availableCount > 5}">Available</span>
+                                        <span class="badge bg-warning text-dark"
+                                            th:if="${room.availableCount != null && room.availableCount <= 5 && room.availableCount > 0}">
                                             Only <span th:text="${room.availableCount}">3</span> left!
                                         </span>
-                                    <span class="badge bg-success" th:if="${room.availableCount == null}">Available</span>
-                                </div>
-
-                                <p class="card-text" th:text="${room.description != null ? room.description : 'No description available.'}">Room description...</p>
-
-                                <div class="mb-3">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="fas fa-user-friends me-2"></i>
-                                        <span th:text="${room.capacity != null ? room.capacity + ' Guests' : 'Capacity not specified'}">2 Guests</span>
+                                        <span class="badge bg-success"
+                                            th:if="${room.availableCount == null}">Available</span>
                                     </div>
-                                    <!-- Simplified amenities display -->
-                                    <div class="d-flex flex-wrap">
-                                        <span class="badge bg-light text-dark me-1 mb-1">WiFi</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">TV</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">Air Conditioning</span>
-                                    </div>
-                                </div>
 
-                                <div class="mt-auto d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="fs-4 fw-bold text-primary" th:text="${'$' + (room.pricePerNight != null ? room.pricePerNight : '0')}">$120</span>
-                                        <small class="text-muted">/night</small>
+                                    <p class="card-text"
+                                        th:text="${room.description != null ? room.description : 'No description available.'}">
+                                        Room description...</p>
+
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-user-friends me-2"></i>
+                                            <span
+                                                th:text="${room.capacity != null ? room.capacity + ' Guests' : 'Capacity not specified'}">2
+                                                Guests</span>
+                                        </div>
+                                        <!-- Simplified amenities display -->
+                                        <div class="d-flex flex-wrap">
+                                            <span class="badge bg-light text-dark me-1 mb-1">WiFi</span>
+                                            <span class="badge bg-light text-dark me-1 mb-1">TV</span>
+                                            <span class="badge bg-light text-dark me-1 mb-1">Air Conditioning</span>
+                                        </div>
                                     </div>
-                                    <a th:href="@{'/booking/new?roomId=' + ${room.id} + '&checkIn=' + ${checkIn} + '&checkOut=' + ${checkOut} + '&guests=' + ${guests}}"
-                                       class="btn btn-primary">
-                                        Book Now
-                                    </a>
+
+                                    <div class="mt-auto d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="fs-4 fw-bold text-primary"
+                                                th:text="${'$' + (room.pricePerNight != null ? room.pricePerNight : '0')}">$120</span>
+                                            <small class="text-muted">/night</small>
+                                        </div>
+                                        <a th:href="@{'/booking/new?roomId=' + ${room.id} + '&checkIn=' + ${checkIn} + '&checkOut=' + ${checkOut} + '&guests=' + ${guests}}"
+                                            class="btn btn-primary">
+                                            Book Now
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </div>
+            </section>
+        </div>
 
-    <!-- Room Gallery Modal -->
-    <div class="modal fade" id="roomGalleryModal" tabindex="-1" aria-labelledby="roomGalleryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="roomGalleryModalLabel">Room Gallery</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="roomGalleryCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner" id="roomCarouselInner">
-                            <!-- Room images will be loaded here via JavaScript -->
+        <!-- Room Gallery Modal -->
+        <div class="modal fade" id="roomGalleryModal" tabindex="-1" aria-labelledby="roomGalleryModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="roomGalleryModalLabel">Room Gallery</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="roomGalleryCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner" id="roomCarouselInner">
+                                <!-- Room images will be loaded here via JavaScript -->
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#roomGalleryCarousel"
+                                data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#roomGalleryCarousel"
+                                data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#roomGalleryCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#roomGalleryCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Page-specific JavaScript -->
-<th:block layout:fragment="jsResources">
-    <script th:inline="javascript">
-        // Fallback function for map if Google Maps API is not available
-        function initMap() {
-            try {
-                const hotel = /*[[${hotel}]]*/ {};
-                const lat = parseFloat(hotel.latitude) || 0;
-                const lng = parseFloat(hotel.longitude) || 0;
+    <!-- Page-specific JavaScript -->
+    <th:block layout:fragment="jsResources">
+        <script th:inline="javascript">
+            // Fallback function for map if Google Maps API is not available
+            function initMap() {
+                try {
+                    const hotel = /*[[${hotel}]]*/ {};
+                    const lat = parseFloat(hotel.latitude) || 0;
+                    const lng = parseFloat(hotel.longitude) || 0;
 
-                const mapOptions = {
-                    center: { lat, lng },
-                    zoom: 15,
-                    mapTypeControl: false
-                };
+                    const mapOptions = {
+                        center: { lat, lng },
+                        zoom: 15,
+                        mapTypeControl: false
+                    };
 
-                const map = new google.maps.Map(document.getElementById('map'), mapOptions);
+                    const map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-                const marker = new google.maps.Marker({
-                    position: { lat, lng },
-                    map: map,
-                    title: hotel.name
-                });
-            } catch (error) {
-                console.error('Error initializing map:', error);
-                document.getElementById('map').innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light"><p class="text-muted">Map loading failed. Please try again later.</p></div>';
+                    const marker = new google.maps.Marker({
+                        position: { lat, lng },
+                        map: map,
+                        title: hotel.name
+                    });
+                } catch (error) {
+                    console.error('Error initializing map:', error);
+                    document.getElementById('map').innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light"><p class="text-muted">Map loading failed. Please try again later.</p></div>';
+                }
             }
-        }
 
-        // Date validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkInDate = document.getElementById('checkInDate');
-            const checkOutDate = document.getElementById('checkOutDate');
+            // Date validation
+            document.addEventListener('DOMContentLoaded', function () {
+                const checkInDate = document.getElementById('checkInDate');
+                const checkOutDate = document.getElementById('checkOutDate');
 
-            if (checkInDate && checkOutDate) {
-                // Set minimum dates
-                const today = new Date();
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
+                if (checkInDate && checkOutDate) {
+                    // Set minimum dates
+                    const today = new Date();
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
 
-                checkInDate.min = today.toISOString().split('T')[0];
-                checkOutDate.min = tomorrow.toISOString().split('T')[0];
+                    checkInDate.min = today.toISOString().split('T')[0];
+                    checkOutDate.min = tomorrow.toISOString().split('T')[0];
 
-                checkInDate.addEventListener('change', function() {
-                    // Set minimum check-out date to be the day after check-in
-                    const selectedDate = new Date(this.value);
-                    selectedDate.setDate(selectedDate.getDate() + 1);
-                    const nextDay = selectedDate.toISOString().split('T')[0];
+                    checkInDate.addEventListener('change', function () {
+                        // Set minimum check-out date to be the day after check-in
+                        const selectedDate = new Date(this.value);
+                        selectedDate.setDate(selectedDate.getDate() + 1);
+                        const nextDay = selectedDate.toISOString().split('T')[0];
 
-                    checkOutDate.min = nextDay;
+                        checkOutDate.min = nextDay;
 
-                    // If check-out date is before the new minimum, update it
-                    if (checkOutDate.value && new Date(checkOutDate.value) < selectedDate) {
-                        checkOutDate.value = nextDay;
-                    }
-                });
-            }
-        });
+                        // If check-out date is before the new minimum, update it
+                        if (checkOutDate.value && new Date(checkOutDate.value) < selectedDate) {
+                            checkOutDate.value = nextDay;
+                        }
+                    });
+                }
+            });
 
-        // Favorite functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check favorite status via API
-            const hotelId = /*[[${hotel != null ? hotel.id : null}]]*/ null;
+            // Favorite functionality
+            document.addEventListener('DOMContentLoaded', function () {
+                // Check favorite status via API
+                const hotelId = /*[[${hotel != null ? hotel.id : null}]]*/ null;
 
-            if (hotelId) {
-                fetch(`/api/favorites/status/${hotelId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Favorite status:', data.isFavorite);
-                    })
-                    .catch(error => console.error('Error checking favorite status:', error));
-            }
-        });
+                if (hotelId) {
+                    fetch(`/api/favorites/status/${hotelId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Favorite status:', data.isFavorite);
+                        })
+                        .catch(error => console.error('Error checking favorite status:', error));
+                }
+            });
 
-        // Add this to the existing JavaScript section
-        // Room gallery functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const roomGalleryModal = document.getElementById('roomGalleryModal');
-            if (roomGalleryModal) {
-                roomGalleryModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    const roomId = button.getAttribute('data-room-id');
+            // Add this to the existing JavaScript section
+            // Room gallery functionality
+            document.addEventListener('DOMContentLoaded', function () {
+                const roomGalleryModal = document.getElementById('roomGalleryModal');
+                if (roomGalleryModal) {
+                    roomGalleryModal.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
+                        const roomId = button.getAttribute('data-room-id');
 
-                    // Find the room data from the page
-                    const rooms = /*[[${availableRooms}]]*/ [];
-                    const room = rooms.find(r => r.id == roomId);
+                        // Find the room data from the page
+                        const rooms = /*[[${availableRooms}]]*/[];
+                        const room = rooms.find(r => r.id == roomId);
 
-                    if (room && room.images && room.images.length > 0) {
-                        const carouselInner = document.getElementById('roomCarouselInner');
-                        carouselInner.innerHTML = '';
+                        if (room && room.images && room.images.length > 0) {
+                            const carouselInner = document.getElementById('roomCarouselInner');
+                            carouselInner.innerHTML = '';
 
-                        room.images.forEach((image, index) => {
-                            const carouselItem = document.createElement('div');
-                            carouselItem.className = 'carousel-item' + (index === 0 ? ' active' : '');
-                            carouselItem.innerHTML = `
+                            room.images.forEach((image, index) => {
+                                const carouselItem = document.createElement('div');
+                                carouselItem.className = 'carousel-item' + (index === 0 ? ' active' : '');
+                                carouselItem.innerHTML = `
                                 <img src="${image.url}"
                                      class="d-block w-100"
-                                     alt="${room.name} Image ${index + 1}"
+                                     alt="${room.name} - Photo ${index + 1}"
                                      style="height: 600px; object-fit: contain;"
                                      onerror="this.src='/images/room-placeholder.jpg';">
                             `;
-                            carouselInner.appendChild(carouselItem);
-                        });
+                                carouselInner.appendChild(carouselItem);
+                            });
 
-                        // Update modal title
-                        document.getElementById('roomGalleryModalLabel').textContent = room.name + ' - Photo Gallery';
-                    }
-                });
-            }
-        });
-    </script>
-</th:block>
+                            // Update modal title
+                            document.getElementById('roomGalleryModalLabel').textContent = room.name + ' - Photo Gallery';
+                        }
+                    });
+                }
+            });
+        </script>
+    </th:block>
 </body>
+
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -38,10 +38,10 @@
                         </li>
                         <!-- Admin Navigation - Only visible to admins -->
                         <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
-                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="nav-link dropdown-toggle btn btn-link text-decoration-none border-0"
+                                type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-cog me-1"></i>Admin
-                            </a>
+                            </button>
                             <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                                 <li><a class="dropdown-item" href="/admin/dashboard"><i
                                             class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>

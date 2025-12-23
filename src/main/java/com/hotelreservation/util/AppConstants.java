@@ -50,13 +50,43 @@ public class AppConstants {
         public static final String ROLE = "role";
         public static final String JWT_COOKIE_NAME = "jwt_token";
         public static final String ANONYMOUS_USER = "anonymousUser";
+
+        public static final String ERROR_MESSAGE = "errorMessage";
+        public static final String SUCCESS_MESSAGE = "successMessage";
+        public static final String ERROR = "error";
     }
 
-    public static class Messages {
+    public static class Views {
+        public static final String ADMIN_DASHBOARD = "admin/dashboard";
+        public static final String ADMIN_HOTELS = "admin/hotels";
+        public static final String ADMIN_ROOMS = "admin/rooms";
+        public static final String ADMIN_USERS = "admin/users";
+        public static final String ADMIN_BOOKINGS = "admin/bookings";
+        public static final String ADMIN_REVIEWS = "admin/reviews";
+        public static final String ADMIN_SYSTEM = "admin/system";
+
+        public static final String OWNER_DASHBOARD = "hotel-owner/dashboard";
+        public static final String OWNER_HOTELS = "hotel-owner/hotels";
+        public static final String OWNER_HOTEL_FORM = "hotel-owner/hotel-form";
+        public static final String OWNER_HOTEL_DETAIL = "hotel-owner/hotel-detail";
+        public static final String OWNER_HOTEL_EDIT = "hotel-owner/hotel-edit";
+        public static final String OWNER_ROOM_DETAIL = "hotel-owner/room-detail";
+
+        public static final String PROFILE = "profile/index";
+        public static final String AUTH_LOGIN = "auth/login";
+        public static final String AUTH_REGISTER = "auth/register";
+        public static final String ERROR_403 = "error/403";
+        public static final String ERROR_404 = "error/404";
+        public static final String ERROR_500 = "error/500";
+    }
+
+    public static class Errors {
         public static final String USER_NOT_FOUND = "User not found";
         public static final String UNAUTHORIZED = "Unauthorized access";
         public static final String HOTEL_NOT_FOUND = "Hotel not found";
         public static final String ROOM_NOT_FOUND = "Room not found";
         public static final String BOOKING_NOT_FOUND = "Booking not found";
+        public static final String REVIEW_NOT_FOUND = "Review not found";
+        public static final String GENERIC_ERROR = "An error occurred: ";
     }
 }

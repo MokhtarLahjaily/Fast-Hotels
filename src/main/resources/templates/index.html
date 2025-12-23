@@ -1,248 +1,269 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/base}">
+
 <head>
     <title>Welcome to PFA Hotels</title>
 </head>
-<body>
-<main layout:fragment="content">
-    <!-- Hero Section -->
-    <section class="hero-section position-relative">
-        <div class="hero-image-container">
-            <img src="/images/hero-image.jpg" class="hero-image w-100" alt="Luxury hotel view" style="height: 600px; object-fit: cover;">
-            <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.4;"></div>
-        </div>
-        <div class="container position-absolute top-50 start-50 translate-middle text-center text-white" style="z-index: 2;">
-            <h1 class="display-3 fw-bold mb-4 text-shadow">Find Your Perfect Stay</h1>
-            <p class="lead fs-4 mb-5 text-shadow">Discover amazing hotels at the best prices</p>
-            <a href="#search-form" class="btn btn-primary btn-lg px-5 py-3 rounded-pill animate-bounce">
-                <i class="fas fa-search me-2"></i>Search Now
-            </a>
-        </div>
-    </section>
 
-    <!-- Search Form -->
-    <section id="search-form" class="py-5 bg-light">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <div class="card shadow border-0 rounded-lg">
-                        <div class="card-body p-4 p-lg-5">
-                            <h2 class="card-title text-center mb-4">Search for Hotels</h2>
-                            <form th:action="@{/hotels}" method="get" class="needs-validation" novalidate>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label for="destination" class="form-label">Destination</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white"><i class="fas fa-map-marker-alt text-primary"></i></span>
-                                            <input type="text" class="form-control border-start-0" id="destination" name="destination" placeholder="City, Country or Hotel name" required>
+<body>
+    <main layout:fragment="content">
+        <!-- Hero Section -->
+        <section class="hero-section position-relative">
+            <div class="hero-image-container">
+                <img src="/images/hero-image.jpg" class="hero-image w-100" alt="Luxury hotel view"
+                    style="height: 600px; object-fit: cover;">
+                <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.4;">
+                </div>
+            </div>
+            <div class="container position-absolute top-50 start-50 translate-middle text-center text-white"
+                style="z-index: 2;">
+                <h1 class="display-3 fw-bold mb-4 text-shadow">Find Your Perfect Stay</h1>
+                <p class="lead fs-4 mb-5 text-shadow">Discover amazing hotels at the best prices</p>
+                <a href="#search-form" class="btn btn-primary btn-lg px-5 py-3 rounded-pill animate-bounce">
+                    <i class="fas fa-search me-2"></i>Search Now
+                </a>
+            </div>
+        </section>
+
+        <!-- Search Form -->
+        <section id="search-form" class="py-5 bg-light">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="card shadow border-0 rounded-lg">
+                            <div class="card-body p-4 p-lg-5">
+                                <h2 class="card-title text-center mb-4">Search for Hotels</h2>
+                                <form th:action="@{/hotels}" method="get" class="needs-validation" novalidate>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="destination" class="form-label">Destination</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white"><i
+                                                        class="fas fa-map-marker-alt text-primary"></i></span>
+                                                <input type="text" class="form-control border-start-0" id="destination"
+                                                    name="destination" placeholder="City, Country or Hotel name"
+                                                    required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="checkIn" class="form-label">Check-in</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white"><i
+                                                        class="fas fa-calendar-alt text-primary"></i></span>
+                                                <input type="date" class="form-control border-start-0" id="checkIn"
+                                                    name="checkIn" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="checkOut" class="form-label">Check-out</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white"><i
+                                                        class="fas fa-calendar-alt text-primary"></i></span>
+                                                <input type="date" class="form-control border-start-0" id="checkOut"
+                                                    name="checkOut" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                                <i class="fas fa-search me-2"></i>Search
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label for="checkIn" class="form-label">Check-in</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white"><i class="fas fa-calendar-alt text-primary"></i></span>
-                                            <input type="date" class="form-control border-start-0" id="checkIn" name="checkIn" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="checkOut" class="form-label">Check-out</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white"><i class="fas fa-calendar-alt text-primary"></i></span>
-                                            <input type="date" class="form-control border-start-0" id="checkOut" name="checkOut" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-end">
-                                        <button type="submit" class="btn btn-primary w-100 py-2">
-                                            <i class="fas fa-search me-2"></i>Search
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Featured Hotels Section -->
-    <section class="py-5">
-        <div class="container">
-            <div class="row mb-4">
-                <div class="col-12 text-center">
-                    <h2 class="section-title position-relative pb-3 mb-2">Featured Hotels</h2>
-                    <p class="text-muted">Discover our handpicked selection of exceptional accommodations</p>
+        <!-- Featured Hotels Section -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row mb-4">
+                    <div class="col-12 text-center">
+                        <h2 class="section-title position-relative pb-3 mb-2">Featured Hotels</h2>
+                        <p class="text-muted">Discover our handpicked selection of exceptional accommodations</p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="alert alert-warning" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+                <div class="alert alert-warning" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
-            <div class="row g-4" th:if="${featuredHotels != null && !featuredHotels.empty}">
-                <div class="col-md-6 col-lg-4" th:each="hotel : ${featuredHotels}">
-                    <div class="card h-100 shadow-sm hover-shadow border-0 rounded-lg overflow-hidden">
-                        <div class="position-relative">
-                            <!-- Safer image handling with error fallback -->
-                            <img th:if="${hotel.imageUrl != null}"
-                                 th:src="${hotel.imageUrl}"
-                                 class="card-img-top" alt="Hotel Image" style="height: 220px; object-fit: cover;"
-                                 onerror="this.onerror=null; this.src='/images/hotel-placeholder.jpg';">
-                            <img th:if="${hotel.imageUrl == null}"
-                                 src="/images/hotel-placeholder.jpg"
-                                 class="card-img-top" alt="Hotel Image" style="height: 220px; object-fit: cover;">
-                            <div class="position-absolute top-0 end-0 p-2">
-                                <span class="badge bg-primary rounded-pill px-3 py-2" th:text="${hotel.starRating + ' Stars'}">5 Stars</span>
+                <div class="row g-4" th:if="${featuredHotels != null && !featuredHotels.empty}">
+                    <div class="col-md-6 col-lg-4" th:each="hotel : ${featuredHotels}">
+                        <div class="card h-100 shadow-sm hover-shadow border-0 rounded-lg overflow-hidden">
+                            <div class="position-relative">
+                                <!-- Safer image handling with error fallback -->
+                                <img th:if="${hotel.imageUrl != null}" th:src="${hotel.imageUrl}" class="card-img-top"
+                                    th:alt="${hotel.name}" style="height: 220px; object-fit: cover;"
+                                    onerror="this.onerror=null; this.src='/images/hotel-placeholder.jpg';">
+                                <img th:if="${hotel.imageUrl == null}" src="/images/hotel-placeholder.jpg"
+                                    class="card-img-top" th:alt="${hotel.name}"
+                                    style="height: 220px; object-fit: cover;">
+                                <div class="position-absolute top-0 end-0 p-2">
+                                    <span class="badge bg-primary rounded-pill px-3 py-2"
+                                        th:text="${hotel.starRating + ' Stars'}">5 Stars</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title" th:text="${hotel.name}">Hotel Name</h5>
-                            <p class="card-text mb-2">
-                                <i class="fas fa-map-marker-alt text-primary me-1"></i>
-                                <span th:text="${hotel.city + ', ' + hotel.country}" class="text-muted">Location</span>
-                            </p>
-                            <div class="mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${hotel.name}">Hotel Name</h5>
+                                <p class="card-text mb-2">
+                                    <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                    <span th:text="${hotel.city + ', ' + hotel.country}"
+                                        class="text-muted">Location</span>
+                                </p>
+                                <div class="mb-3">
                                     <span class="text-warning" th:each="i : ${#numbers.sequence(1, hotel.starRating)}">
                                         <i class="fas fa-star"></i>
                                     </span>
-                            </div>
-                            <p class="card-text" th:text="${#strings.abbreviate(hotel.description, 100)}">Description</p>
+                                </div>
+                                <p class="card-text" th:text="${#strings.abbreviate(hotel.description, 100)}">
+                                    Description</p>
 
-                            <!-- Amenities section with improved null handling -->
-                            <div class="amenities mt-2" th:if="${hotel.amenities != null}">
-                                <span class="small text-muted">Amenities:</span>
-                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                <!-- Amenities section with improved null handling -->
+                                <div class="amenities mt-2" th:if="${hotel.amenities != null}">
+                                    <span class="small text-muted">Amenities:</span>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
                                         <span th:each="amenity : ${hotel.amenities}"
-                                              th:if="${amenity != null && amenity.name != null}"
-                                              class="badge bg-light text-dark me-1">
+                                            th:if="${amenity != null && amenity.name != null}"
+                                            class="badge bg-light text-dark me-1">
                                             <i th:if="${amenity.icon != null}" th:class="${amenity.icon}"></i>
                                             <span th:text="${amenity.name}">Amenity</span>
                                         </span>
-                                    <span th:if="${hotel.amenities.empty}" class="text-muted small">No amenities listed</span>
+                                        <span th:if="${hotel.amenities.empty}" class="text-muted small">No amenities
+                                            listed</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
-                            <!-- Price display with fallback -->
-                            <span class="fw-bold text-primary" th:if="${hotel.minPrice != null}"
-                                  th:text="${'From $' + #numbers.formatDecimal(hotel.minPrice, 1, 2)}">From $120</span>
-                            <span class="fw-bold text-primary" th:if="${hotel.minPrice == null}">Contact for price</span>
-                            <a th:href="@{/hotels/{id}(id=${hotel.id})}" class="btn btn-outline-primary">
-                                <i class="fas fa-info-circle me-1"></i>View Details
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center py-5" th:if="${featuredHotels == null || featuredHotels.empty}">
-                <i class="fas fa-hotel fa-3x text-muted mb-3"></i>
-                <h4>No featured hotels available at the moment.</h4>
-                <p class="text-muted">Please check back later or try searching for specific destinations.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Why Choose Us Section -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="row mb-4">
-                <div class="col-12 text-center">
-                    <h2 class="section-title position-relative pb-3 mb-2">Why Choose Us</h2>
-                    <p class="text-muted">Experience the difference with our premium hotel booking service</p>
-                </div>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 bg-transparent">
-                        <div class="card-body text-center">
-                            <div class="feature-icon bg-primary text-white mx-auto mb-4">
-                                <i class="fas fa-tag fa-2x"></i>
+                            <div
+                                class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
+                                <!-- Price display with fallback -->
+                                <span class="fw-bold text-primary" th:if="${hotel.minPrice != null}"
+                                    th:text="${'From $' + #numbers.formatDecimal(hotel.minPrice, 1, 2)}">From
+                                    $120</span>
+                                <span class="fw-bold text-primary" th:if="${hotel.minPrice == null}">Contact for
+                                    price</span>
+                                <a th:href="@{/hotels/{id}(id=${hotel.id})}" class="btn btn-outline-primary">
+                                    <i class="fas fa-info-circle me-1"></i>View Details
+                                </a>
                             </div>
-                            <h4>Best Price Guarantee</h4>
-                            <p class="text-muted">Find a lower price? We'll match it and give you an additional discount.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 bg-transparent">
-                        <div class="card-body text-center">
-                            <div class="feature-icon bg-primary text-white mx-auto mb-4">
-                                <i class="fas fa-shield-alt fa-2x"></i>
-                            </div>
-                            <h4>Safe & Secure Booking</h4>
-                            <p class="text-muted">Your personal and payment information is protected with the highest security standards.</p>
-                        </div>
+
+                <div class="text-center py-5" th:if="${featuredHotels == null || featuredHotels.empty}">
+                    <i class="fas fa-hotel fa-3x text-muted mb-3"></i>
+                    <h4>No featured hotels available at the moment.</h4>
+                    <p class="text-muted">Please check back later or try searching for specific destinations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us Section -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="row mb-4">
+                    <div class="col-12 text-center">
+                        <h2 class="section-title position-relative pb-3 mb-2">Why Choose Us</h2>
+                        <p class="text-muted">Experience the difference with our premium hotel booking service</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 bg-transparent">
-                        <div class="card-body text-center">
-                            <div class="feature-icon bg-primary text-white mx-auto mb-4">
-                                <i class="fas fa-headset fa-2x"></i>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-transparent">
+                            <div class="card-body text-center">
+                                <div class="feature-icon bg-primary text-white mx-auto mb-4">
+                                    <i class="fas fa-tag fa-2x"></i>
+                                </div>
+                                <h4>Best Price Guarantee</h4>
+                                <p class="text-muted">Find a lower price? We'll match it and give you an additional
+                                    discount.</p>
                             </div>
-                            <h4>24/7 Customer Support</h4>
-                            <p class="text-muted">Our friendly support team is available around the clock to assist you.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-transparent">
+                            <div class="card-body text-center">
+                                <div class="feature-icon bg-primary text-white mx-auto mb-4">
+                                    <i class="fas fa-shield-alt fa-2x"></i>
+                                </div>
+                                <h4>Safe & Secure Booking</h4>
+                                <p class="text-muted">Your personal and payment information is protected with the
+                                    highest security standards.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-transparent">
+                            <div class="card-body text-center">
+                                <div class="feature-icon bg-primary text-white mx-auto mb-4">
+                                    <i class="fas fa-headset fa-2x"></i>
+                                </div>
+                                <h4>24/7 Customer Support</h4>
+                                <p class="text-muted">Our friendly support team is available around the clock to assist
+                                    you.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-</main>
+        </section>
+    </main>
 
-<!-- Initialize date pickers -->
-<th:block layout:fragment="js">
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default dates for check-in and check-out
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
+    <!-- Initialize date pickers -->
+    <th:block layout:fragment="js">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Set default dates for check-in and check-out
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
 
-            const checkIn = document.getElementById('checkIn');
-            const checkOut = document.getElementById('checkOut');
+                const checkIn = document.getElementById('checkIn');
+                const checkOut = document.getElementById('checkOut');
 
-            if (checkIn && checkOut) {
-                // Format dates as YYYY-MM-DD
-                checkIn.value = today.toISOString().split('T')[0];
-                checkOut.value = tomorrow.toISOString().split('T')[0];
+                if (checkIn && checkOut) {
+                    // Format dates as YYYY-MM-DD
+                    checkIn.value = today.toISOString().split('T')[0];
+                    checkOut.value = tomorrow.toISOString().split('T')[0];
 
-                // Set minimum dates
-                checkIn.min = today.toISOString().split('T')[0];
-                checkOut.min = tomorrow.toISOString().split('T')[0];
+                    // Set minimum dates
+                    checkIn.min = today.toISOString().split('T')[0];
+                    checkOut.min = tomorrow.toISOString().split('T')[0];
 
-                // Ensure check-out is always after check-in
-                checkIn.addEventListener('change', function() {
-                    const newCheckIn = new Date(this.value);
-                    const currentCheckOut = new Date(checkOut.value);
+                    // Ensure check-out is always after check-in
+                    checkIn.addEventListener('change', function () {
+                        const newCheckIn = new Date(this.value);
+                        const currentCheckOut = new Date(checkOut.value);
 
-                    if (newCheckIn >= currentCheckOut) {
-                        const newCheckOut = new Date(newCheckIn);
-                        newCheckOut.setDate(newCheckOut.getDate() + 1);
-                        checkOut.value = newCheckOut.toISOString().split('T')[0];
-                    }
+                        if (newCheckIn >= currentCheckOut) {
+                            const newCheckOut = new Date(newCheckIn);
+                            newCheckOut.setDate(newCheckOut.getDate() + 1);
+                            checkOut.value = newCheckOut.toISOString().split('T')[0];
+                        }
 
-                    // Update minimum date for checkout
-                    const minCheckOut = new Date(newCheckIn);
-                    minCheckOut.setDate(minCheckOut.getDate() + 1);
-                    checkOut.min = minCheckOut.toISOString().split('T')[0];
+                        // Update minimum date for checkout
+                        const minCheckOut = new Date(newCheckIn);
+                        minCheckOut.setDate(minCheckOut.getDate() + 1);
+                        checkOut.min = minCheckOut.toISOString().split('T')[0];
+                    });
+                }
+
+                // Form validation
+                const forms = document.querySelectorAll('.needs-validation');
+                Array.from(forms).forEach(form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
                 });
-            }
-
-            // Form validation
-            const forms = document.querySelectorAll('.needs-validation');
-            Array.from(forms).forEach(form => {
-                form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
             });
-        });
-    </script>
-</th:block>
+        </script>
+    </th:block>
 </body>
+
 </html>

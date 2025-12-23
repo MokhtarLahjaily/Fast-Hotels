@@ -1,5 +1,6 @@
 package com.hotelreservation.controller.view;
 
+import com.hotelreservation.util.AppConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -39,7 +40,7 @@ public class MainController {
         // For example, send an email or save to database
 
         // Add a success message
-        redirectAttributes.addFlashAttribute("successMessage",
+        redirectAttributes.addFlashAttribute(AppConstants.Attributes.SUCCESS_MESSAGE,
                 "Thank you for your message! We'll get back to you soon.");
 
         return "redirect:/contact";

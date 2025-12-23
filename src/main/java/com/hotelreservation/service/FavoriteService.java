@@ -213,4 +213,28 @@ public class FavoriteService {
         }
         self.removeFromFavorites(authentication.getName(), hotelId);
     }
+
+    @Transactional
+    public com.hotelreservation.dto.response.FavoriteResponse toggleFavorite(String userEmail, Long hotelId) {
+        boolean isFav = isFavorite(userEmail, hotelId);
+        String status;
+        String message;
+
+        if (isFav) {
+            removeFromFavorites(userEmail, hotelId);
+            status = "removed";
+            message = "Hotel removed from favorites";
+        } else {
+            addToFavorites(userEmail, hotelId);
+            status = "added";
+            message = "Hotel added to favorites";
+        }
+
+        return com.hotelreservation.dto.response.FavoriteResponse.builder()
+                .status(status)
+                .message(message)
+                .hotelId(hotelId)
+                .isFavorite(!isFav)
+                .build();
+    }
 }

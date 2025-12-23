@@ -74,7 +74,7 @@ public class DataInitializer implements CommandLineRunner {
                 logger.info("Starting database initialization...");
 
                 // Create admin user if it doesn't exist
-                User adminUser = createAdminUser();
+                createAdminUser();
 
                 // Create hotel owners
                 List<User> hotelOwners = createHotelOwners();
