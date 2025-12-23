@@ -3,8 +3,9 @@ package com.hotelreservation.service;
 import com.hotelreservation.model.Booking;
 import com.hotelreservation.model.BookingStatus;
 import com.hotelreservation.repository.BookingRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,22 +14,32 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BookingStatusUpdateService {
 
     private final BookingRepository bookingRepository;
+    private BookingStatusUpdateService self;
+
+    public BookingStatusUpdateService(BookingRepository bookingRepository) {
+        this.bookingRepository = bookingRepository;
+    }
+
+    @Autowired
+    public void setSelf(@Lazy BookingStatusUpdateService self) {
+        this.self = self;
+    }
 
     /**
      * Updates booking statuses daily at midnight.
      * - CONFIRMED bookings with check-out date before today become COMPLETED
-     * - CONFIRMED bookings with check-in date before today and check-out date after today become ACTIVE
+     * - CONFIRMED bookings with check-in date before today and check-out date after
+     * today become ACTIVE
      */
     @Scheduled(cron = "0 0 0 * * ?") // Run at midnight every day
     @Transactional
     public void updateBookingStatuses() {
         log.info("Starting scheduled booking status update");
-        updateAllBookingStatuses();
+        self.updateAllBookingStatuses();
         log.info("Completed scheduled booking status update");
     }
 
@@ -46,7 +57,8 @@ public class BookingStatusUpdateService {
         int totalUpdated = 0;
 
         try {
-            // Update CONFIRMED bookings with check-out dates today or in the past to COMPLETED
+            // Update CONFIRMED bookings with check-out dates today or in the past to
+            // COMPLETED
             List<Booking> completedBookings = bookingRepository.findByStatusAndCheckOutDateBefore(
                     BookingStatus.CONFIRMED, today.plusDays(1)); // Include today
 
@@ -118,13 +130,14 @@ public class BookingStatusUpdateService {
     @Transactional
     public int manualUpdateBookingStatuses() {
         log.info("Starting manual booking status update");
-        int updatedCount = updateAllBookingStatuses();
+        int updatedCount = self.updateAllBookingStatuses();
         log.info("Completed manual booking status update, {} bookings updated", updatedCount);
         return updatedCount;
     }
 
     /**
-     * Get statistics about bookings that need status updates without actually updating them.
+     * Get statistics about bookings that need status updates without actually
+     * updating them.
      * Useful for admin dashboards or reporting.
      *
      * @return a summary of bookings that would be updated
@@ -198,10 +211,21 @@ public class BookingStatusUpdateService {
             this.toCancelled = toCancelled;
         }
 
-        public int getToCompleted() { return toCompleted; }
-        public int getToActive() { return toActive; }
-        public int getToCancelled() { return toCancelled; }
-        public int getTotal() { return toCompleted + toActive + toCancelled; }
+        public int getToCompleted() {
+            return toCompleted;
+        }
+
+        public int getToActive() {
+            return toActive;
+        }
+
+        public int getToCancelled() {
+            return toCancelled;
+        }
+
+        public int getTotal() {
+            return toCompleted + toActive + toCancelled;
+        }
 
         @Override
         public String toString() {

@@ -3,6 +3,7 @@ package com.hotelreservation.controller.view;
 import com.hotelreservation.dto.response.BookingResponse;
 import com.hotelreservation.service.BookingService;
 import com.hotelreservation.service.ReviewService;
+import com.hotelreservation.util.Constants;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,8 @@ public class BookingsViewController {
             return "booking/list";
         } catch (Exception e) {
             logger.error("Error loading bookings page", e);
-            model.addAttribute("errorMessage", "An error occurred while loading your bookings: " + e.getMessage());
+            model.addAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while loading your bookings: " + e.getMessage());
             return "booking/list";
         }
     }
@@ -71,7 +73,8 @@ public class BookingsViewController {
             return "booking/detail";
         } catch (Exception e) {
             logger.error("Error loading booking details", e);
-            model.addAttribute("errorMessage", "An error occurred while loading the booking details: " + e.getMessage());
+            model.addAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while loading the booking details: " + e.getMessage());
             return "booking/detail";
         }
     }
@@ -82,12 +85,12 @@ public class BookingsViewController {
 
         try {
             BookingResponse booking = bookingService.cancelBooking(id);
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Your booking has been successfully cancelled. Booking reference: #" + booking.getId());
-            return "redirect:/bookings";
+            return Constants.REDIRECT_BOOKINGS;
         } catch (Exception e) {
             logger.error("Error cancelling booking", e);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
                     "An error occurred while cancelling your booking: " + e.getMessage());
             return "redirect:/bookings/" + id;
         }

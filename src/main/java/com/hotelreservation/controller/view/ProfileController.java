@@ -11,6 +11,7 @@ import com.hotelreservation.model.User;
 import com.hotelreservation.repository.UserRepository;
 import com.hotelreservation.service.BookingService;
 import com.hotelreservation.service.UserService;
+import com.hotelreservation.util.Constants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class ProfileController {
             String email = authentication.getName();
 
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException(Constants.MSG_ERR_USER_NOT_FOUND));
 
             // Create UserResponse manually
             UserResponse userResponse = new UserResponse();
@@ -87,13 +88,13 @@ public class ProfileController {
                     if (booking.getHotelName() == null && booking.getHotel() != null) {
                         booking.setHotelName(booking.getHotel().getName());
                     } else if (booking.getHotelName() == null) {
-                        booking.setHotelName("N/A");
+                        booking.setHotelName(Constants.DEFAULT_NA);
                     }
 
                     if (booking.getRoomType() == null && booking.getRoom() != null) {
                         booking.setRoomType(booking.getRoom().getType());
                     } else if (booking.getRoomType() == null) {
-                        booking.setRoomType("N/A");
+                        booking.setRoomType(Constants.DEFAULT_NA);
                     }
                 }
 
@@ -105,10 +106,10 @@ public class ProfileController {
                 model.addAttribute("bookingError", "Unable to load recent bookings. Please try again later.");
             }
 
-            return "profile/index";
+            return Constants.VIEW_PROFILE;
         } catch (Exception e) {
             log.error("Error showing profile page: {}", e.getMessage(), e);
-            return "redirect:/error";
+            return Constants.REDIRECT_PREFIX + "/error";
         }
     }
 
@@ -122,41 +123,46 @@ public class ProfileController {
 
         if (result.hasErrors()) {
             log.warn("Profile update validation failed: {}", result.getAllErrors());
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest", result);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest",
+                    result);
             redirectAttributes.addFlashAttribute("profileUpdateRequest", request);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         }
 
         try {
             UserResponse updatedUser = userService.updateProfile(request);
             log.info("Profile updated successfully for user: {}", updatedUser.getEmail());
-            redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, Constants.MSG_PROFILE_UPDATED);
         } catch (UserAlreadyExistsException e) {
             log.warn("Profile update failed: {}", e.getMessage());
             result.rejectValue("email", "error.email", "Email already in use");
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest", result);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest",
+                    result);
             redirectAttributes.addFlashAttribute("profileUpdateRequest", request);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         } catch (UnauthorizedException e) {
             log.warn("Password change failed: {}", e.getMessage());
             result.rejectValue("currentPassword", "error.currentPassword", "Current password is incorrect");
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest", result);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest",
+                    result);
             redirectAttributes.addFlashAttribute("profileUpdateRequest", request);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         } catch (BadRequestException e) {
             log.warn("Password change failed: {}", e.getMessage());
             result.rejectValue("confirmPassword", "error.confirmPassword", "New passwords do not match");
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest", result);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest",
+                    result);
             redirectAttributes.addFlashAttribute("profileUpdateRequest", request);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         } catch (Exception e) {
             log.error("Error updating profile", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while updating your profile");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while updating your profile");
             redirectAttributes.addFlashAttribute("profileUpdateRequest", request);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         }
 
-        return "redirect:/profile";
+        return Constants.REDIRECT_PROFILE;
     }
 
     @PostMapping("/change-password")
@@ -169,38 +175,42 @@ public class ProfileController {
 
         if (result.hasErrors()) {
             log.warn("Password change validation failed: {}", result.getAllErrors());
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeRequest", result);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeRequest",
+                    result);
             redirectAttributes.addFlashAttribute("passwordChangeRequest", request);
             redirectAttributes.addFlashAttribute("passwordTab", true);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         }
 
         try {
             userService.changePassword(request);
             log.info("Password changed successfully");
-            redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Password changed successfully");
         } catch (UnauthorizedException e) {
             log.warn("Password change failed: {}", e.getMessage());
             result.rejectValue("currentPassword", "error.currentPassword", "Current password is incorrect");
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeRequest", result);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeRequest",
+                    result);
             redirectAttributes.addFlashAttribute("passwordChangeRequest", request);
             redirectAttributes.addFlashAttribute("passwordTab", true);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         } catch (BadRequestException e) {
             log.warn("Password change failed: {}", e.getMessage());
             result.rejectValue("confirmPassword", "error.confirmPassword", "New passwords do not match");
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeRequest", result);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeRequest",
+                    result);
             redirectAttributes.addFlashAttribute("passwordChangeRequest", request);
             redirectAttributes.addFlashAttribute("passwordTab", true);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         } catch (Exception e) {
             log.error("Error changing password", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while changing your password");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while changing your password");
             redirectAttributes.addFlashAttribute("passwordChangeRequest", request);
             redirectAttributes.addFlashAttribute("passwordTab", true);
-            return "redirect:/profile";
+            return Constants.REDIRECT_PROFILE;
         }
 
-        return "redirect:/profile";
+        return Constants.REDIRECT_PROFILE;
     }
 }

@@ -13,6 +13,7 @@ import com.hotelreservation.service.AdminService;
 import com.hotelreservation.service.BookingService;
 import com.hotelreservation.service.BookingStatusUpdateService;
 import com.hotelreservation.service.HotelService;
+import com.hotelreservation.util.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,7 +43,7 @@ public class AdminDashboardController {
     private final AdminService adminService;
     private final HotelService hotelService;
 
-    @GetMapping({"", "/", "/dashboard"})
+    @GetMapping({ "", "/", "/dashboard" })
     public String dashboard(Model model) {
         log.info("Accessing admin dashboard");
         try {
@@ -70,13 +71,13 @@ public class AdminDashboardController {
             model.addAttribute("cancelledBookings", cancelledBookings);
 
             // Add page title
-            model.addAttribute("pageTitle", "Admin Dashboard");
+            model.addAttribute(Constants.ATTR_PAGE_TITLE, "Admin Dashboard");
 
-            return "admin/dashboard";
+            return Constants.VIEW_ADMIN_DASHBOARD;
         } catch (Exception e) {
             log.error("Error loading admin dashboard: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error loading dashboard data: " + e.getMessage());
-            return "admin/dashboard";
+            model.addAttribute(Constants.ATTR_ERROR, "Error loading dashboard data: " + e.getMessage());
+            return Constants.VIEW_ADMIN_DASHBOARD;
         }
     }
 
@@ -100,15 +101,15 @@ public class AdminDashboardController {
             model.addAttribute("status", status);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", hotelsPage.getTotalPages());
-            model.addAttribute("pageTitle", "Hotel Management");
+            model.addAttribute(Constants.ATTR_PAGE_TITLE, "Hotel Management");
 
             log.info("Loaded {} hotels for admin page", hotelsPage.getTotalElements());
-            return "admin/hotels";
+            return Constants.VIEW_ADMIN_HOTELS;
         } catch (Exception e) {
             log.error("Error loading admin hotels page: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error loading hotels: " + e.getMessage());
+            model.addAttribute(Constants.ATTR_ERROR, "Error loading hotels: " + e.getMessage());
             model.addAttribute("hotels", Page.empty());
-            return "admin/hotels";
+            return Constants.VIEW_ADMIN_HOTELS;
         }
     }
 
@@ -120,7 +121,8 @@ public class AdminDashboardController {
             @RequestParam(required = false) String roomType,
             @RequestParam(required = false) String status,
             Model model) {
-        log.info("Accessing admin rooms page - page: {}, size: {}, hotelId: {}, roomType: {}", page, size, hotelId, roomType);
+        log.info("Accessing admin rooms page - page: {}, size: {}, hotelId: {}, roomType: {}", page, size, hotelId,
+                roomType);
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -142,16 +144,16 @@ public class AdminDashboardController {
             model.addAttribute("selectedStatus", status);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", roomsPage.getTotalPages());
-            model.addAttribute("pageTitle", "Room Management");
+            model.addAttribute(Constants.ATTR_PAGE_TITLE, "Room Management");
 
             log.info("Loaded {} rooms for admin page", roomsPage.getTotalElements());
-            return "admin/rooms";
+            return Constants.VIEW_ADMIN_ROOMS;
         } catch (Exception e) {
             log.error("Error loading admin rooms page: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error loading rooms: " + e.getMessage());
+            model.addAttribute(Constants.ATTR_ERROR, "Error loading rooms: " + e.getMessage());
             model.addAttribute("rooms", Page.empty());
             model.addAttribute("hotels", java.util.Collections.emptyList());
-            return "admin/rooms";
+            return Constants.VIEW_ADMIN_ROOMS;
         }
     }
 
@@ -175,15 +177,15 @@ public class AdminDashboardController {
             model.addAttribute("status", status);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", usersPage.getTotalPages());
-            model.addAttribute("pageTitle", "User Management");
+            model.addAttribute(Constants.ATTR_PAGE_TITLE, "User Management");
 
             log.info("Loaded {} users for admin page", usersPage.getTotalElements());
-            return "admin/users";
+            return Constants.VIEW_ADMIN_USERS;
         } catch (Exception e) {
             log.error("Error loading admin users page: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error loading users: " + e.getMessage());
+            model.addAttribute(Constants.ATTR_ERROR, "Error loading users: " + e.getMessage());
             model.addAttribute("users", Page.empty());
-            return "admin/users";
+            return Constants.VIEW_ADMIN_USERS;
         }
     }
 
@@ -215,23 +217,23 @@ public class AdminDashboardController {
             model.addAttribute("status", status);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", reviewsPage.getTotalPages());
-            model.addAttribute("pageTitle", "Review Management");
+            model.addAttribute(Constants.ATTR_PAGE_TITLE, "Review Management");
 
             log.info("Loaded {} reviews for admin page", reviewsPage.getTotalElements());
-            return "admin/reviews";
+            return Constants.VIEW_ADMIN_REVIEWS;
         } catch (Exception e) {
             log.error("Error loading admin reviews page: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error loading reviews: " + e.getMessage());
+            model.addAttribute(Constants.ATTR_ERROR, "Error loading reviews: " + e.getMessage());
             model.addAttribute("reviews", Page.empty());
             model.addAttribute("hotels", java.util.Collections.emptyList());
-            return "admin/reviews";
+            return Constants.VIEW_ADMIN_REVIEWS;
         }
     }
 
     @GetMapping("/system")
     public String system(Model model) {
         log.info("Accessing admin system page");
-        model.addAttribute("pageTitle", "System Settings");
-        return "admin/system";
+        model.addAttribute(Constants.ATTR_PAGE_TITLE, "System Settings");
+        return Constants.VIEW_ADMIN_SYSTEM;
     }
 }

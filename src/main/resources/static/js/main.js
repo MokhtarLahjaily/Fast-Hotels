@@ -33,13 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
 function initializeBootstrapComponents() {
     // Initialize tooltips if Bootstrap is loaded
     if (typeof bootstrap !== "undefined") {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         tooltipTriggerList.forEach((tooltipTriggerEl) => {
             new bootstrap.Tooltip(tooltipTriggerEl)
         })
 
         // Initialize popovers
-        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        const popoverTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="popover"]'))
         popoverTriggerList.forEach((popoverTriggerEl) => {
             new bootstrap.Popover(popoverTriggerEl)
         })
@@ -89,10 +89,10 @@ function handleImageErrors() {
     document.querySelectorAll("img").forEach((img) => {
         img.addEventListener("error", function () {
             // Check if this is already the fallback image to prevent infinite loop
-            if (!this.src.includes("hotel-placeholder.jpg") && !this.hasAttribute("data-error-handled")) {
+            if (!this.src.includes("hotel-placeholder.jpg") && !this.dataset.errorHandled) {
                 console.log("Image failed to load, using placeholder: ", this.src)
                 this.src = "/images/hotel-placeholder.jpg"
-                this.setAttribute("data-error-handled", "true")
+                this.dataset.errorHandled = "true"
                 this.alt = "Image not available"
             }
         })
@@ -114,8 +114,8 @@ function setupFormLoadingState() {
             const submitButton = this.querySelector('button[type="submit"]')
             if (submitButton && !submitButton.classList.contains("no-loading-state")) {
                 // Save original button content
-                if (!submitButton.hasAttribute("data-original-content")) {
-                    submitButton.setAttribute("data-original-content", submitButton.innerHTML)
+                if (!submitButton.dataset.originalContent) {
+                    submitButton.dataset.originalContent = submitButton.innerHTML
                 }
 
                 // Set loading state
@@ -138,7 +138,7 @@ function setupFormLoadingState() {
 function setupSmoothScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener("click", function (e) {
-            const targetId = this.getAttribute("href")
+            const targetId = this.dataset.href || this.getAttribute("href")
 
             // Skip if it's just "#" or empty
             if (targetId === "#" || !targetId) return

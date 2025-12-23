@@ -5,6 +5,7 @@ import com.hotelreservation.dto.response.BookingResponse;
 import com.hotelreservation.service.AdminService;
 import com.hotelreservation.service.BookingService;
 import com.hotelreservation.service.BookingStatusUpdateService;
+import com.hotelreservation.util.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -62,12 +63,12 @@ public class AdminBookingController {
             model.addAttribute("cancelledCount", cancelledCount);
 
             log.info("Loaded {} bookings for admin page", bookingsPage.getTotalElements());
-            return "admin/bookings";
+            return Constants.VIEW_ADMIN_BOOKINGS;
         } catch (Exception e) {
             log.error("Error loading admin bookings page: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error loading bookings: " + e.getMessage());
+            model.addAttribute(Constants.ATTR_ERROR, "Error loading bookings: " + e.getMessage());
             model.addAttribute("bookings", Page.empty());
-            return "admin/bookings";
+            return Constants.VIEW_ADMIN_BOOKINGS;
         }
     }
 
@@ -77,15 +78,15 @@ public class AdminBookingController {
 
         try {
             int updatedCount = bookingStatusUpdateService.updateAllBookingStatuses();
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Successfully updated " + updatedCount + " booking(s) status.");
         } catch (Exception e) {
             log.error("Error updating booking statuses", e);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
                     "An error occurred while updating booking statuses: " + e.getMessage());
         }
 
-        return "redirect:/admin/bookings";
+        return Constants.REDIRECT_ADMIN_BOOKINGS;
     }
 
     @PostMapping("/complete-eligible")
@@ -94,15 +95,15 @@ public class AdminBookingController {
 
         try {
             int completedCount = bookingStatusUpdateService.markAllEligibleBookingsAsCompleted();
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Successfully marked " + completedCount + " booking(s) as completed.");
         } catch (Exception e) {
             log.error("Error completing eligible bookings", e);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
                     "An error occurred while completing bookings: " + e.getMessage());
         }
 
-        return "redirect:/admin/bookings";
+        return Constants.REDIRECT_ADMIN_BOOKINGS;
     }
 
     @PostMapping("/{id}/complete")
@@ -120,15 +121,15 @@ public class AdminBookingController {
             // Update booking status to COMPLETED
             bookingService.updateBookingStatus(id, BookingStatus.COMPLETED);
 
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Successfully marked booking #" + id + " as completed.");
         } catch (Exception e) {
             log.error("Error completing booking with ID: {}", id, e);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
                     "An error occurred while completing the booking: " + e.getMessage());
         }
 
-        return "redirect:/admin/bookings";
+        return Constants.REDIRECT_ADMIN_BOOKINGS;
     }
 
     @PostMapping("/{id}/cancel")
@@ -146,15 +147,15 @@ public class AdminBookingController {
             // Update booking status to CANCELLED
             bookingService.updateBookingStatus(id, BookingStatus.CANCELLED);
 
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Successfully cancelled booking #" + id + ".");
         } catch (Exception e) {
             log.error("Error cancelling booking with ID: {}", id, e);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
                     "An error occurred while cancelling the booking: " + e.getMessage());
         }
 
-        return "redirect:/admin/bookings";
+        return Constants.REDIRECT_ADMIN_BOOKINGS;
     }
 
     @PostMapping("/{id}/confirm")
@@ -172,15 +173,15 @@ public class AdminBookingController {
             // Use the confirmBooking method from BookingService
             bookingService.confirmBooking(id);
 
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Successfully confirmed booking #" + id + ".");
         } catch (Exception e) {
             log.error("Error confirming booking with ID: {}", id, e);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
                     "An error occurred while confirming the booking: " + e.getMessage());
         }
 
-        return "redirect:/admin/bookings";
+        return Constants.REDIRECT_ADMIN_BOOKINGS;
     }
 
     @GetMapping("/{id}")
@@ -202,11 +203,12 @@ public class AdminBookingController {
             model.addAttribute("completedCount", completedCount);
             model.addAttribute("cancelledCount", cancelledCount);
 
-            return "admin/bookings";
+            return Constants.VIEW_ADMIN_BOOKINGS;
         } catch (Exception e) {
             log.error("Error viewing booking details", e);
-            model.addAttribute("errorMessage", "An error occurred while loading the booking details: " + e.getMessage());
-            return "admin/bookings";
+            model.addAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while loading the booking details: " + e.getMessage());
+            return Constants.VIEW_ADMIN_BOOKINGS;
         }
     }
 }

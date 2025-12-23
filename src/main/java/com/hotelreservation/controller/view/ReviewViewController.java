@@ -8,6 +8,7 @@ import com.hotelreservation.exception.ResourceNotFoundException;
 import com.hotelreservation.exception.UnauthorizedException;
 import com.hotelreservation.service.BookingService;
 import com.hotelreservation.service.ReviewService;
+import com.hotelreservation.util.Constants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -51,7 +52,8 @@ public class ReviewViewController {
             return "review/list";
         } catch (Exception e) {
             logger.error("Error viewing my reviews", e);
-            model.addAttribute("errorMessage", "An error occurred while loading your reviews. Please try again.");
+            model.addAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while loading your reviews. Please try again.");
             return "review/list";
         }
     }
@@ -112,7 +114,7 @@ public class ReviewViewController {
                 return "review/form";
             } catch (Exception e) {
                 logger.error("Error getting booking details after validation failure", e);
-                return "redirect:/bookings";
+                return Constants.REDIRECT_PREFIX + "/bookings";
             }
         }
 
@@ -120,33 +122,38 @@ public class ReviewViewController {
             // Check if booking is eligible for review
             if (!bookingService.isEligibleForReview(reviewRequest.getBookingId())) {
                 logger.warn("Booking {} is not eligible for review", reviewRequest.getBookingId());
-                redirectAttributes.addFlashAttribute("errorMessage", "This booking is not eligible for review.");
+                redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                        "This booking is not eligible for review.");
                 return "redirect:/bookings/" + reviewRequest.getBookingId();
             }
 
             // Check if booking already has a review
             if (reviewService.hasBookingBeenReviewed(reviewRequest.getBookingId())) {
                 logger.warn("Booking {} already has a review", reviewRequest.getBookingId());
-                redirectAttributes.addFlashAttribute("errorMessage", "You have already reviewed this booking.");
+                redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                        "You have already reviewed this booking.");
                 return "redirect:/bookings/" + reviewRequest.getBookingId();
             }
 
             ReviewResponse review = reviewService.createReview(reviewRequest);
             logger.info("Review submitted successfully for booking: {}", reviewRequest.getBookingId());
 
-            redirectAttributes.addFlashAttribute("successMessage", "Your review has been submitted successfully! Thank you for your feedback.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
+                    "Your review has been submitted successfully! Thank you for your feedback.");
             return "redirect:/bookings/" + reviewRequest.getBookingId();
         } catch (UnauthorizedException e) {
             logger.warn("Unauthorized review submission: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "You are not authorized to review this booking.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "You are not authorized to review this booking.");
             return "redirect:/bookings/" + reviewRequest.getBookingId();
         } catch (BadRequestException e) {
             logger.warn("Bad request for review submission: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, e.getMessage());
             return "redirect:/bookings/" + reviewRequest.getBookingId();
         } catch (Exception e) {
             logger.error("Error submitting review", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while submitting your review. Please try again.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while submitting your review. Please try again.");
             return "redirect:/bookings/" + reviewRequest.getBookingId();
         }
     }
@@ -206,7 +213,7 @@ public class ReviewViewController {
                 return "review/form";
             } catch (Exception e) {
                 logger.error("Error getting details after validation failure", e);
-                return "redirect:/reviews";
+                return Constants.REDIRECT_REVIEWS;
             }
         }
 
@@ -214,20 +221,23 @@ public class ReviewViewController {
             ReviewResponse review = reviewService.updateReview(reviewId, reviewRequest);
             logger.info("Review updated successfully: {}", reviewId);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Your review has been updated successfully!");
-            return "redirect:/reviews";
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
+                    "Your review has been updated successfully!");
+            return Constants.REDIRECT_REVIEWS;
         } catch (UnauthorizedException e) {
             logger.warn("Unauthorized review update: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "You are not authorized to update this review.");
-            return "redirect:/reviews";
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "You are not authorized to update this review.");
+            return Constants.REDIRECT_REVIEWS;
         } catch (ResourceNotFoundException e) {
             logger.warn("Review not found for update: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Review not found.");
-            return "redirect:/reviews";
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Review not found.");
+            return Constants.REDIRECT_REVIEWS;
         } catch (Exception e) {
             logger.error("Error updating review", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while updating your review. Please try again.");
-            return "redirect:/reviews";
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while updating your review. Please try again.");
+            return Constants.REDIRECT_REVIEWS;
         }
     }
 
@@ -247,20 +257,24 @@ public class ReviewViewController {
             reviewService.deleteReview(reviewId);
             logger.info("Review deleted successfully: {}", reviewId);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Your review has been deleted successfully!");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
+                    "Your review has been deleted successfully!");
 
         } catch (UnauthorizedException e) {
             logger.warn("Unauthorized review deletion attempt for review {}: {}", reviewId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "You are not authorized to delete this review.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "You are not authorized to delete this review.");
         } catch (ResourceNotFoundException e) {
             logger.warn("Review not found for deletion: {}", reviewId);
-            redirectAttributes.addFlashAttribute("errorMessage", "Review not found or has already been deleted.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "Review not found or has already been deleted.");
         } catch (Exception e) {
             logger.error("Unexpected error deleting review {}: {}", reviewId, e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while deleting your review. Please try again.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "An error occurred while deleting your review. Please try again.");
         }
 
-        return "redirect:/reviews";
+        return Constants.REDIRECT_PREFIX + "/reviews";
     }
 
     @GetMapping("/delete/{reviewId}")
@@ -269,7 +283,8 @@ public class ReviewViewController {
             RedirectAttributes redirectAttributes) {
 
         logger.warn("GET request received for review deletion: {}. Redirecting to reviews list.", reviewId);
-        redirectAttributes.addFlashAttribute("errorMessage", "Invalid request. Please use the delete button to remove reviews.");
-        return "redirect:/reviews";
+        redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                "Invalid request. Please use the delete button to remove reviews.");
+        return Constants.REDIRECT_PREFIX + "/reviews";
     }
 }

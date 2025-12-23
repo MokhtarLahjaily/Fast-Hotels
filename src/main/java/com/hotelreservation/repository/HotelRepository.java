@@ -63,4 +63,23 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         java.util.Optional<Hotel> findByIdWithRoomsAndAmenities(@Param("id") Long id);
 
         List<Hotel> findByOwnerId(Long ownerId);
+
+        @Query(value = "SELECT h.* FROM hotels h WHERE " +
+                        "(:search IS NULL OR :search = '' OR " +
+                        "LOWER(h.name::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(h.description::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(h.city::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(h.country::text) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+                        "(:city IS NULL OR :city = '' OR LOWER(h.city::text) LIKE LOWER(CONCAT('%', :city, '%')))", countQuery = "SELECT COUNT(*) FROM hotels h WHERE "
+                                        +
+                                        "(:search IS NULL OR :search = '' OR " +
+                                        "LOWER(h.name::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                                        "LOWER(h.description::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                                        "LOWER(h.city::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                                        "LOWER(h.country::text) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+                                        "(:city IS NULL OR :city = '' OR LOWER(h.city::text) LIKE LOWER(CONCAT('%', :city, '%')))", nativeQuery = true)
+        Page<Hotel> findHotelsWithFilters(@Param("search") String search,
+                        @Param("city") String city,
+                        @Param("status") String status,
+                        Pageable pageable);
 }

@@ -13,6 +13,7 @@ import com.hotelreservation.service.HotelService;
 import com.hotelreservation.service.ImageService;
 import com.hotelreservation.service.RoomService;
 import com.hotelreservation.service.UserService;
+import com.hotelreservation.util.Constants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class HotelOwnerController {
         model.addAttribute("hotels", ownedHotels);
         model.addAttribute("hotelCount", ownedHotels.size());
 
-        return "hotel-owner/dashboard";
+        return Constants.VIEW_OWNER_DASHBOARD;
     }
 
     @GetMapping("/hotels")
@@ -66,7 +67,7 @@ public class HotelOwnerController {
             String email = authentication.getName();
 
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException(Constants.MSG_ERR_USER_NOT_FOUND));
 
             Page<HotelResponse> hotelsPage = hotelService.getHotelsByOwner(user.getId(), PageRequest.of(page, size));
 
@@ -75,18 +76,18 @@ public class HotelOwnerController {
             model.addAttribute("totalPages", hotelsPage.getTotalPages());
             model.addAttribute("totalHotels", hotelsPage.getTotalElements());
 
-            return "hotel-owner/hotels";
+            return Constants.VIEW_OWNER_HOTELS;
         } catch (Exception e) {
             log.error("Error listing owner hotels", e);
-            model.addAttribute("errorMessage", "Error loading hotels");
-            return "hotel-owner/hotels";
+            model.addAttribute(Constants.ATTR_ERROR_MSG, "Error loading hotels");
+            return Constants.VIEW_OWNER_HOTELS;
         }
     }
 
     @GetMapping("/hotels/new")
     public String newHotel(Model model) {
         model.addAttribute("hotelRequest", new HotelRequest());
-        return "hotel-owner/hotel-form";
+        return Constants.VIEW_OWNER_HOTEL_FORM;
     }
 
     @PostMapping("/hotels/new")
@@ -97,7 +98,7 @@ public class HotelOwnerController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            return "hotel-owner/hotel-form";
+            return Constants.VIEW_OWNER_HOTEL_FORM;
         }
 
         try {
@@ -108,12 +109,12 @@ public class HotelOwnerController {
                 imageService.uploadHotelImages(hotel.getId(), images);
             }
 
-            redirectAttributes.addFlashAttribute("successMessage", "Hotel created successfully!");
-            return "redirect:/hotel-owner/hotels/" + hotel.getId();
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Hotel created successfully!");
+            return Constants.REDIRECT_OWNER_HOTELS + "/" + hotel.getId();
         } catch (Exception e) {
             log.error("Error creating hotel", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error creating hotel: " + e.getMessage());
-            return "redirect:/hotel-owner/hotels/new";
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Error creating hotel: " + e.getMessage());
+            return Constants.REDIRECT_OWNER_HOTELS + "/new";
         }
     }
 
@@ -142,11 +143,11 @@ public class HotelOwnerController {
             model.addAttribute("rooms", roomsPage.getContent());
             model.addAttribute("hotelImages", hotelImages);
 
-            return "hotel-owner/hotel-detail";
+            return Constants.VIEW_OWNER_HOTEL_DETAIL;
         } catch (Exception e) {
             log.error("Error viewing hotel: {}", id, e);
-            model.addAttribute("errorMessage", "Error loading hotel details");
-            return "hotel-owner/hotels";
+            model.addAttribute(Constants.ATTR_ERROR_MSG, "Error loading hotel details");
+            return Constants.VIEW_OWNER_HOTELS;
         }
     }
 
@@ -181,11 +182,11 @@ public class HotelOwnerController {
             model.addAttribute("hotel", hotel);
             model.addAttribute("hotelRequest", hotelRequest);
 
-            return "hotel-owner/hotel-edit";
+            return Constants.VIEW_OWNER_HOTEL_EDIT;
         } catch (Exception e) {
             log.error("Error loading hotel for edit: {}", id, e);
-            model.addAttribute("errorMessage", "Error loading hotel");
-            return "redirect:/hotel-owner/hotels";
+            model.addAttribute(Constants.ATTR_ERROR_MSG, "Error loading hotel");
+            return Constants.REDIRECT_OWNER_HOTELS;
         }
     }
 
@@ -197,17 +198,17 @@ public class HotelOwnerController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            return "hotel-owner/hotel-edit";
+            return Constants.VIEW_OWNER_HOTEL_EDIT;
         }
 
         try {
             hotelService.updateHotel(id, hotelRequest);
-            redirectAttributes.addFlashAttribute("successMessage", "Hotel updated successfully!");
-            return "redirect:/hotel-owner/hotels/" + id;
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Hotel updated successfully!");
+            return Constants.REDIRECT_OWNER_HOTELS + "/" + id;
         } catch (Exception e) {
             log.error("Error updating hotel: {}", id, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error updating hotel: " + e.getMessage());
-            return "redirect:/hotel-owner/hotels/" + id + "/edit";
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Error updating hotel: " + e.getMessage());
+            return Constants.REDIRECT_OWNER_HOTELS + "/" + id + "/edit";
         }
     }
 
@@ -230,14 +231,14 @@ public class HotelOwnerController {
             }
 
             List<ImageResponse> uploadedImages = imageService.uploadHotelImages(id, images);
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Successfully uploaded " + uploadedImages.size() + " image(s)!");
         } catch (Exception e) {
             log.error("Error uploading images for hotel: {}", id, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error uploading images: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Error uploading images: " + e.getMessage());
         }
 
-        return "redirect:/hotel-owner/hotels/" + id;
+        return Constants.REDIRECT_OWNER_HOTELS + "/" + id;
     }
 
     @PostMapping("/hotels/{hotelId}/images/{imageId}/delete")
@@ -259,13 +260,13 @@ public class HotelOwnerController {
             }
 
             imageService.deleteImage(imageId);
-            redirectAttributes.addFlashAttribute("successMessage", "Image deleted successfully!");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Image deleted successfully!");
         } catch (Exception e) {
             log.error("Error deleting image: {}", imageId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting image: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Error deleting image: " + e.getMessage());
         }
 
-        return "redirect:/hotel-owner/hotels/" + hotelId;
+        return Constants.REDIRECT_OWNER_HOTELS + "/" + hotelId;
     }
 
     @PostMapping("/hotels/{hotelId}/images/{imageId}/set-primary")
@@ -287,13 +288,14 @@ public class HotelOwnerController {
             }
 
             imageService.setPrimaryImage(imageId);
-            redirectAttributes.addFlashAttribute("successMessage", "Primary image updated successfully!");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Primary image updated successfully!");
         } catch (Exception e) {
             log.error("Error setting primary image: {}", imageId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error setting primary image: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "Error setting primary image: " + e.getMessage());
         }
 
-        return "redirect:/hotel-owner/hotels/" + hotelId;
+        return Constants.REDIRECT_OWNER_HOTELS + "/" + hotelId;
     }
 
     @GetMapping("/hotels/{hotelId}/rooms/{roomId}")
@@ -322,11 +324,11 @@ public class HotelOwnerController {
             model.addAttribute("room", room);
             model.addAttribute("roomImages", roomImages);
 
-            return "hotel-owner/room-detail";
+            return Constants.VIEW_OWNER_ROOM_DETAIL;
         } catch (Exception e) {
             log.error("Error viewing room: {}", roomId, e);
-            model.addAttribute("errorMessage", "Error loading room details");
-            return "redirect:/hotel-owner/hotels/" + hotelId;
+            model.addAttribute(Constants.ATTR_ERROR_MSG, "Error loading room details");
+            return Constants.REDIRECT_OWNER_HOTELS + "/" + hotelId;
         }
     }
 
@@ -355,14 +357,14 @@ public class HotelOwnerController {
             }
 
             List<ImageResponse> uploadedImages = imageService.uploadRoomImages(roomId, images);
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG,
                     "Successfully uploaded " + uploadedImages.size() + " image(s)!");
         } catch (Exception e) {
             log.error("Error uploading images for room: {}", roomId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error uploading images: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Error uploading images: " + e.getMessage());
         }
 
-        return "redirect:/hotel-owner/hotels/" + hotelId + "/rooms/" + roomId;
+        return Constants.REDIRECT_OWNER_HOTELS + "/" + hotelId + "/rooms/" + roomId;
     }
 
     @PostMapping("/hotels/{hotelId}/rooms/{roomId}/images/{imageId}/delete")
@@ -385,13 +387,13 @@ public class HotelOwnerController {
             }
 
             imageService.deleteImage(imageId);
-            redirectAttributes.addFlashAttribute("successMessage", "Image deleted successfully!");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Image deleted successfully!");
         } catch (Exception e) {
             log.error("Error deleting room image: {}", imageId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting image: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Error deleting image: " + e.getMessage());
         }
 
-        return "redirect:/hotel-owner/hotels/" + hotelId + "/rooms/" + roomId;
+        return Constants.REDIRECT_OWNER_HOTELS + "/" + hotelId + "/rooms/" + roomId;
     }
 
     @PostMapping("/hotels/{hotelId}/rooms/{roomId}/images/{imageId}/set-primary")
@@ -414,12 +416,13 @@ public class HotelOwnerController {
             }
 
             imageService.setPrimaryImage(imageId);
-            redirectAttributes.addFlashAttribute("successMessage", "Primary image updated successfully!");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Primary image updated successfully!");
         } catch (Exception e) {
             log.error("Error setting primary room image: {}", imageId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Error setting primary image: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG,
+                    "Error setting primary image: " + e.getMessage());
         }
 
-        return "redirect:/hotel-owner/hotels/" + hotelId + "/rooms/" + roomId;
+        return Constants.REDIRECT_OWNER_HOTELS + "/" + hotelId + "/rooms/" + roomId;
     }
 }

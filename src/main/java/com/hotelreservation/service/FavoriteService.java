@@ -8,8 +8,9 @@ import com.hotelreservation.repository.FavoriteRepository;
 import com.hotelreservation.repository.HotelRepository;
 import com.hotelreservation.repository.UserRepository;
 import com.hotelreservation.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class FavoriteService {
@@ -33,6 +33,22 @@ public class FavoriteService {
     private final UserRepository userRepository;
     private final HotelRepository hotelRepository;
     private final HotelService hotelService;
+    private FavoriteService self;
+
+    public FavoriteService(FavoriteRepository favoriteRepository,
+            UserRepository userRepository,
+            HotelRepository hotelRepository,
+            HotelService hotelService) {
+        this.favoriteRepository = favoriteRepository;
+        this.userRepository = userRepository;
+        this.hotelRepository = hotelRepository;
+        this.hotelService = hotelService;
+    }
+
+    @Autowired
+    public void setSelf(@Lazy FavoriteService self) {
+        this.self = self;
+    }
 
     public boolean addToFavorites(String userEmail, Long hotelId) {
         try {
@@ -138,7 +154,7 @@ public class FavoriteService {
     @Transactional(readOnly = true)
     public List<HotelResponse> getUserFavorites(String userEmail) {
         try {
-            List<Hotel> favoriteHotels = getUserFavoriteHotelsList(userEmail);
+            List<Hotel> favoriteHotels = self.getUserFavoriteHotelsList(userEmail);
 
             if (favoriteHotels.isEmpty()) {
                 return new ArrayList<>();
@@ -177,7 +193,7 @@ public class FavoriteService {
                 authentication.getName().equals("anonymousUser")) {
             return false;
         }
-        return isFavorite(authentication.getName(), hotelId);
+        return self.isFavorite(authentication.getName(), hotelId);
     }
 
     public void addFavorite(Long hotelId) {
@@ -186,7 +202,7 @@ public class FavoriteService {
                 authentication.getName().equals("anonymousUser")) {
             throw new RuntimeException("User not authenticated");
         }
-        addToFavorites(authentication.getName(), hotelId);
+        self.addToFavorites(authentication.getName(), hotelId);
     }
 
     public void removeFavorite(Long hotelId) {
@@ -195,6 +211,6 @@ public class FavoriteService {
                 authentication.getName().equals("anonymousUser")) {
             throw new RuntimeException("User not authenticated");
         }
-        removeFromFavorites(authentication.getName(), hotelId);
+        self.removeFromFavorites(authentication.getName(), hotelId);
     }
 }

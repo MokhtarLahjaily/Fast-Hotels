@@ -3,6 +3,7 @@ package com.hotelreservation.controller.view;
 import com.hotelreservation.dto.response.HotelResponse;
 import com.hotelreservation.service.FavoriteService;
 import com.hotelreservation.service.HotelService;
+import com.hotelreservation.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class FavoriteViewController {
             return "favorites/list";
         } catch (Exception e) {
             logger.error("Error viewing favorites", e);
-            model.addAttribute("errorMessage", "An error occurred while loading your favorites.");
+            model.addAttribute(Constants.ATTR_ERROR_MSG, "An error occurred while loading your favorites.");
             return "favorites/list";
         }
     }
@@ -63,10 +64,10 @@ public class FavoriteViewController {
 
         try {
             favoriteService.addFavorite(hotelId);
-            redirectAttributes.addFlashAttribute("successMessage", "Hotel added to favorites!");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Hotel added to favorites!");
         } catch (Exception e) {
             logger.error("Error adding favorite", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to add hotel to favorites.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Failed to add hotel to favorites.");
         }
 
         return redirectUrl != null ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
@@ -86,10 +87,10 @@ public class FavoriteViewController {
 
         try {
             favoriteService.removeFavorite(hotelId);
-            redirectAttributes.addFlashAttribute("successMessage", "Hotel removed from favorites!");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_SUCCESS_MSG, "Hotel removed from favorites!");
         } catch (Exception e) {
             logger.error("Error removing favorite", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to remove hotel from favorites.");
+            redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Failed to remove hotel from favorites.");
         }
 
         return redirectUrl != null ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
