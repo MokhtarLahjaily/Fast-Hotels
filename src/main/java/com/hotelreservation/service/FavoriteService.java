@@ -162,7 +162,7 @@ public class FavoriteService {
 
             return favoriteHotels.stream()
                     .map(hotel -> hotelService.getHotelById(hotel.getId()))
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (Exception e) {
             log.error("Error getting favorite hotel responses for user {}: {}", userEmail, e.getMessage());
             return new ArrayList<>();

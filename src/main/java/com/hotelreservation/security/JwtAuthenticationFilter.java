@@ -19,13 +19,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final Logger jwtLogger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
@@ -36,11 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         String servletPath = request.getServletPath();
-        logger.debug("Processing request: {}", servletPath);
+        jwtLogger.debug("Processing request: {}", servletPath);
 
         // Skip filter for static resources and public routes
         if (shouldSkipFilter(servletPath)) {
-            logger.debug("Skipping filter for path: {}", servletPath);
+            jwtLogger.debug("Skipping filter for path: {}", servletPath);
             filterChain.doFilter(request, response);
             return;
         }
@@ -49,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
                 !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
-            logger.debug("Authentication already set in SecurityContext: {}",
+            jwtLogger.debug("Authentication already set in SecurityContext: {}",
                     SecurityContextHolder.getContext().getAuthentication().getName());
             filterChain.doFilter(request, response);
             return;
@@ -76,11 +75,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                        logger.debug("Authentication set for user: {}", username);
+                        jwtLogger.debug("Authentication set for user: {}", username);
                     }
                 }
             } catch (Exception e) {
-                logger.error("Error processing JWT token for path: " + servletPath, e);
+                jwtLogger.error("Error processing JWT token for path: " + servletPath, e);
             }
         }
 

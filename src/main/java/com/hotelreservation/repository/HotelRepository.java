@@ -16,6 +16,10 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
         Page<Hotel> findByOwner(User owner, Pageable pageable);
 
         // JPQL query with casting (may not work with bytea fields)
+        // PERFORMANCE WARNING: Leading wildcard LIKE conditions ('%value%') prevent
+        // B-Tree index usage and cause full table scans.
+        // For production, consider using PostgreSQL pg_trgm extension with GIN indexes
+        // or full-text search (ElasticSearch/Solr).
         @Query("SELECT h FROM Hotel h WHERE " +
                         "(:city IS NULL OR CAST(h.city AS string) LIKE CONCAT('%', CAST(:city AS string), '%') OR " +
                         "CAST(h.country AS string) LIKE CONCAT('%', CAST(:city AS string), '%') OR " +

@@ -70,7 +70,7 @@ public class FavoriteViewController {
             redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Failed to add hotel to favorites.");
         }
 
-        return redirectUrl != null ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
+        return isValidRedirectUrl(redirectUrl) ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
     }
 
     @PostMapping("/remove/{hotelId}")
@@ -93,6 +93,10 @@ public class FavoriteViewController {
             redirectAttributes.addFlashAttribute(Constants.ATTR_ERROR_MSG, "Failed to remove hotel from favorites.");
         }
 
-        return redirectUrl != null ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
+        return isValidRedirectUrl(redirectUrl) ? "redirect:" + redirectUrl : "redirect:/hotels/" + hotelId;
+    }
+
+    private boolean isValidRedirectUrl(String url) {
+        return url != null && !url.isEmpty() && url.startsWith("/") && !url.startsWith("//");
     }
 }

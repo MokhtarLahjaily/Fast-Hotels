@@ -1,6 +1,5 @@
 package com.hotelreservation.service;
 
-
 import com.hotelreservation.dto.request.RoomRequest;
 import com.hotelreservation.dto.response.AmenityResponse;
 import com.hotelreservation.dto.response.ImageResponse;
@@ -55,14 +54,16 @@ public class RoomService {
                 .map(this::mapToRoomResponse);
     }
 
-    public List<RoomResponse> getAvailableRooms(Long hotelId, LocalDate checkIn, LocalDate checkOut, Integer guestCount) {
+    public List<RoomResponse> getAvailableRooms(Long hotelId, LocalDate checkIn, LocalDate checkOut,
+            Integer guestCount) {
         return roomRepository.findAvailableRooms(hotelId, checkIn, checkOut, guestCount)
                 .stream()
                 .map(this::mapToRoomResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public Page<RoomResponse> getRoomsByPriceRange(Long hotelId, Integer guestCount, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+    public Page<RoomResponse> getRoomsByPriceRange(Long hotelId, Integer guestCount, BigDecimal minPrice,
+            BigDecimal maxPrice, Pageable pageable) {
         if (minPrice == null) {
             minPrice = BigDecimal.ZERO;
         }
@@ -212,13 +213,14 @@ public class RoomService {
     /**
      * Get available rooms for a specific hotel, date range, and guest count
      *
-     * @param hotelId The hotel ID
-     * @param checkIn Check-in date
+     * @param hotelId  The hotel ID
+     * @param checkIn  Check-in date
      * @param checkOut Check-out date
-     * @param guests Number of guests
+     * @param guests   Number of guests
      * @return List of available RoomResponse objects
      */
-    public List<RoomResponse> getAvailableRoomsByHotelId(Long hotelId, LocalDate checkIn, LocalDate checkOut, Integer guests) {
+    public List<RoomResponse> getAvailableRoomsByHotelId(Long hotelId, LocalDate checkIn, LocalDate checkOut,
+            Integer guests) {
         logger.info("Getting available rooms for hotel ID: {}, checkIn: {}, checkOut: {}, guests: {}",
                 hotelId, checkIn, checkOut, guests);
 
@@ -242,7 +244,7 @@ public class RoomService {
             return roomRepository.findAvailableRooms(hotelId, checkIn, checkOut, guests)
                     .stream()
                     .map(this::mapToRoomResponse)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (ResourceNotFoundException e) {
             logger.warn("Hotel not found with ID: {}", hotelId);
             throw e;

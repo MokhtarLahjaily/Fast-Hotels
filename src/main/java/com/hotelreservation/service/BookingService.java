@@ -53,6 +53,7 @@ public class BookingService {
 
     /**
      * Get recent bookings for the currently authenticated user
+     * 
      * @param limit The maximum number of bookings to return
      * @return List of recent bookings
      */
@@ -72,7 +73,7 @@ public class BookingService {
 
         return recentBookings.stream()
                 .map(this::mapToBookingResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Page<BookingResponse> getCurrentUserBookings(Pageable pageable) {
@@ -96,7 +97,8 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
-        // Check if the booking belongs to the current user or if the user is the hotel owner
+        // Check if the booking belongs to the current user or if the user is the hotel
+        // owner
         if (!booking.getUser().getId().equals(user.getId()) &&
                 !booking.getRoom().getHotel().getOwner().getId().equals(user.getId())) {
             throw new UnauthorizedException("You are not authorized to view this booking");
@@ -126,7 +128,8 @@ public class BookingService {
 
         BookingResponse response = mapToBookingResponse(booking);
 
-        // Add review eligibility information (but don't check current user since this is admin)
+        // Add review eligibility information (but don't check current user since this
+        // is admin)
         response.setEligibleForReview(false); // Admin doesn't review
         response.setHasReview(booking.getReview() != null);
 
@@ -232,7 +235,8 @@ public class BookingService {
             throw new BadRequestException("Cannot cancel a completed booking");
         }
 
-        // Check cancellation policy (e.g., can't cancel if check-in is less than 24 hours away)
+        // Check cancellation policy (e.g., can't cancel if check-in is less than 24
+        // hours away)
         if (booking.getCheckInDate().isBefore(LocalDate.now().plusDays(1))) {
             throw new BadRequestException("Booking cannot be cancelled within 24 hours of check-in");
         }

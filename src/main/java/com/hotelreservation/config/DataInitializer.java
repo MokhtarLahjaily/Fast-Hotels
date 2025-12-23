@@ -93,8 +93,14 @@ public class DataInitializer implements CommandLineRunner {
                         return userRepository.findByEmail("admin@example.com").get();
                 }
 
+                String adminPassword = System.getenv("ADMIN_PASSWORD");
+                if (adminPassword == null || adminPassword.isEmpty()) {
+                        adminPassword = java.util.UUID.randomUUID().toString();
+                        logger.warn("ADMIN_PASSWORD environment variable not set. Using random password for admin.");
+                }
+
                 User adminUser = User.builder().email("admin@example.com")
-                                .passwordHash(passwordEncoder.encode("admin123")).firstName("Admin").lastName("User")
+                                .passwordHash(passwordEncoder.encode(adminPassword)).firstName("Admin").lastName("User")
                                 .role(UserRole.ADMIN).build();
 
                 adminUser = userRepository.save(adminUser);
@@ -119,7 +125,12 @@ public class DataInitializer implements CommandLineRunner {
                         return userRepository.findByEmail(email).get();
                 }
 
-                User hotelOwner = User.builder().email(email).passwordHash(passwordEncoder.encode("owner123"))
+                String ownerPassword = System.getenv("OWNER_PASSWORD");
+                if (ownerPassword == null || ownerPassword.isEmpty()) {
+                        ownerPassword = java.util.UUID.randomUUID().toString();
+                }
+
+                User hotelOwner = User.builder().email(email).passwordHash(passwordEncoder.encode(ownerPassword))
                                 .firstName(firstName).lastName(lastName).role(UserRole.HOTEL_OWNER).build();
 
                 hotelOwner = userRepository.save(hotelOwner);
@@ -291,7 +302,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         @Transactional
-        private void createHotelOwnersForExistingHotels() {
+        public void createHotelOwnersForExistingHotels() {
                 // Create hotel owners if they don't exist
                 List<User> hotelOwners = createHotelOwners();
 

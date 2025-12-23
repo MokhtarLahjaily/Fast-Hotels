@@ -65,7 +65,7 @@ public class HotelService {
     public List<HotelResponse> findAllHotels() {
         return hotelRepository.findAll().stream()
                 .map(this::convertToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public HotelResponse findHotelById(Long id) {
@@ -273,7 +273,7 @@ public class HotelService {
                     .sorted(Comparator.comparing(HotelResponse::getStarRating,
                             Comparator.nullsLast(Comparator.reverseOrder())))
                     .limit(6)
-                    .collect(Collectors.toList());
+                    .toList();
 
             logger.debug("Returning {} featured hotels", featuredHotels.size());
             return featuredHotels;

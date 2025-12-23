@@ -132,7 +132,8 @@ public class ImageService {
                     .build();
 
             Image savedImage = imageRepository.save(image);
-            log.info("Successfully uploaded image: {} for {} {} with URL: {}", filename, entityType, entityId, imageUrl);
+            log.info("Successfully uploaded image: {} for {} {} with URL: {}", filename, entityType, entityId,
+                    imageUrl);
 
             return mapToImageResponse(savedImage);
         } catch (IOException e) {
@@ -151,6 +152,12 @@ public class ImageService {
         try {
             // Delete file from disk
             String filename = image.getUrl().substring(image.getUrl().lastIndexOf("/") + 1);
+
+            if (filename.contains("..")) {
+                log.warn("Potential path traversal attempt in image deletion: {}", filename);
+                throw new IOException("Invalid filename: " + filename);
+            }
+
             Path actualUploadPath = getActualUploadPath();
             Path filePath = actualUploadPath.resolve(filename);
 
@@ -214,7 +221,8 @@ public class ImageService {
     }
 
     /**
-     * Get the actual upload path, handling both development and production environments
+     * Get the actual upload path, handling both development and production
+     * environments
      */
     private Path getActualUploadPath() {
         // For development: use src/main/resources/static/images/uploads
@@ -248,9 +256,14 @@ public class ImageService {
             throw new BadRequestException("Invalid filename");
         }
 
+        if (filename.contains("..")) {
+            throw new BadRequestException("Filename contains invalid path sequence");
+        }
+
         String extension = getFileExtension(filename).toLowerCase();
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new BadRequestException("File type not allowed. Allowed types: " + String.join(", ", ALLOWED_EXTENSIONS));
+            throw new BadRequestException(
+                    "File type not allowed. Allowed types: " + String.join(", ", ALLOWED_EXTENSIONS));
         }
     }
 
