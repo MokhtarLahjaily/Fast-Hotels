@@ -1,5 +1,6 @@
 package com.hotelreservation.config;
 
+import com.hotelreservation.util.AppConstants;
 import com.hotelreservation.model.Amenity;
 import com.hotelreservation.model.Hotel;
 import com.hotelreservation.model.Image;
@@ -88,9 +89,9 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         private User createAdminUser() {
-                if (userRepository.findByEmail("admin@example.com").isPresent()) {
+                if (userRepository.findByEmail(AppConstants.DefaultUsers.ADMIN_EMAIL).isPresent()) {
                         logger.info("Admin user already exists");
-                        return userRepository.findByEmail("admin@example.com").get();
+                        return userRepository.findByEmail(AppConstants.DefaultUsers.ADMIN_EMAIL).get();
                 }
 
                 String adminPassword = System.getenv("ADMIN_PASSWORD");
@@ -99,7 +100,7 @@ public class DataInitializer implements CommandLineRunner {
                         logger.warn("ADMIN_PASSWORD environment variable not set. Using random password for admin.");
                 }
 
-                User adminUser = User.builder().email("admin@example.com")
+                User adminUser = User.builder().email(AppConstants.DefaultUsers.ADMIN_EMAIL)
                                 .passwordHash(passwordEncoder.encode(adminPassword)).firstName("Admin").lastName("User")
                                 .role(UserRole.ADMIN).build();
 

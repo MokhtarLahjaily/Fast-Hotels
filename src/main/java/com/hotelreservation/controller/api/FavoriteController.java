@@ -25,13 +25,13 @@ public class FavoriteController {
     }
 
     @PostMapping("/{hotelId}")
-    public ResponseEntity<?> toggleFavorite(
+    public ResponseEntity<Map<String, Object>> toggleFavorite(
             @PathVariable Long hotelId,
             Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated() ||
                 authentication.getName().equals("anonymousUser")) {
-            return ResponseEntity.status(401).body("User not authenticated");
+            return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
         }
 
         try {
@@ -56,12 +56,12 @@ public class FavoriteController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error toggling favorite for hotel {}: {}", hotelId, e.getMessage());
-            return ResponseEntity.status(500).body("Error toggling favorite status");
+            return ResponseEntity.status(500).body(Map.of("error", "Error toggling favorite status"));
         }
     }
 
     @GetMapping("/status/{hotelId}")
-    public ResponseEntity<?> checkFavoriteStatus(
+    public ResponseEntity<Map<String, Object>> checkFavoriteStatus(
             @PathVariable Long hotelId,
             Authentication authentication) {
 

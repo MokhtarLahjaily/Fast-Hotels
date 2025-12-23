@@ -1,5 +1,7 @@
 package com.hotelreservation.security;
 
+import com.hotelreservation.util.AppConstants;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -47,7 +49,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Check if authentication is already set (e.g., from form login or session)
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
-                !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
+                !SecurityContextHolder.getContext().getAuthentication().getName()
+                        .equals(AppConstants.Attributes.ANONYMOUS_USER)) {
             jwtLogger.debug("Authentication already set in SecurityContext: {}",
                     SecurityContextHolder.getContext().getAuthentication().getName());
             filterChain.doFilter(request, response);
@@ -108,7 +111,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             return Arrays.stream(cookies)
-                    .filter(cookie -> "jwt_token".equals(cookie.getName()))
+                    .filter(cookie -> AppConstants.Attributes.JWT_COOKIE_NAME.equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);

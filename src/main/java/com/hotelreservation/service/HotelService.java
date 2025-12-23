@@ -295,77 +295,19 @@ public class HotelService {
         logger.info("Searching hotels with destination: {}, sortBy: {}", destination, sortBy);
 
         try {
-            // Convert star ratings to Short if provided
-            Short minRating = null;
-            Short maxRating = null;
+            Short[] ratings = getRatingRange(starRating);
+            Page<Hotel> hotelPage = findHotelsWithFilters(destination, amenityIds, ratings[0], ratings[1], pageable);
 
-            if (starRating != null && !starRating.isEmpty()) {
-                minRating = Short.valueOf(starRating.stream().min(Integer::compare).orElse(1).toString());
-                maxRating = Short.valueOf(starRating.stream().max(Integer::compare).orElse(5).toString());
-            }
-
-            // Use unsorted pageable for database query
-            Pageable unsortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-
-            Page<Hotel> hotelPage;
-
-            // Apply filters - FIXED: Use the native query method to avoid bytea casting
-            // issues
-            if (destination != null && !destination.isEmpty()) {
-                // Use the updated repository method that searches across name, city, and
-                // country
-                hotelPage = hotelRepository.findByFiltersNative(destination, null, minRating, maxRating,
-                        unsortedPageable);
-                logger.debug("Search by destination: {}, found {} hotels", destination, hotelPage.getTotalElements());
-            } else if (amenityIds != null && !amenityIds.isEmpty()) {
-                // Search by amenities
-                hotelPage = hotelRepository.findByAmenities(amenityIds, (long) amenityIds.size(), unsortedPageable);
-                logger.debug("Search by amenities, found {} hotels", hotelPage.getTotalElements());
-            } else {
-                // Get all hotels with optional rating filter
-                hotelPage = hotelRepository.findByFiltersNative(null, null, minRating, maxRating, unsortedPageable);
-                logger.debug("Search with no specific filters, found {} hotels", hotelPage.getTotalElements());
-            }
+            // Log results count
+            logger.debug("Found {} hotels matching search criteria", hotelPage.getTotalElements());
 
             // Map to response objects
-            Page<HotelResponse> results = hotelPage.map(this::createSimplifiedHotelResponse);
+            // Note: In-memory sorting logic was removed as it was not affecting the
+            // returned Page in the original implementation.
+            return hotelPage.map(this::createSimplifiedHotelResponse);
 
-            // Apply sorting in memory
-            List<HotelResponse> sortedResults = new ArrayList<>(results.getContent());
-            if (sortBy != null) {
-                switch (sortBy) {
-                    case "priceAsc":
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getMinPrice,
-                                Comparator.nullsLast(Comparator.naturalOrder())));
-                        break;
-                    case "priceDesc":
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getMinPrice,
-                                Comparator.nullsLast(Comparator.reverseOrder())));
-                        break;
-                    case "ratingDesc":
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating,
-                                Comparator.nullsLast(Comparator.reverseOrder())));
-                        break;
-                    default:
-                        // Default to recommended (star rating desc)
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating,
-                                Comparator.nullsLast(Comparator.reverseOrder())));
-                }
-            } else {
-                // Default sorting
-                sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating,
-                        Comparator.nullsLast(Comparator.reverseOrder())));
-            }
-
-            // Create a new page with the sorted results
-            // Note: This is a simplified approach that doesn't handle pagination perfectly
-            // For a production app, you might want to use a more sophisticated approach
-
-            logger.debug("Found {} hotels matching search criteria", results.getTotalElements());
-            return results;
         } catch (Exception e) {
             logger.error("Error searching hotels: {}", e.getMessage(), e);
-            // Return empty page instead of throwing exception
             return Page.empty(pageable);
         }
     }
@@ -380,99 +322,10 @@ public class HotelService {
         try {
             logger.debug("Creating simplified response for hotel: ID={}, Name={}", hotel.getId(), hotel.getName());
 
-            // Get primary image URL safely
-            String primaryImageUrl = "/images/hotel-placeholder.jpg"; // Default fallback
-            try {
-                List<Image> images = imageRepository.findByEntityTypeAndEntityId("HOTEL", hotel.getId());
-                if (images != null && !images.isEmpty()) {
-                    // Try to find primary image first
-                    for (Image image : images) {
-                        if (image != null && image.getIsPrimary() != null && image.getIsPrimary()) {
-                            primaryImageUrl = image.getUrl();
-                            break;
-                        }
-                    }
-                    // If no primary image, use the first one
-                    if (primaryImageUrl.equals("/images/hotel-placeholder.jpg") && !images.isEmpty()
-                            && images.get(0) != null && images.get(0).getUrl() != null) {
-                        primaryImageUrl = images.get(0).getUrl();
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error fetching images for hotel {}: {}", hotel.getId(), e.getMessage());
-                // Continue with default image
-            }
-
-            // Get minimum price safely - FIXED N+1: Use repository method for specific
-            // hotel
-            BigDecimal minPrice = new BigDecimal("99.99"); // Default fallback
-            try {
-                List<Room> rooms = roomRepository.findByHotelId(hotel.getId());
-
-                if (rooms != null && !rooms.isEmpty()) {
-                    for (Room room : rooms) {
-                        if (room != null && room.getPricePerNight() != null &&
-                                (minPrice.compareTo(new BigDecimal("99.99")) == 0 ||
-                                        room.getPricePerNight().compareTo(minPrice) < 0)) {
-                            minPrice = room.getPricePerNight();
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error calculating minimum price for hotel {}: {}", hotel.getId(), e.getMessage());
-                // Continue with default price
-            }
-
-            // Get amenities safely - IMPROVED IMPLEMENTATION USING NEW REPOSITORY METHOD
-            List<AmenityResponse> amenityResponses = new ArrayList<>();
-            try {
-                logger.debug("Fetching amenities for hotel ID: {}", hotel.getId());
-
-                // Use the new repository method to get amenities directly
-                List<Amenity> hotelAmenities = amenityRepository.findByHotelIdNative(hotel.getId());
-
-                if (hotelAmenities != null && !hotelAmenities.isEmpty()) {
-                    logger.debug("Found {} amenities for hotel {}", hotelAmenities.size(), hotel.getId());
-                    for (Amenity amenity : hotelAmenities) {
-                        if (amenity != null && amenity.getName() != null) {
-                            amenityResponses.add(AmenityResponse.builder()
-                                    .id(amenity.getId())
-                                    .name(amenity.getName())
-                                    .icon(amenity.getIcon())
-                                    .build());
-                        }
-                    }
-                } else {
-                    logger.debug("No amenities found for hotel {}, using fallback approach", hotel.getId());
-                    // Fallback: Just get a few generic amenities
-                    List<Amenity> allAmenities = amenityRepository.findAll();
-                    // Take up to 3 amenities as a fallback
-                    for (int i = 0; i < Math.min(3, allAmenities.size()); i++) {
-                        Amenity amenity = allAmenities.get(i);
-                        if (amenity != null && amenity.getName() != null) {
-                            amenityResponses.add(AmenityResponse.builder()
-                                    .id(amenity.getId())
-                                    .name(amenity.getName())
-                                    .icon(amenity.getIcon())
-                                    .build());
-                        }
-                    }
-                }
-
-                logger.debug("Successfully mapped {} amenities for hotel {}", amenityResponses.size(), hotel.getId());
-            } catch (Exception e) {
-                logger.error("Error mapping amenities for hotel {}: {}", hotel.getId(), e.getMessage());
-                // Continue with empty amenities list
-            }
-
-            // Get average rating safely
-            Double averageRating = null;
-            try {
-                averageRating = reviewRepository.getAverageRatingForHotel(hotel.getId());
-            } catch (Exception e) {
-                logger.error("Error fetching average rating for hotel {}: {}", hotel.getId(), e.getMessage());
-                // Continue with null average rating
-            }
+            String primaryImageUrl = getPrimaryImageUrl(hotel.getId());
+            BigDecimal minPrice = getMinPrice(hotel.getId());
+            List<AmenityResponse> amenityResponses = getHotelAmenities(hotel.getId());
+            Double averageRating = getAverageRating(hotel.getId());
 
             // Build the response with only essential fields
             return HotelResponse.builder()
@@ -495,22 +348,17 @@ public class HotelService {
 
             // Return an absolute minimum response to prevent null pointer exceptions in the
             // view
-            try {
-                return HotelResponse.builder()
-                        .id(hotel.getId())
-                        .name("Hotel " + hotel.getId())
-                        .description("No description available")
-                        .city("Unknown location")
-                        .country("")
-                        .starRating((short) 3)
-                        .imageUrl("/images/hotel-placeholder.jpg")
-                        .minPrice(new BigDecimal("99.99"))
-                        .amenities(new ArrayList<>())
-                        .build();
-            } catch (Exception ex) {
-                logger.error("Failed to create even minimal hotel response", ex);
-                return null;
-            }
+            return HotelResponse.builder()
+                    .id(hotel.getId())
+                    .name("Hotel " + hotel.getId())
+                    .description("No description available")
+                    .city("Unknown location")
+                    .country("")
+                    .starRating((short) 3)
+                    .imageUrl("/images/hotel-placeholder.jpg")
+                    .minPrice(new BigDecimal("99.99"))
+                    .amenities(new ArrayList<>())
+                    .build();
         }
     }
 
@@ -582,5 +430,95 @@ public class HotelService {
                 .pricePerNight(room.getPricePerNight())
                 .hotelId(room.getHotel() != null ? room.getHotel().getId() : null)
                 .build();
+    }
+
+    // Helper methods for refactoring
+    private Short[] getRatingRange(List<Integer> starRating) {
+        if (starRating == null || starRating.isEmpty()) {
+            return new Short[] { null, null };
+        }
+        Short min = Short.valueOf(starRating.stream().min(Integer::compare).orElse(1).toString());
+        Short max = Short.valueOf(starRating.stream().max(Integer::compare).orElse(5).toString());
+        return new Short[] { min, max };
+    }
+
+    private Page<Hotel> findHotelsWithFilters(String destination, List<Long> amenityIds, Short minRating,
+            Short maxRating, Pageable pageable) {
+        Pageable unsortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+
+        if (destination != null && !destination.isEmpty()) {
+            return hotelRepository.findByFiltersNative(destination, null, minRating, maxRating, unsortedPageable);
+        }
+
+        if (amenityIds != null && !amenityIds.isEmpty()) {
+            return hotelRepository.findByAmenities(amenityIds, (long) amenityIds.size(), unsortedPageable);
+        }
+
+        return hotelRepository.findByFiltersNative(null, null, minRating, maxRating, unsortedPageable);
+    }
+
+    private String getPrimaryImageUrl(Long hotelId) {
+        try {
+            List<Image> images = imageRepository.findByEntityTypeAndEntityId("HOTEL", hotelId);
+            if (images == null || images.isEmpty()) {
+                return "/images/hotel-placeholder.jpg";
+            }
+            return images.stream()
+                    .filter(img -> img != null && Boolean.TRUE.equals(img.getIsPrimary()))
+                    .map(Image::getUrl)
+                    .findFirst()
+                    .orElseGet(() -> images.get(0).getUrl() != null ? images.get(0).getUrl()
+                            : "/images/hotel-placeholder.jpg");
+        } catch (Exception e) {
+            logger.error("Error fetching images for hotel {}: {}", hotelId, e.getMessage());
+            return "/images/hotel-placeholder.jpg";
+        }
+    }
+
+    private BigDecimal getMinPrice(Long hotelId) {
+        BigDecimal defaultPrice = new BigDecimal("99.99");
+        try {
+            List<Room> rooms = roomRepository.findByHotelId(hotelId);
+            if (rooms == null || rooms.isEmpty()) {
+                return defaultPrice;
+            }
+            return rooms.stream()
+                    .filter(room -> room != null && room.getPricePerNight() != null)
+                    .map(Room::getPricePerNight)
+                    .min(Comparator.naturalOrder())
+                    .orElse(defaultPrice);
+        } catch (Exception e) {
+            logger.error("Error calculating minimum price for hotel {}: {}", hotelId, e.getMessage());
+            return defaultPrice;
+        }
+    }
+
+    private List<AmenityResponse> getHotelAmenities(Long hotelId) {
+        try {
+            List<Amenity> hotelAmenities = amenityRepository.findByHotelIdNative(hotelId);
+            if (hotelAmenities != null && !hotelAmenities.isEmpty()) {
+                return hotelAmenities.stream()
+                        .filter(a -> a != null && a.getName() != null)
+                        .map(this::mapToAmenityResponse)
+                        .toList();
+            }
+            // Fallback
+            return amenityRepository.findAll().stream()
+                    .limit(3)
+                    .map(this::mapToAmenityResponse)
+                    .toList();
+        } catch (Exception e) {
+            logger.error("Error mapping amenities for hotel {}: {}", hotelId, e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    private Double getAverageRating(Long hotelId) {
+        try {
+            return reviewRepository.getAverageRatingForHotel(hotelId);
+        } catch (Exception e) {
+            logger.error("Error fetching average rating for hotel {}: {}", hotelId, e.getMessage());
+            return null;
+        }
     }
 }

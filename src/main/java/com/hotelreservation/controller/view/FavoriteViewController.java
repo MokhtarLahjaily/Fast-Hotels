@@ -97,6 +97,26 @@ public class FavoriteViewController {
     }
 
     private boolean isValidRedirectUrl(String url) {
-        return url != null && !url.isEmpty() && url.startsWith("/") && !url.startsWith("//");
+        if (url == null || url.isEmpty()) {
+            return false;
+        }
+
+        // Strict whitelist of allowed paths
+        // Must start with '/' and not '//' (protocol relative)
+        if (!url.startsWith("/") || url.startsWith("//") || url.contains("\\")) {
+            return false;
+        }
+
+        // Optional: List of allowed base paths for even stricter security
+        List<String> allowedPrefixes = List.of(
+                "/hotels",
+                "/favorites",
+                "/profile",
+                "/bookings",
+                "/search",
+                "/admin",
+                "/owner");
+
+        return allowedPrefixes.stream().anyMatch(url::startsWith);
     }
 }

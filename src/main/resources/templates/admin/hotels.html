@@ -1,141 +1,154 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/base}">
+
 <head>
     <title>Hotel Management</title>
 </head>
+
 <body>
-<div layout:fragment="content">
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Hotel Management</h1>
-            <a href="/admin/hotels/create" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i> Add New Hotel
-            </a>
-        </div>
-
-        <!-- Alerts -->
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${success}">Success message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${error}">Error message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-
-        <!-- Search and Filter -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <form action="/admin/hotels" method="get" class="row g-3">
-                    <div class="col-md-4">
-                        <label for="search" class="form-label">Search</label>
-                        <input type="text" class="form-control" id="search" name="search" th:value="${param.search}" placeholder="Hotel name or location">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="city" class="form-label">City</label>
-                        <select class="form-select" id="city" name="city">
-                            <option value="">All Cities</option>
-                            <option th:selected="${param.city != null && param.city[0] == 'New York'}" value="New York">New York</option>
-                            <option th:selected="${param.city != null && param.city[0] == 'Los Angeles'}" value="Los Angeles">Los Angeles</option>
-                            <option th:selected="${param.city != null && param.city[0] == 'Chicago'}" value="Chicago">Chicago</option>
-                            <option th:selected="${param.city != null && param.city[0] == 'Miami'}" value="Miami">Miami</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="status" class="form-label">Status</label>
-                        <select class="form-select" id="status" name="status">
-                            <option value="">All Statuses</option>
-                            <option th:selected="${param.status != null && param.status[0] == 'ACTIVE'}" value="ACTIVE">Active</option>
-                            <option th:selected="${param.status != null && param.status[0] == 'INACTIVE'}" value="INACTIVE">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-1"></i> Search
-                        </button>
-                    </div>
-                </form>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Hotel Management</h1>
+                <a href="/admin/hotels/create" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> Add New Hotel
+                </a>
             </div>
-        </div>
 
-        <!-- Hotels Table -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>City</th>
-                            <th>Rating</th>
-                            <th>Address</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:if="${hotels == null || hotels.empty}">
-                            <td colspan="7" class="text-center py-4">
-                                <i class="fas fa-hotel fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">No hotels found</p>
-                            </td>
-                        </tr>
-                        <tr th:each="hotel : ${hotels}" th:if="${hotels != null && !hotels.empty}">
-                            <td th:text="${hotel.id}">1</td>
-                            <td th:text="${hotel.name ?: 'N/A'}">Grand Hotel</td>
-                            <td th:text="${hotel.city ?: 'N/A'}">New York</td>
-                            <td>
-                                <span th:text="${hotel.starRating ?: 'N/A'}">4.5</span>
-                                <i class="fas fa-star text-warning" th:if="${hotel.starRating != null}"></i>
-                            </td>
-                            <td th:text="${hotel.address ?: 'N/A'}">123 Main St</td>
-                            <td>
-                                <span class="badge bg-success">Active</span>
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-sm">
-                                    <a th:href="@{/admin/hotels/{id}(id=${hotel.id})}" class="btn btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a th:href="@{/admin/hotels/{id}/edit(id=${hotel.id})}" class="btn btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-danger"
-                                            data-bs-toggle="modal"
-                                            th:data-bs-target="'#deleteModal' + ${hotel.id}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+            <!-- Alerts -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}">Success message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}">Error message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form action="/admin/hotels" method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" th:value="${param.search}"
+                                placeholder="Hotel name or location">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="city" class="form-label">City</label>
+                            <select class="form-select" id="city" name="city">
+                                <option value="">All Cities</option>
+                                <option th:selected="${param.city != null && param.city[0] == 'New York'}"
+                                    value="New York">New York</option>
+                                <option th:selected="${param.city != null && param.city[0] == 'Los Angeles'}"
+                                    value="Los Angeles">Los Angeles</option>
+                                <option th:selected="${param.city != null && param.city[0] == 'Chicago'}"
+                                    value="Chicago">Chicago</option>
+                                <option th:selected="${param.city != null && param.city[0] == 'Miami'}" value="Miami">
+                                    Miami</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                <option th:selected="${param.status != null && param.status[0] == 'ACTIVE'}"
+                                    value="ACTIVE">Active</option>
+                                <option th:selected="${param.status != null && param.status[0] == 'INACTIVE'}"
+                                    value="INACTIVE">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i> Search
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <!-- Pagination -->
-                <nav th:if="${hotels != null && hotels.totalPages > 1}" aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item" th:classappend="${hotels.first ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/hotels(page=${hotels.number - 1}, size=${hotels.size}, search=${param.search}, city=${param.city}, status=${param.status})}" tabindex="-1" th:aria-disabled="${hotels.first}">Previous</a>
-                        </li>
+            <!-- Hotels Table -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">City</th>
+                                    <th scope="col">Rating</th>
+                                    <th scope="col">Address</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${hotels == null || hotels.empty}">
+                                    <td colspan="7" class="text-center py-4">
+                                        <i class="fas fa-hotel fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">No hotels found</p>
+                                    </td>
+                                </tr>
+                                <tr th:each="hotel : ${hotels}" th:if="${hotels != null && !hotels.empty}">
+                                    <td th:text="${hotel.id}">1</td>
+                                    <td th:text="${hotel.name ?: 'N/A'}">Grand Hotel</td>
+                                    <td th:text="${hotel.city ?: 'N/A'}">New York</td>
+                                    <td>
+                                        <span th:text="${hotel.starRating ?: 'N/A'}">4.5</span>
+                                        <i class="fas fa-star text-warning" th:if="${hotel.starRating != null}"></i>
+                                    </td>
+                                    <td th:text="${hotel.address ?: 'N/A'}">123 Main St</td>
+                                    <td>
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a th:href="@{/admin/hotels/{id}(id=${hotel.id})}" class="btn btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a th:href="@{/admin/hotels/{id}/edit(id=${hotel.id})}"
+                                                class="btn btn-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                                th:data-bs-target="'#deleteModal' + ${hotel.id}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, hotels.totalPages - 1)}"
-                            th:classappend="${i == hotels.number ? 'active' : ''}">
-                            <a class="page-link" th:href="@{/admin/hotels(page=${i}, size=${hotels.size}, search=${param.search}, city=${param.city}, status=${param.status})}"
-                               th:text="${i + 1}">1</a>
-                        </li>
+                    <!-- Pagination -->
+                    <nav th:if="${hotels != null && hotels.totalPages > 1}" aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${hotels.first ? 'disabled' : ''}">
+                                <a class="page-link"
+                                    th:href="@{/admin/hotels(page=${hotels.number - 1}, size=${hotels.size}, search=${param.search}, city=${param.city}, status=${param.status})}"
+                                    tabindex="-1" th:aria-disabled="${hotels.first}">Previous</a>
+                            </li>
 
-                        <li class="page-item" th:classappend="${hotels.last ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{/admin/hotels(page=${hotels.number + 1}, size=${hotels.size}, search=${param.search}, city=${param.city}, status=${param.status})}">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, hotels.totalPages - 1)}"
+                                th:classappend="${i == hotels.number ? 'active' : ''}">
+                                <a class="page-link"
+                                    th:href="@{/admin/hotels(page=${i}, size=${hotels.size}, search=${param.search}, city=${param.city}, status=${param.status})}"
+                                    th:text="${i + 1}">1</a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${hotels.last ? 'disabled' : ''}">
+                                <a class="page-link"
+                                    th:href="@{/admin/hotels(page=${hotels.number + 1}, size=${hotels.size}, search=${param.search}, city=${param.city}, status=${param.status})}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

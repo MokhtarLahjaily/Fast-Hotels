@@ -88,31 +88,37 @@ public class ImageService {
             // Validate file
             validateFile(file);
 
-            // Generate unique filename
+            // Generate unique filename with UUID
             String originalFilename = file.getOriginalFilename();
             String extension = getFileExtension(originalFilename);
             String filename = UUID.randomUUID().toString() + "." + extension;
 
             // Get the actual upload path
-            Path actualUploadPath = getActualUploadPath();
+            Path actualUploadPath = getActualUploadPath().toAbsolutePath().normalize();
 
             // Ensure directory exists
             if (!Files.exists(actualUploadPath)) {
                 Files.createDirectories(actualUploadPath);
-                log.info("Created upload directory: {}", actualUploadPath.toAbsolutePath());
+                log.info("Created upload directory: {}", actualUploadPath);
             }
 
-            // Save file to disk
-            Path filePath = actualUploadPath.resolve(filename);
-            log.info("Saving file to: {}", filePath.toAbsolutePath());
+            // Save file to disk with Path Traversal Check
+            Path filePath = actualUploadPath.resolve(filename).normalize();
+
+            if (!filePath.startsWith(actualUploadPath)) {
+                log.error("Path traversal attempt: {}", filePath);
+                throw new RuntimeException("Security detected path traversal attempt");
+            }
+
+            log.info("Saving file to: {}", filePath);
 
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // Verify file was created
             if (Files.exists(filePath)) {
-                log.info("File successfully saved: {}", filePath.toAbsolutePath());
+                log.info("File successfully saved: {}", filePath);
             } else {
-                log.error("File was not created: {}", filePath.toAbsolutePath());
+                log.error("File was not created: {}", filePath);
                 throw new RuntimeException("File was not saved to disk");
             }
 
