@@ -83,7 +83,8 @@ public class HotelService {
         }
     }
 
-    public Page<HotelResponse> getHotelsByFilters(String city, String country, Short minRating, Short maxRating, Pageable pageable) {
+    public Page<HotelResponse> getHotelsByFilters(String city, String country, Short minRating, Short maxRating,
+            Pageable pageable) {
         try {
             // Use the native query method to avoid bytea casting issues
             return hotelRepository.findByFiltersNative(city, country, minRating, maxRating, pageable)
@@ -106,7 +107,7 @@ public class HotelService {
 
     public HotelResponse getHotelById(Long id) {
         try {
-            Hotel hotel = hotelRepository.findById(id)
+            Hotel hotel = hotelRepository.findByIdWithRoomsAndAmenities(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
             return mapToHotelResponseSafely(hotel);
@@ -121,13 +122,15 @@ public class HotelService {
     @Transactional
     public HotelResponse createHotel(HotelRequest hotelRequest) {
         User owner = userRepository.findById(hotelRequest.getOwnerId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + hotelRequest.getOwnerId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("User not found with id: " + hotelRequest.getOwnerId()));
 
         Set<Amenity> amenities = new HashSet<>();
         if (hotelRequest.getAmenityIds() != null && !hotelRequest.getAmenityIds().isEmpty()) {
             amenities = hotelRequest.getAmenityIds().stream()
                     .map(amenityId -> amenityRepository.findById(amenityId)
-                            .orElseThrow(() -> new ResourceNotFoundException("Amenity not found with id: " + amenityId)))
+                            .orElseThrow(
+                                    () -> new ResourceNotFoundException("Amenity not found with id: " + amenityId)))
                     .collect(Collectors.toSet());
         }
 
@@ -155,14 +158,16 @@ public class HotelService {
 
         if (hotelRequest.getOwnerId() != null) {
             User owner = userRepository.findById(hotelRequest.getOwnerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + hotelRequest.getOwnerId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "User not found with id: " + hotelRequest.getOwnerId()));
             hotel.setOwner(owner);
         }
 
         if (hotelRequest.getAmenityIds() != null) {
             Set<Amenity> amenities = hotelRequest.getAmenityIds().stream()
                     .map(amenityId -> amenityRepository.findById(amenityId)
-                            .orElseThrow(() -> new ResourceNotFoundException("Amenity not found with id: " + amenityId)))
+                            .orElseThrow(
+                                    () -> new ResourceNotFoundException("Amenity not found with id: " + amenityId)))
                     .collect(Collectors.toSet());
             hotel.setAmenities(amenities);
         }
@@ -184,6 +189,11 @@ public class HotelService {
     @Transactional
     public void deleteHotel(Long id) {
         Hotel hotel = findById(id);
+
+        // Clean up images - images don't have a direct relationship in Hotel entity
+        imageRepository.deleteByEntityTypeAndEntityId("HOTEL", id);
+
+        // Associated rooms, reviews, and favorites are deleted via CascadeType.ALL
         hotelRepository.delete(hotel);
     }
 
@@ -260,7 +270,8 @@ public class HotelService {
 
             // Sort by star rating in memory
             List<HotelResponse> featuredHotels = allHotels.stream()
-                    .sorted(Comparator.comparing(HotelResponse::getStarRating, Comparator.nullsLast(Comparator.reverseOrder())))
+                    .sorted(Comparator.comparing(HotelResponse::getStarRating,
+                            Comparator.nullsLast(Comparator.reverseOrder())))
                     .limit(6)
                     .collect(Collectors.toList());
 
@@ -298,10 +309,13 @@ public class HotelService {
 
             Page<Hotel> hotelPage;
 
-            // Apply filters - FIXED: Use the native query method to avoid bytea casting issues
+            // Apply filters - FIXED: Use the native query method to avoid bytea casting
+            // issues
             if (destination != null && !destination.isEmpty()) {
-                // Use the updated repository method that searches across name, city, and country
-                hotelPage = hotelRepository.findByFiltersNative(destination, null, minRating, maxRating, unsortedPageable);
+                // Use the updated repository method that searches across name, city, and
+                // country
+                hotelPage = hotelRepository.findByFiltersNative(destination, null, minRating, maxRating,
+                        unsortedPageable);
                 logger.debug("Search by destination: {}, found {} hotels", destination, hotelPage.getTotalElements());
             } else if (amenityIds != null && !amenityIds.isEmpty()) {
                 // Search by amenities
@@ -321,21 +335,26 @@ public class HotelService {
             if (sortBy != null) {
                 switch (sortBy) {
                     case "priceAsc":
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getMinPrice, Comparator.nullsLast(Comparator.naturalOrder())));
+                        sortedResults.sort(Comparator.comparing(HotelResponse::getMinPrice,
+                                Comparator.nullsLast(Comparator.naturalOrder())));
                         break;
                     case "priceDesc":
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getMinPrice, Comparator.nullsLast(Comparator.reverseOrder())));
+                        sortedResults.sort(Comparator.comparing(HotelResponse::getMinPrice,
+                                Comparator.nullsLast(Comparator.reverseOrder())));
                         break;
                     case "ratingDesc":
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating, Comparator.nullsLast(Comparator.reverseOrder())));
+                        sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating,
+                                Comparator.nullsLast(Comparator.reverseOrder())));
                         break;
                     default:
                         // Default to recommended (star rating desc)
-                        sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating, Comparator.nullsLast(Comparator.reverseOrder())));
+                        sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating,
+                                Comparator.nullsLast(Comparator.reverseOrder())));
                 }
             } else {
                 // Default sorting
-                sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating, Comparator.nullsLast(Comparator.reverseOrder())));
+                sortedResults.sort(Comparator.comparing(HotelResponse::getStarRating,
+                        Comparator.nullsLast(Comparator.reverseOrder())));
             }
 
             // Create a new page with the sorted results
@@ -374,7 +393,8 @@ public class HotelService {
                         }
                     }
                     // If no primary image, use the first one
-                    if (primaryImageUrl.equals("/images/hotel-placeholder.jpg") && !images.isEmpty() && images.get(0) != null && images.get(0).getUrl() != null) {
+                    if (primaryImageUrl.equals("/images/hotel-placeholder.jpg") && !images.isEmpty()
+                            && images.get(0) != null && images.get(0).getUrl() != null) {
                         primaryImageUrl = images.get(0).getUrl();
                     }
                 }
@@ -383,16 +403,15 @@ public class HotelService {
                 // Continue with default image
             }
 
-            // Get minimum price safely
+            // Get minimum price safely - FIXED N+1: Use repository method for specific
+            // hotel
             BigDecimal minPrice = new BigDecimal("99.99"); // Default fallback
             try {
-                List<Room> rooms = roomRepository.findAll().stream()
-                        .filter(room -> room != null && room.getHotel() != null && room.getHotel().getId().equals(hotel.getId()))
-                        .collect(Collectors.toList());
+                List<Room> rooms = roomRepository.findByHotelId(hotel.getId());
 
-                if (!rooms.isEmpty()) {
+                if (rooms != null && !rooms.isEmpty()) {
                     for (Room room : rooms) {
-                        if (room.getPricePerNight() != null &&
+                        if (room != null && room.getPricePerNight() != null &&
                                 (minPrice.compareTo(new BigDecimal("99.99")) == 0 ||
                                         room.getPricePerNight().compareTo(minPrice) < 0)) {
                             minPrice = room.getPricePerNight();
@@ -474,7 +493,8 @@ public class HotelService {
             logger.error("Error creating simplified response for hotel {}: {}",
                     hotel != null ? hotel.getId() : "null", e.getMessage(), e);
 
-            // Return an absolute minimum response to prevent null pointer exceptions in the view
+            // Return an absolute minimum response to prevent null pointer exceptions in the
+            // view
             try {
                 return HotelResponse.builder()
                         .id(hotel.getId())
@@ -494,7 +514,8 @@ public class HotelService {
         }
     }
 
-    // Original detailed mapping method - kept for reference but not used for featured hotels
+    // Original detailed mapping method - kept for reference but not used for
+    // featured hotels
     private HotelResponse mapToHotelResponseSafely(Hotel hotel) {
         if (hotel == null) {
             logger.warn("Attempted to map null hotel to response");

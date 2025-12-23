@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/base}">
+
+<head>
+    <style layout:fragment="cssResources">
+        .dashboard-wrapper {
+            display: flex;
+            min-height: calc(100vh - 56px);
+            /* Adjust based on header height */
+        }
+
+        .sidebar {
+            width: 280px;
+            min-height: 100%;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .dashboard-content {
+            flex-grow: 1;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar .nav-link {
+            transition: all 0.2s;
+            margin: 4px 0;
+            padding: 12px 20px;
+        }
+
+        .sidebar .nav-link.active {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                margin-left: -280px;
+                position: absolute;
+            }
+
+            .sidebar.show {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="dashboard-wrapper">
+            <!-- Sidebar -->
+            <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+            <!-- Main Dashboard Content -->
+            <section class="dashboard-content">
+                <div class="container-fluid py-4">
+                    <!-- Breadcrumbs or Alerts could go here -->
+                    <div layout:fragment="dashboard-content"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <th:block layout:fragment="jsResources">
+        <script>
+            // Any dashboard specific JS
+        </script>
+    </th:block>
+</body>
+
+</html>

@@ -1,104 +1,125 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <title>Header Fragment</title>
 </head>
+
 <body>
-<header th:fragment="header" class="bg-white shadow-sm">
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container">
-            <!-- Logo -->
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-hotel text-primary me-2"></i>EasyStay
-            </a>
+    <header th:fragment="header" class="bg-white shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <!-- Logo -->
+                <a class="navbar-brand fw-bold" href="/">
+                    <i class="fas fa-hotel text-primary me-2"></i>EasyStay
+                </a>
 
-            <!-- Mobile Toggle Button -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                <!-- Mobile Toggle Button -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <!-- Navigation Links -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/hotels">Hotels</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/about">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contact">Contact</a>
-                    </li>
-                    <!-- Admin Navigation - Only visible to admins -->
-                    <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
-                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-cog me-1"></i>Admin
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/admin/hotels"><i class="fas fa-hotel me-2"></i>Hotels</a></li>
-                            <li><a class="dropdown-item" href="/admin/rooms"><i class="fas fa-door-open me-2"></i>Rooms</a></li>
-                            <li><a class="dropdown-item" href="/admin/bookings"><i class="fas fa-calendar-check me-2"></i>Bookings</a></li>
-                            <li><a class="dropdown-item" href="/admin/users"><i class="fas fa-users me-2"></i>Users</a></li>
-                            <li><a class="dropdown-item" href="/admin/reviews"><i class="fas fa-star me-2"></i>Reviews</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/admin/system"><i class="fas fa-server me-2"></i>System</a></li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <!-- User Authentication -->
-                <div class="d-flex align-items-center">
-                    <!-- If user is authenticated -->
-                    <div sec:authorize="isAuthenticated()" class="dropdown">
-                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown"
+                <!-- Navigation Links -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/hotels">Hotels</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact">Contact</a>
+                        </li>
+                        <!-- Admin Navigation - Only visible to admins -->
+                        <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle me-1"></i>
-                            <span sec:authentication="name">Username</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>My Profile</a></li>
-                            <li><a class="dropdown-item" href="/bookings"><i class="fas fa-list me-2"></i>My Bookings</a></li>
-                            <li><a class="dropdown-item" href="/favorites"><i class="fas fa-heart me-2"></i>My Favorites</a></li>
-                            <li><a class="dropdown-item" href="/reviews"><i class="fas fa-star me-2"></i>My Reviews</a></li>
-                            <!-- Hotel Owner Navigation - Only visible to hotel owners -->
-                            <li sec:authorize="hasRole('HOTEL_OWNER')">
-                                <a class="dropdown-item" href="/hotel-owner/dashboard">
-                                    <i class="fas fa-building me-2"></i>My Hotels
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form th:action="@{/logout}" method="post" class="dropdown-item p-0">
-                                    <button type="submit" class="btn btn-link text-decoration-none text-danger w-100 text-start px-3 py-1">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+                                <i class="fas fa-cog me-1"></i>Admin
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                <li><a class="dropdown-item" href="/admin/dashboard"><i
+                                            class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="/admin/hotels"><i
+                                            class="fas fa-hotel me-2"></i>Hotels</a></li>
+                                <li><a class="dropdown-item" href="/admin/rooms"><i
+                                            class="fas fa-door-open me-2"></i>Rooms</a></li>
+                                <li><a class="dropdown-item" href="/admin/bookings"><i
+                                            class="fas fa-calendar-check me-2"></i>Bookings</a></li>
+                                <li><a class="dropdown-item" href="/admin/users"><i
+                                            class="fas fa-users me-2"></i>Users</a></li>
+                                <li><a class="dropdown-item" href="/admin/reviews"><i
+                                            class="fas fa-star me-2"></i>Reviews</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="/admin/system"><i
+                                            class="fas fa-server me-2"></i>System</a></li>
+                            </ul>
+                        </li>
+                    </ul>
 
-                    <!-- If user is not authenticated -->
-                    <div sec:authorize="!isAuthenticated()" class="d-flex">
-                        <a href="/login" class="btn btn-outline-primary me-2">
-                            <i class="fas fa-sign-in-alt me-1"></i>Login
-                        </a>
-                        <a href="/register" class="btn btn-primary">
-                            <i class="fas fa-user-plus me-1"></i>Register
-                        </a>
+                    <!-- User Authentication -->
+                    <div class="d-flex align-items-center">
+                        <!-- If user is authenticated -->
+                        <div sec:authorize="isAuthenticated()" class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span
+                                    th:text="${#authentication.principal instanceof T(com.hotelreservation.security.CustomUserDetails) ? #authentication.principal.fullName : #authentication.name}">Username</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>My
+                                        Profile</a></li>
+                                <li><a class="dropdown-item" href="/bookings"><i class="fas fa-list me-2"></i>My
+                                        Bookings</a></li>
+                                <li><a class="dropdown-item" href="/favorites"><i class="fas fa-heart me-2"></i>My
+                                        Favorites</a></li>
+                                <li><a class="dropdown-item" href="/reviews"><i class="fas fa-star me-2"></i>My
+                                        Reviews</a></li>
+                                <!-- Hotel Owner Navigation - Only visible to hotel owners -->
+                                <li sec:authorize="hasRole('HOTEL_OWNER')">
+                                    <a class="dropdown-item" href="/hotel-owner/dashboard">
+                                        <i class="fas fa-building me-2"></i>My Hotels
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form th:action="@{/logout}" method="post" class="dropdown-item p-0">
+                                        <button type="submit"
+                                            class="btn btn-link text-decoration-none text-danger w-100 text-start px-3 py-1">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- If user is not authenticated -->
+                        <div sec:authorize="!isAuthenticated()" class="d-flex">
+                            <a href="/login" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                            <a href="/register" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </nav>
-</header>
+        </nav>
+    </header>
 </body>
+
 </html>

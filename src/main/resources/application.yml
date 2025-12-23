@@ -57,10 +57,11 @@ jwt:
 ollama:
   enabled: true
   api-url: ${OLLAMA_API_URL:http://localhost:11434}
-  model: phi3:mini
+  model: llama3.2:1b
   timeout: 30000 # 30 secondes
   max-tokens: 150 # Limiter la longueur des réponses
   temperature: 0.7
+
 
 logging:
   level:

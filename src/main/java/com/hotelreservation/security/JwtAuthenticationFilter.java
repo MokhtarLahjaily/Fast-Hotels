@@ -34,18 +34,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
-        logger.debug("Processing request: {}", requestURI);
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
+        String servletPath = request.getServletPath();
+        logger.debug("Processing request: {}", servletPath);
 
-        // Skip filter for static resources and login processing
-        if (shouldSkipFilter(requestURI)) {
+        // Skip filter for static resources and public routes
+        if (shouldSkipFilter(servletPath)) {
+            logger.debug("Skipping filter for path: {}", servletPath);
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Check if authentication is already set (e.g., from form login)
+        // Check if authentication is already set (e.g., from form login or session)
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
                 !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")) {
@@ -57,24 +57,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Try to get JWT from cookies first
         String jwt = extractJwtFromCookies(request);
-        logger.debug("JWT from cookies: {}", jwt != null ? "Present" : "Not found");
 
         // If not found in cookies, try Authorization header
         if (jwt == null) {
             jwt = extractJwtFromHeader(request);
-            logger.debug("JWT from header: {}", jwt != null ? "Present" : "Not found");
         }
 
         if (jwt != null) {
             try {
-                // First validate the token format and expiration
                 if (jwtTokenProvider.validateToken(jwt)) {
                     String username = jwtTokenProvider.getUsernameFromToken(jwt);
-                    logger.debug("Username from token: {}", username);
-
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    // Now validate the token against the user details
                     if (jwtTokenProvider.validateToken(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
@@ -83,52 +77,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authentication);
 
                         logger.debug("Authentication set for user: {}", username);
-                    } else {
-                        logger.debug("Token validation failed for user: {}", username);
                     }
-                } else {
-                    logger.debug("Invalid token format or expired token");
                 }
             } catch (Exception e) {
-                logger.error("Error processing JWT token", e);
+                logger.error("Error processing JWT token for path: " + servletPath, e);
             }
-        } else {
-            logger.debug("No JWT token found in request");
         }
 
         filterChain.doFilter(request, response);
-
-        // Log authentication state after the filter chain
-        if (SecurityContextHolder.getContext().getAuthentication() != null &&
-                SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
-            logger.debug("Authentication after filter chain: {}",
-                    SecurityContextHolder.getContext().getAuthentication().getName());
-        } else {
-            logger.debug("No authentication after filter chain");
-        }
     }
 
     private boolean shouldSkipFilter(String path) {
         return path.startsWith("/css/") ||
                 path.startsWith("/js/") ||
                 path.startsWith("/images/") ||
+                path.startsWith("/fonts/") ||
+                path.startsWith("/webjars/") ||
+                path.startsWith("/static/") ||
                 path.equals("/favicon.ico") ||
                 path.equals("/login") ||
                 path.equals("/register") ||
-                path.startsWith("/api/auth/");
+                path.startsWith("/api/auth/") ||
+                path.equals("/error") ||
+                path.equals("/about") ||
+                path.equals("/contact") ||
+                path.equals("/") ||
+                path.equals("/search");
     }
 
     private String extractJwtFromCookies(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
-            Optional<Cookie> jwtCookie = Arrays.stream(cookies)
+            return Arrays.stream(cookies)
                     .filter(cookie -> "jwt_token".equals(cookie.getName()))
-                    .findFirst();
-
-            if (jwtCookie.isPresent()) {
-                logger.debug("JWT found in cookies");
-                return jwtCookie.get().getValue();
-            }
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
         }
         return null;
     }
@@ -136,10 +120,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String extractJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            logger.debug("JWT found in Authorization header");
             return bearerToken.substring(7);
         }
-        logger.debug("JWT not found in Authorization header");
         return null;
     }
 }

@@ -389,5 +389,43 @@ main {
 
 .password-strength-meter .very-strong {
     width: 100%;
-    background-color: var(--success-color);
 }
+
+/* Sidebar Styles */
+.sidebar {
+    border-radius: 12px;
+    position: sticky;
+    top: 2rem;
+}
+
+.sidebar .nav-link {
+    border-radius: 8px;
+    margin-bottom: 2px;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.sidebar .nav-link.active {
+    background-color: #e7f1ff;
+    color: var(--primary-color) !important;
+}
+
+/* Dashboard Cards */
+.border-left-primary { border-left: 0.25rem solid var(--primary-color) !important; }
+.border-left-success { border-left: 0.25rem solid var(--success-color) !important; }
+.border-left-info { border-left: 0.25rem solid var(--info-color) !important; }
+.border-left-warning { border-left: 0.25rem solid var(--warning-color) !important; }
+
+.dashboard-card {
+    border: none;
+    border-radius: 10px;
+}
+
+.text-xs { font-size: .7rem; }
+.font-weight-bold { font-weight: 700 !important; }
+.text-gray-300 { color: #dddfeb !important; }
+.text-gray-800 { color: #5a5c69 !important; }

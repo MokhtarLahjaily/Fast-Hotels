@@ -21,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 
 @Configuration
 @EnableWebSecurity
@@ -36,16 +37,18 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/", "/search", "/hotels/**", "/css/**", "/js/**", "/images/**",
-                                "/login", "/register", "/about", "/contact", "/error", "/favicon.ico", "/auth-debug", "/auth-test").permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/api/auth/**", "/", "/search", "/hotels/**", "/css/**", "/js/**",
+                                "/images/**", "/static/**", "/webjars/**",
+                                "/login", "/register", "/about", "/contact", "/error", "/favicon.ico", "/auth-debug",
+                                "/auth-test")
+                        .permitAll()
                         .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/hotel-owner/**").hasRole("HOTEL_OWNER")
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .sessionAuthenticationStrategy(sessionAuthenticationStrategy())
-                )
+                        .sessionAuthenticationStrategy(sessionAuthenticationStrategy()))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -53,8 +56,7 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .permitAll()
-                )
+                        .permitAll())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
@@ -62,8 +64,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID", "jwt_token")
-                );
+                        .deleteCookies("JSESSIONID", "jwt_token"));
 
         return http.build();
     }

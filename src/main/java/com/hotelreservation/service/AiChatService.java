@@ -31,7 +31,7 @@ public class AiChatService {
     private final AmenityService amenityService;
 
     // Maximum conversation history to maintain per session
-    private static final int MAX_HISTORY_LENGTH = 6; // Réduit de 10 à 6
+    private static final int MAX_HISTORY_LENGTH = 6;
 
     // Maximum retries for AI service
     private static final int MAX_RETRIES = 2;
@@ -39,7 +39,7 @@ public class AiChatService {
     @Value("${ollama.api-url:http://localhost:11434}")
     private String ollamaApiUrl;
 
-    @Value("${ollama.model:phi3:mini}")
+    @Value("${ollama.model:llama3.2:1b}")
     private String ollamaModel;
 
     @Value("${ollama.enabled:true}")
@@ -105,17 +105,46 @@ public class AiChatService {
 
         // Trim history if it exceeds maximum length
         if (history.size() > MAX_HISTORY_LENGTH + 1) { // +1 for the system message
-            // Keep the system message (first one) and remove the oldest user/assistant message
+            // Keep the system message (first one) and remove the oldest user/assistant
+            // message
             history.remove(1);
         }
     }
 
     private String getSystemPrompt() {
-        // Prompt système simplifié pour des performances optimales
-        return "You are a helpful hotel booking assistant for PFA Hotels. " +
-                "Keep responses very short (1-2 sentences). " +
-                "Help with hotel searches, bookings, and general info. " +
-                "Current date: " + LocalDateTime.now().toLocalDate() + ".";
+        StringBuilder prompt = new StringBuilder();
+        prompt.append(
+                "You are the official 'EasyStay' AI Assistant. You help users find hotels, manage bookings, and answer general travel questions.\n\n");
+
+        prompt.append("STRICT RULES:\n");
+        prompt.append(
+                "1. ONLY recommend hotels from the 'AVAILABLE HOTELS' list provided below. DO NOT make up hotel names.\n");
+        prompt.append(
+                "2. If a user asks for a hotel not in the list, tell them you don't have that specific hotel but invitation them to search on our website.\n");
+        prompt.append("3. Keep responses concise (capped at 3 short sentences).\n");
+        prompt.append("4. Be helpful, professional, and friendly.\n\n");
+
+        prompt.append("AVAILABLE HOTELS IN OUR DATABASE:\n");
+        try {
+            List<HotelResponse> topHotels = hotelService.getFeaturedHotels();
+            if (topHotels != null && !topHotels.isEmpty()) {
+                for (HotelResponse hotel : topHotels) {
+                    prompt.append("- ").append(hotel.getName())
+                            .append(" (").append(hotel.getCity()).append(", ").append(hotel.getCountry()).append("): ")
+                            .append(hotel.getStarRating()).append(" stars. Min price: $").append(hotel.getMinPrice())
+                            .append("\n");
+                }
+            } else {
+                prompt.append(
+                        "- We have many hotels across various cities like New York, Paris, and Dubai. Please search our catalog.\n");
+            }
+        } catch (Exception e) {
+            prompt.append(
+                    "- Our database is currently being updated. Please check back for specific recommendations.\n");
+        }
+
+        prompt.append("\nCurrent date: ").append(LocalDateTime.now().toLocalDate()).append(".\n");
+        return prompt.toString();
     }
 
     private String callOpenAiApi(String sessionId) {
@@ -150,7 +179,8 @@ public class AiChatService {
             return "I'm sorry, I couldn't process your request at the moment.";
         } catch (Exception e) {
             logger.error("Error calling OpenAI API: {}", e.getMessage(), e);
-            return getEnhancedFallbackResponse(conversationHistory.get(sessionId).get(conversationHistory.get(sessionId).size() - 1).get("content"), sessionId);
+            return getEnhancedFallbackResponse(conversationHistory.get(sessionId)
+                    .get(conversationHistory.get(sessionId).size() - 1).get("content"), sessionId);
         }
     }
 
@@ -200,9 +230,9 @@ public class AiChatService {
 
                 // Paramètres d'optimisation agressifs pour des réponses plus rapides
                 Map<String, Object> options = new HashMap<>();
-                options.put("temperature", 0.3);         // Moins créatif = plus rapide
+                options.put("temperature", 0.3); // Moins créatif = plus rapide
                 options.put("top_p", 0.8);
-                options.put("num_predict", 50);          // Réponses très courtes
+                options.put("num_predict", 50); // Réponses très courtes
                 options.put("repeat_penalty", 1.1);
                 options.put("stop", Arrays.asList("Q:", "\n\n", "User:", "System:")); // Arrêter plus tôt
                 requestBody.put("options", options);
@@ -236,7 +266,9 @@ public class AiChatService {
         }
 
         // If all retries failed, use the enhanced fallback
-        return getEnhancedFallbackResponse(conversationHistory.get(sessionId).get(conversationHistory.get(sessionId).size() - 1).get("content"), sessionId);
+        logger.warn("Ollama AI service is unreachable or slow. Falling back to local response logic.");
+        return getEnhancedFallbackResponse(conversationHistory.get(sessionId).get(history.size() - 1).get("content"),
+                sessionId);
     }
 
     private String getEnhancedFallbackResponse(String message, String sessionId) {
@@ -273,19 +305,34 @@ public class AiChatService {
         // Check for common questions with context awareness
         if (message.contains("hello") || message.contains("hi") || message.contains("hey")) {
             if (!previousBotMessage.isEmpty()) {
-                return "Hello again! How can I help you today?";
+                return "Hello again! I'm here if you have more questions about our hotels.";
             }
-            return "Hello! How can I help you with your hotel search?";
+            return "Hello! I'm the EasyStay Assistant. How can I help you find the perfect hotel today?";
+        } else if (message.contains("hotel") && (message.contains("recommend") || message.contains("suggest")
+                || message.contains("which one") || message.contains("best"))) {
+            try {
+                List<HotelResponse> featuredHotels = hotelService.getFeaturedHotels();
+                if (featuredHotels != null && !featuredHotels.isEmpty()) {
+                    HotelResponse hotel = featuredHotels.get(new Random().nextInt(featuredHotels.size()));
+                    return "I highly recommend " + hotel.getName() + " in " + hotel.getCity() + ". It has a "
+                            + hotel.getStarRating() + "-star rating and starts at just $" + hotel.getMinPrice()
+                            + " per night!";
+                }
+                return "I recommend searching our 'Featured' section on the homepage for our top-rated properties.";
+            } catch (Exception e) {
+                logger.warn("Could not fetch featured hotels for recommendation: {}", e.getMessage());
+                return "We have many great options! Try using our search filters to find a hotel that fits your budget and style.";
+            }
         } else if (message.contains("thank")) {
-            return "You're welcome! Anything else I can help with?";
+            return "You're very welcome! Let me know if you need help with anything else.";
         } else if (message.contains("bye") || message.contains("goodbye")) {
-            return "Goodbye! Have a great day!";
+            return "Goodbye! We look forward to seeing you at one of our hotels soon.";
         } else if (message.contains("help")) {
-            return "I can help you find hotels, check bookings, and answer questions about our services. What do you need?";
+            return "I can help you find hotels, explain amenities, or guide you through the booking process. Just ask about a city or a specific hotel!";
         } else if (message.contains("cancel") && (message.contains("booking") || message.contains("reservation"))) {
-            return "To cancel a booking, go to your account page and click 'Cancel' on your reservation. Most bookings can be cancelled 24 hours before check-in.";
-        } else if (message.contains("payment") && message.contains("method")) {
-            return "We accept credit cards, PayPal, and bank transfers. Payment options will be shown during checkout.";
+            return "To cancel, please visit 'My Bookings' in your profile. Note that some reservations have a 24-hour cancellation policy.";
+        } else if (message.contains("payment") || message.contains("pay")) {
+            return "We accept all major credit cards and secure online payments. You can pay at the time of booking or at the hotel depending on the rate selected.";
         } else if (message.contains("check-in") || message.contains("checkout") || message.contains("check out")) {
             return "Standard check-in is 3 PM and check-out is 11 AM. Times may vary by hotel.";
         } else if (message.contains("breakfast")) {
@@ -301,7 +348,8 @@ public class AiChatService {
                 List<HotelResponse> featuredHotels = hotelService.getFeaturedHotels();
                 if (!featuredHotels.isEmpty()) {
                     HotelResponse hotel = featuredHotels.get(new Random().nextInt(featuredHotels.size()));
-                    return "I recommend " + hotel.getName() + " in " + hotel.getCity() + ". It's highly rated by guests!";
+                    return "I recommend " + hotel.getName() + " in " + hotel.getCity()
+                            + ". It's highly rated by guests!";
                 }
             } catch (Exception e) {
                 logger.warn("Could not fetch featured hotels for recommendation: {}", e.getMessage());

@@ -55,17 +55,16 @@ public class Room {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "room")
     private Set<Booking> bookings = new HashSet<>();
 
+    @Builder.Default
     @ManyToMany
-    @JoinTable(
-            name = "room_amenities",
-            joinColumns = @JoinColumn(name = "room_id"),
-            inverseJoinColumns = @JoinColumn(name = "amenity_id")
-    )
+    @JoinTable(name = "room_amenities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "amenity_id"))
     private Set<Amenity> amenities = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private Set<RoomInventory> inventory = new HashSet<>();
 

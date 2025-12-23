@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+    <div th:fragment="sidebar" class="sidebar bg-dark text-white p-0">
+        <div class="sidebar-header p-4 border-bottom border-secondary">
+            <h5 class="mb-0">
+                <i class="fas fa-user-shield me-2" sec:authorize="hasRole('ADMIN')"></i>
+                <i class="fas fa-building me-2" sec:authorize="hasRole('HOTEL_OWNER')"></i>
+                <span
+                    th:text="${#authorization.expression('hasRole(''ADMIN'')') ? 'Admin Panel' : 'Owner Panel'}">Dashboard</span>
+            </h5>
+        </div>
+
+        <div class="sidebar-user p-4 border-bottom border-secondary">
+            <div class="d-flex align-items-center">
+                <div class="avatar me-3">
+                    <i class="fas fa-user-circle fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0"
+                        th:text="${#authentication.principal instanceof T(com.hotelreservation.security.CustomUserDetails) ? #authentication.principal.fullName : #authentication.name}">
+                        User Name</h6>
+                    <small class="text-muted" th:text="${#authentication.name}">user@example.com</small>
+                </div>
+            </div>
+        </div>
+
+        <nav class="nav flex-column p-2">
+            <!-- Common / Dashboard -->
+            <a class="nav-link mb-2 rounded"
+                th:href="${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/dashboard' : '/hotel-owner/dashboard'}"
+                th:classappend="${#request.requestURI == '/admin/dashboard' || #request.requestURI == '/hotel-owner/dashboard' ? 'active bg-primary text-white' : 'text-white-50'}">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+
+            <!-- Admin specific links -->
+            <th:block sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link mb-2 rounded" href="/admin/hotels"
+                    th:classappend="${#request.requestURI.startsWith('/admin/hotels') ? 'active bg-primary text-white' : 'text-white-50'}">
+                    <i class="fas fa-hotel me-2"></i> Hotels
+                </a>
+                <a class="nav-link mb-2 rounded" href="/admin/rooms"
+                    th:classappend="${#request.requestURI.startsWith('/admin/rooms') ? 'active bg-primary text-white' : 'text-white-50'}">
+                    <i class="fas fa-door-open me-2"></i> Rooms
+                </a>
+                <a class="nav-link mb-2 rounded" href="/admin/bookings"
+                    th:classappend="${#request.requestURI.startsWith('/admin/bookings') ? 'active bg-primary text-white' : 'text-white-50'}">
+                    <i class="fas fa-calendar-check me-2"></i> Bookings
+                </a>
+                <a class="nav-link mb-2 rounded" href="/admin/users"
+                    th:classappend="${#request.requestURI.startsWith('/admin/users') ? 'active bg-primary text-white' : 'text-white-50'}">
+                    <i class="fas fa-users me-2"></i> Users
+                </a>
+                <a class="nav-link mb-2 rounded" href="/admin/reviews"
+                    th:classappend="${#request.requestURI.startsWith('/admin/reviews') ? 'active bg-primary text-white' : 'text-white-50'}">
+                    <i class="fas fa-star me-2"></i> Reviews
+                </a>
+                <a class="nav-link mb-2 rounded" href="/admin/system"
+                    th:classappend="${#request.requestURI.startsWith('/admin/system') ? 'active bg-primary text-white' : 'text-white-50'}">
+                    <i class="fas fa-server me-2"></i> System
+                </a>
+            </th:block>
+
+            <!-- Hotel Owner specific links -->
+            <th:block sec:authorize="hasRole('HOTEL_OWNER')">
+                <a class="nav-link mb-2 rounded" href="/hotel-owner/hotels"
+                    th:classappend="${#request.requestURI.startsWith('/hotel-owner/hotels') ? 'active bg-primary text-white' : 'text-white-50'}">
+                    <i class="fas fa-hotel me-2"></i> My Hotels
+                </a>
+                <!-- Future improvement: Add owner bookings -->
+            </th:block>
+
+            <div class="mt-4 pt-4 border-top border-secondary">
+                <a class="nav-link mb-2 rounded text-white-50" href="/">
+                    <i class="fas fa-home me-2"></i> Back to Home
+                </a>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit"
+                        class="nav-link mb-2 rounded text-white-50 bg-transparent border-0 w-100 text-start">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </div>
+</body>
+
+</html>

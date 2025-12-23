@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,16 +64,14 @@ public class ChatController {
                         response.setSuggestions(Arrays.asList(
                                 "Tell me more about " + hotels.get(0).getName(),
                                 "What amenities does " + hotels.get(0).getName() + " have?",
-                                "Show me more hotels in " + location
-                        ));
+                                "Show me more hotels in " + location));
                     } else {
                         // No hotels found, suggest popular destinations
                         response.setSuggestions(Arrays.asList(
                                 "Hotels in Paris",
                                 "Hotels in New York",
                                 "Hotels in Tokyo",
-                                "Hotels in London"
-                        ));
+                                "Hotels in London"));
                     }
                 }
             } else if (containsAmenitySearchIntent(message)) {
@@ -86,47 +83,43 @@ public class ChatController {
                     response.setSuggestions(Arrays.asList(
                             "Hotels with " + String.join(" and ", amenities),
                             "Luxury hotels with " + amenities.get(0),
-                            "Budget-friendly hotels with " + amenities.get(0)
-                    ));
+                            "Budget-friendly hotels with " + amenities.get(0)));
                 }
             } else if (containsBookingIntent(message)) {
                 // Handle booking intent with suggestions
                 response.setSuggestions(Arrays.asList(
                         "Show me hotels in Paris",
                         "What documents do I need for booking?",
-                        "What's your cancellation policy?"
-                ));
+                        "What's your cancellation policy?"));
             } else if (containsHelpIntent(message)) {
                 // Handle help intent with suggestions
                 response.setSuggestions(Arrays.asList(
                         "Find hotels",
                         "Booking process",
                         "Cancellation policy",
-                        "Payment methods"
-                ));
+                        "Payment methods"));
             } else {
                 // For other queries, provide general suggestions
                 response.setSuggestions(Arrays.asList(
                         "Find hotels near me",
                         "How do I make a booking?",
                         "What amenities do your hotels offer?",
-                        "Tell me about your loyalty program"
-                ));
+                        "Tell me about your loyalty program"));
             }
         } catch (Exception e) {
             logger.error("Error processing chat request: {}", e.getMessage(), e);
 
             // Fallback response in case of error
             response = ChatResponse.builder()
-                    .message("I'm sorry, I'm having trouble processing your request right now. Please try again later or contact our support team for assistance.")
+                    .message(
+                            "I'm sorry, I'm having trouble processing your request right now. Please try again later or contact our support team for assistance.")
                     .sessionId(request.getSessionId() != null ? request.getSessionId() : UUID.randomUUID().toString())
                     .timestamp(LocalDateTime.now()) // Fixed: Using LocalDateTime.now() directly
                     .isAiResponse(true)
                     .suggestions(Arrays.asList(
                             "Browse hotels",
                             "Contact support",
-                            "Check booking status"
-                    ))
+                            "Check booking status"))
                     .build();
         }
 
@@ -138,8 +131,7 @@ public class ChatController {
                 "find hotel", "search hotel", "looking for hotel", "show hotel",
                 "hotels in", "hotel in", "accommodation in", "place to stay in",
                 "find a place", "where to stay", "best hotel", "recommend hotel",
-                "hotel near", "lodging in", "stay in", "book hotel in"
-        );
+                "hotel near", "lodging in", "stay in", "book hotel in");
 
         return searchKeywords.stream().anyMatch(message::contains);
     }
@@ -151,8 +143,7 @@ public class ChatController {
                 "pet friendly", "family friendly", "luxury", "budget", "free wifi",
                 "room service", "fitness center", "business center", "conference room",
                 "beach access", "ocean view", "mountain view", "city view", "balcony",
-                "kitchen", "suite", "accessible", "wheelchair", "airport shuttle"
-        );
+                "kitchen", "suite", "accessible", "wheelchair", "airport shuttle");
 
         return amenityKeywords.stream().anyMatch(message::contains);
     }
@@ -162,8 +153,7 @@ public class ChatController {
                 "book", "reserve", "make reservation", "booking", "reservation",
                 "check availability", "available room", "book a room", "reserve a room",
                 "check in", "check out", "cancel booking", "modify booking", "change reservation",
-                "booking confirmation", "reservation details", "booking policy"
-        );
+                "booking confirmation", "reservation details", "booking policy");
 
         return bookingKeywords.stream().anyMatch(message::contains);
     }
@@ -172,8 +162,7 @@ public class ChatController {
         List<String> helpKeywords = Arrays.asList(
                 "help", "how to", "how do i", "what is", "explain", "tell me about",
                 "information", "guide", "assistance", "support", "faq", "question",
-                "confused", "don't understand", "unclear", "more info", "details about"
-        );
+                "confused", "don't understand", "unclear", "more info", "details about");
 
         return helpKeywords.stream().anyMatch(message::contains);
     }
@@ -229,8 +218,7 @@ public class ChatController {
                 "seoul", "beijing", "shanghai", "taipei", "manila", "kuala lumpur",
                 "jakarta", "delhi", "mumbai", "bangalore", "chennai", "kolkata",
                 "auckland", "wellington", "christchurch", "queenstown", "honolulu",
-                "cancun", "havana", "punta cana", "san juan", "nassau", "montego bay"
-        );
+                "cancun", "havana", "punta cana", "san juan", "nassau", "montego bay");
 
         for (String city : commonCities) {
             if (message.contains(city)) {
@@ -254,8 +242,7 @@ public class ChatController {
                 "nightclub", "entertainment", "hot tub", "sauna", "steam room",
                 "massage", "beauty salon", "gift shop", "convenience store", "atm",
                 "currency exchange", "tour desk", "ticket service", "car rental",
-                "bicycle rental", "shuttle service", "valet parking", "electric vehicle charging"
-        );
+                "bicycle rental", "shuttle service", "valet parking", "electric vehicle charging");
 
         for (String amenity : amenities) {
             if (message.contains(amenity)) {
