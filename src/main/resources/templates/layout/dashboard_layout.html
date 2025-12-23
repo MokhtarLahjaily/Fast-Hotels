@@ -3,6 +3,7 @@
     layout:decorate="~{layout/base}">
 
 <head>
+    <title th:text="${pageTitle != null ? pageTitle + ' | Fast-Hotels' : 'Fast-Hotels Dashboard'}"></title>
     <style layout:fragment="cssResources">
         .dashboard-wrapper {
             display: flex;

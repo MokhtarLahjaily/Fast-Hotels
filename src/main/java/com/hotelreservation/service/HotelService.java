@@ -470,7 +470,7 @@ public class HotelService {
                     .filter(img -> img != null && Boolean.TRUE.equals(img.getIsPrimary()))
                     .map(Image::getUrl)
                     .findFirst()
-                            : "/images/hotel-placeholder.jpg");
+                    .orElse("/images/hotel-placeholder.jpg");
         } catch (Exception e) {
             logger.error("Error fetching images for hotel {}", hotelId, e);
             return "/images/hotel-placeholder.jpg";

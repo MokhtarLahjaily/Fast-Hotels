@@ -51,7 +51,7 @@ public class AuthController {
         Cookie cookie = new Cookie("jwt_token", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60); // 1 day
+        cookie.setMaxAge((int) (24L * 60 * 60)); // 1 day - cast to long first to prevent overflow
         response.addCookie(cookie);
         logger.debug("JWT cookie set");
     }

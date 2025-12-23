@@ -17,8 +17,11 @@
             cursor: pointer;
         }
 
-        .booking-row:hover {
+        .booking-row:hover,
+        .booking-row:focus {
             background-color: #f8f9fa;
+            outline: 2px solid #007bff;
+            outline-offset: -2px;
         }
     </style>
 </head>
@@ -182,7 +185,8 @@
                                     <td>
                                         <strong th:text="${'$' + booking.totalPrice}">$500</strong>
                                     </td>
-                                    <td onclick="event.stopPropagation();">
+                                    <td onclick="event.stopPropagation();"
+                                        onkeydown="if(event.key === 'Enter' || event.key === ' ') event.stopPropagation();">
                                         <div class="btn-group btn-group-sm">
                                             <button class="btn btn-outline-primary btn-sm"
                                                 th:onclick="'toggleBookingDetail(' + ${booking.id} + ')'">

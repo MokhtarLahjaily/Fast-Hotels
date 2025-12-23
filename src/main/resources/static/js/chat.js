@@ -167,13 +167,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // Process URLs, line breaks, and markdown-like formatting
             const processedMessage = message
                 .replaceAll("\n", "<br>")
-                .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
+                .replaceAll(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
                 // Bold text between asterisks
-                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replaceAll(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
                 // Italic text between single asterisks
-                .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                .replaceAll(/\*(.*?)\*/g, "<em>$1</em>")
                 // Bullet points
-                .replace(/^- (.*)/gm, "• $1")
+                .replaceAll(/^- (.*)/gm, "• $1")
 
             botMessage.innerHTML = processedMessage
         }
