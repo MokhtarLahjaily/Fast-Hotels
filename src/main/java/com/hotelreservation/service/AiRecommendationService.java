@@ -171,7 +171,9 @@ public class AiRecommendationService {
                 // This is a simple implementation - in a real app, you'd want more robust parsing
                 String[] lines = aiResponse.split("\n");
                 for (String line : lines) {
-                    if (line.contains("ID:") || line.contains("id:") || line.matches(".*\\d+.*")) {
+                    // Use efficient non-regex check for digits
+                    boolean containsDigit = line.chars().anyMatch(Character::isDigit);
+                    if (line.contains("ID:") || line.contains("id:") || containsDigit) {
                         try {
                             // Extract numbers from the line
                             String numberStr = line.replaceAll("[^0-9]", "");

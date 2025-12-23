@@ -376,3 +376,48 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     })
 })
+
+/**
+ * Get CSRF token from cookie (set by Spring Security's CookieCsrfTokenRepository)
+ * @returns {string|null} The CSRF token or null if not found
+ */
+function getCsrfToken() {
+    const name = "XSRF-TOKEN="
+    const decodedCookie = decodeURIComponent(document.cookie)
+    const cookies = decodedCookie.split(";")
+    for (let cookie of cookies) {
+        cookie = cookie.trim()
+        if (cookie.startsWith(name)) {
+            return cookie.substring(name.length)
+        }
+    }
+    // Fallback to meta tag if cookie not available
+    const metaTag = document.querySelector('meta[name="_csrf"]')
+    return metaTag ? metaTag.getAttribute("content") : null
+}
+
+/**
+ * Get CSRF header name
+ * @returns {string} The CSRF header name
+ */
+function getCsrfHeaderName() {
+    const metaTag = document.querySelector('meta[name="_csrf_header"]')
+    return metaTag ? metaTag.getAttribute("content") : "X-XSRF-TOKEN"
+}
+
+/**
+ * Create headers object with CSRF token included
+ * @param {Object} additionalHeaders - Additional headers to include
+ * @returns {Object} Headers object with CSRF token
+ */
+function createHeadersWithCsrf(additionalHeaders = {}) {
+    const headers = {
+        "Content-Type": "application/json",
+        ...additionalHeaders
+    }
+    const csrfToken = getCsrfToken()
+    if (csrfToken) {
+        headers[getCsrfHeaderName()] = csrfToken
+    }
+    return headers
+}

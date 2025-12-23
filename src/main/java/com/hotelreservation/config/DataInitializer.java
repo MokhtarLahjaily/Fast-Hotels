@@ -33,6 +33,7 @@ import java.util.Set;
 public class DataInitializer implements CommandLineRunner {
 
         private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
+        private static final String OWNER_LAST_NAME = "Owner";
 
         private final HotelRepository hotelRepository;
         private final UserRepository userRepository;
@@ -111,11 +112,11 @@ public class DataInitializer implements CommandLineRunner {
 
         private List<User> createHotelOwners() {
                 // Create 5 hotel owners
-                User luxuryOwner = createHotelOwner("luxury.owner@example.com", "Luxury", "Owner");
-                User beachOwner = createHotelOwner("beach.owner@example.com", "Beach", "Owner");
-                User boutiqueOwner = createHotelOwner("boutique.owner@example.com", "Boutique", "Owner");
-                User businessOwner = createHotelOwner("business.owner@example.com", "Business", "Owner");
-                User familyOwner = createHotelOwner("family.owner@example.com", "Family", "Owner");
+                User luxuryOwner = createHotelOwner("luxury.owner@example.com", "Luxury", OWNER_LAST_NAME);
+                User beachOwner = createHotelOwner("beach.owner@example.com", "Beach", OWNER_LAST_NAME);
+                User boutiqueOwner = createHotelOwner("boutique.owner@example.com", "Boutique", OWNER_LAST_NAME);
+                User businessOwner = createHotelOwner("business.owner@example.com", "Business", OWNER_LAST_NAME);
+                User familyOwner = createHotelOwner("family.owner@example.com", "Family", OWNER_LAST_NAME);
 
                 return Arrays.asList(luxuryOwner, beachOwner, boutiqueOwner, businessOwner, familyOwner);
         }

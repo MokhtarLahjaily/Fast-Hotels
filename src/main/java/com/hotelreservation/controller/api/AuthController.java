@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +25,9 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final UserService userService;
+
+    @Value("${app.cookie.secure:true}")
+    private boolean secureCookie;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
@@ -50,9 +54,17 @@ public class AuthController {
     private void setJwtCookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie("jwt_token", token);
         cookie.setHttpOnly(true);
+        cookie.setSecure(secureCookie); // Configurable: true for HTTPS, false for local dev
         cookie.setPath("/");
         cookie.setMaxAge((int) (24L * 60 * 60)); // 1 day - cast to long first to prevent overflow
         response.addCookie(cookie);
-        logger.debug("JWT cookie set");
+        
+        // Set SameSite=Strict via header (not directly supported by Cookie class)
+        String secureFlag = secureCookie ? "Secure; " : "";
+        response.setHeader("Set-Cookie", 
+            String.format("jwt_token=%s; Path=/; Max-Age=%d; HttpOnly; %sSameSite=Strict", 
+                token, 24 * 60 * 60, secureFlag));
+        
+        logger.debug("JWT cookie set (secure={})", secureCookie);
     }
 }

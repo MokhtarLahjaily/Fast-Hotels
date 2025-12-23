@@ -2,6 +2,26 @@
  * JavaScript for handling favorites functionality
  */
 
+/**
+ * Get CSRF token from cookie or meta tag
+ * @returns {string|null} The CSRF token
+ */
+function getFavCsrfToken() {
+    // Try cookie first (Spring Security CookieCsrfTokenRepository)
+    const name = "XSRF-TOKEN="
+    const decodedCookie = decodeURIComponent(document.cookie)
+    const cookies = decodedCookie.split(";")
+    for (let cookie of cookies) {
+        cookie = cookie.trim()
+        if (cookie.startsWith(name)) {
+            return cookie.substring(name.length)
+        }
+    }
+    // Fallback to meta tag
+    const metaTag = document.querySelector('meta[name="_csrf"]')
+    return metaTag ? metaTag.getAttribute("content") : null
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // Toggle favorite via AJAX
     const favoriteToggleButtons = document.querySelectorAll(".favorite-toggle")
@@ -12,13 +32,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const hotelId = this.dataset.hotelId
             const icon = this.querySelector("i")
+            const csrfToken = getFavCsrfToken()
+
+            const headers = {
+                "Content-Type": "application/json",
+            }
+            if (csrfToken) {
+                headers["X-XSRF-TOKEN"] = csrfToken
+            }
 
             fetch(`/api/favorites/${hotelId}`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]').getAttribute("content"),
-                },
+                headers: headers,
             })
                 .then((response) => {
                     if (!response.ok) {

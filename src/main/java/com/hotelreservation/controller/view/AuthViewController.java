@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -40,6 +41,9 @@ public class AuthViewController {
     private final UserService userService;
     private final UserDetailsService userDetailsService;
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+
+    @Value("${app.cookie.secure:true}")
+    private boolean secureCookie;
 
     @GetMapping(AppConstants.Routes.LOGIN)
     public String showLoginForm(Model model) {
@@ -64,12 +68,19 @@ public class AuthViewController {
             // Authenticate the user
             AuthResponse authResponse = userService.login(loginRequest);
 
-            // Set JWT token as a cookie
+            // Set JWT token as a secure cookie
             Cookie cookie = new Cookie(AppConstants.Attributes.JWT_COOKIE_NAME, authResponse.getToken());
             cookie.setHttpOnly(true);
+            cookie.setSecure(secureCookie); // Configurable: true for HTTPS, false for local dev
             cookie.setPath("/");
             cookie.setMaxAge((int) (24L * 60 * 60)); // 1 day - cast to long first to prevent overflow
             response.addCookie(cookie);
+            
+            // Set SameSite=Strict via header (not directly supported by Cookie class)
+            String secureFlag = secureCookie ? "Secure; " : "";
+            response.setHeader("Set-Cookie", 
+                String.format("%s=%s; Path=/; Max-Age=%d; HttpOnly; %sSameSite=Strict", 
+                    AppConstants.Attributes.JWT_COOKIE_NAME, authResponse.getToken(), 24 * 60 * 60, secureFlag));
 
             // Set authentication in SecurityContext
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
@@ -123,12 +134,19 @@ public class AuthViewController {
             // Register the user
             AuthResponse authResponse = userService.register(registerRequest);
 
-            // Set JWT token as a cookie
+            // Set JWT token as a secure cookie
             Cookie cookie = new Cookie(AppConstants.Attributes.JWT_COOKIE_NAME, authResponse.getToken());
             cookie.setHttpOnly(true);
+            cookie.setSecure(secureCookie); // Configurable: true for HTTPS, false for local dev
             cookie.setPath("/");
             cookie.setMaxAge((int) (24L * 60 * 60)); // 1 day - cast to long first to prevent overflow
             response.addCookie(cookie);
+            
+            // Set SameSite=Strict via header (not directly supported by Cookie class)
+            String secureFlag = secureCookie ? "Secure; " : "";
+            response.setHeader("Set-Cookie", 
+                String.format("%s=%s; Path=/; Max-Age=%d; HttpOnly; %sSameSite=Strict", 
+                    AppConstants.Attributes.JWT_COOKIE_NAME, authResponse.getToken(), 24 * 60 * 60, secureFlag));
 
             // Set authentication in SecurityContext
             UserDetails userDetails = userDetailsService.loadUserByUsername(registerRequest.getEmail());

@@ -20,6 +20,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 
@@ -29,18 +31,28 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final String LOGIN_URL = "/login";
+
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // CSRF token handler for proper token processing
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName("_csrf");
+
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(requestHandler)
+                        // Ignore CSRF for stateless API endpoints that use JWT in Authorization header
+                        .ignoringRequestMatchers("/api/auth/**", "/api/chat/**"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/api/auth/**", "/", "/search", "/hotels/**", "/css/**", "/js/**",
                                 "/images/**", "/static/**", "/webjars/**",
-                                "/login", "/register", "/about", "/contact", "/error", "/favicon.ico", "/auth-debug",
+                                LOGIN_URL, "/register", "/about", "/contact", "/error", "/favicon.ico", "/auth-debug",
                                 "/auth-test")
                         .permitAll()
                         .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
@@ -50,10 +62,10 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()))
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/login")
+                        .loginPage(LOGIN_URL)
+                        .loginProcessingUrl(LOGIN_URL)
                         .defaultSuccessUrl("/", true)
-                        .failureUrl("/login?error=true")
+                        .failureUrl(LOGIN_URL + "?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .permitAll())

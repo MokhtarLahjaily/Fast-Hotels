@@ -6,9 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * Controller dedicated to serving the favicon.ico file
  * This provides better control over caching and error handling
  */
-@Controller
+@RestController
 public class FaviconController {
 
     private static final Logger logger = LoggerFactory.getLogger(FaviconController.class);
@@ -35,7 +33,6 @@ public class FaviconController {
      * @return ResponseEntity containing the favicon resource
      */
     @GetMapping("/favicon.ico")
-    @ResponseBody
     public ResponseEntity<Resource> favicon() {
         logger.debug("Serving favicon.ico");
 

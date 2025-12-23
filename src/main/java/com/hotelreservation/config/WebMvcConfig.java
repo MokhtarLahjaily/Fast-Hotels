@@ -24,9 +24,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // Add simple view controllers for static pages if needed
-        //registry.addViewController("/about").setViewName("about");
-        //registry.addViewController("/contact").setViewName("contact");
         registry.addViewController("/login").setViewName("auth/login");
         registry.addViewController("/register").setViewName("auth/register");
         registry.addViewController("/access-denied").setViewName("error/access-denied");
