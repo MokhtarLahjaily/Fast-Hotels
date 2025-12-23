@@ -153,8 +153,9 @@
                                     </td>
                                 </tr>
                                 <tr th:each="booking : ${bookings.content}" class="booking-row"
-                                    th:onclick="'toggleBookingDetail(' + ${booking.id} + ')'" role="button" tabindex="0"
-                                    th:onkeydown="'if(event.key === \'Enter\' || event.key === \' \') { toggleBookingDetail(' + ${booking.id} + '); event.preventDefault(); }'">
+                                    th:data-booking-id="${booking.id}" role="button" tabindex="0"
+                                    th:onclick="'handleRowClick(' + ${booking.id} + ')'"
+                                    th:onkeydown="'handleRowKeydown(event, ' + ${booking.id} + ')'">
                                     <td>
                                         <strong th:text="${'#' + booking.id}">#1</strong>
                                         <br>
@@ -185,8 +186,8 @@
                                     <td>
                                         <strong th:text="${'$' + booking.totalPrice}">$500</strong>
                                     </td>
-                                    <td onclick="event.stopPropagation();"
-                                        onkeydown="if(event.key === 'Enter' || event.key === ' ') event.stopPropagation();">
+                                    <td onclick="stopPropagation(event)"
+                                        onkeydown="stopPropagation(event)">
                                         <div class="btn-group btn-group-sm">
                                             <button class="btn btn-outline-primary btn-sm"
                                                 th:onclick="'toggleBookingDetail(' + ${booking.id} + ')'">
@@ -381,6 +382,42 @@
         </div>
 
         <script>
+            /**
+             * Reusable keyboard accessibility helper.
+             * Triggers a callback when Enter (key code 13) or Space (key code 32) is pressed.
+             * @param {KeyboardEvent} event - The keyboard event
+             * @param {Function} callback - The function to execute
+             */
+            function handleKeyboardActivation(event, callback) {
+                if (event.key === 'Enter' || event.key === ' ' || event.keyCode === 13 || event.keyCode === 32) {
+                    event.preventDefault();
+                    callback();
+                }
+            }
+
+            /**
+             * Handle row click events
+             * @param {number} bookingId - The booking ID
+             */
+            function handleRowClick(bookingId) {
+                toggleBookingDetail(bookingId);
+            }
+
+            /**
+             * Handle row keyboard events for accessibility (WCAG 2.1 Level A)
+             * @param {KeyboardEvent} event - The keyboard event
+             * @param {number} bookingId - The booking ID
+             */
+            function handleRowKeydown(event, bookingId) {
+                handleKeyboardActivation(event, function() {
+                    toggleBookingDetail(bookingId);
+                });
+            }
+
+            /**
+             * Toggle the visibility of a booking's detail row
+             * @param {number} bookingId - The booking ID
+             */
             function toggleBookingDetail(bookingId) {
                 const detailRow = document.getElementById('detail-' + bookingId);
                 if (detailRow.classList.contains('show')) {
@@ -393,6 +430,14 @@
                     // Show this detail row
                     detailRow.classList.add('show');
                 }
+            }
+
+            /**
+             * Prevent event propagation for nested interactive elements
+             * @param {Event} event - The event to stop
+             */
+            function stopPropagation(event) {
+                event.stopPropagation();
             }
         </script>
     </div>

@@ -61,6 +61,7 @@ public class AdminBookingController {
             model.addAttribute("confirmedCount", confirmedCount);
             model.addAttribute("completedCount", completedCount);
             model.addAttribute("cancelledCount", cancelledCount);
+            model.addAttribute("pageTitle", "Booking Management");
 
             log.info("Loaded {} bookings for admin page", bookingsPage.getTotalElements());
             return Constants.VIEW_ADMIN_BOOKINGS;
@@ -68,6 +69,7 @@ public class AdminBookingController {
             log.error("Error loading admin bookings page: {}", e.getMessage(), e);
             model.addAttribute(Constants.ATTR_ERROR, "Error loading bookings: " + e.getMessage());
             model.addAttribute("bookings", Page.empty());
+            model.addAttribute("pageTitle", "Booking Management");
             return Constants.VIEW_ADMIN_BOOKINGS;
         }
     }

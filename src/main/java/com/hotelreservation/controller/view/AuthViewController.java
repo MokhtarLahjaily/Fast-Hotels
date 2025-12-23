@@ -68,7 +68,7 @@ public class AuthViewController {
             Cookie cookie = new Cookie(AppConstants.Attributes.JWT_COOKIE_NAME, authResponse.getToken());
             cookie.setHttpOnly(true);
             cookie.setPath("/");
-            cookie.setMaxAge(24 * 60 * 60); // 1 day
+            cookie.setMaxAge((int) (24L * 60 * 60)); // 1 day - cast to long first to prevent overflow
             response.addCookie(cookie);
 
             // Set authentication in SecurityContext
